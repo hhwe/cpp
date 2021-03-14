@@ -11,14 +11,34 @@ protected:
 public:
     Quote() = default;
     Quote(const string &b, double p) : bookNo(b), price(p) {}
+    virtual ~Quote() = default;
 
     string isbn() const { return bookNo; }
     virtual double net_price(size_t n) const { return n * price; }
 
-    virtual ~Quote() = default;
+    virtual void debug() const;
 };
 
-class Bulk_quote : public Quote
+void Quote::debug() const
+{
+    cout << bookNo << endl;
+    cout << price << endl;
+}
+
+class Disc_quote : public Quote
+{
+private:
+    size_t quantity = 0;
+    double discount = 0.0;
+
+public:
+    Disc_quote() = default;
+    Disc_quote(const string &book, double price, size_t qty, double disc) : Quote(book, price), quantity(qty), discount(disc) {}
+
+    double net_price(size_t) const = 0;
+};
+
+class Bulk_quote : public Disc_quote
 {
 private:
     size_t min_qty = 0;
@@ -26,15 +46,11 @@ private:
 
 public:
     Bulk_quote() = default;
-    Bulk_quote(const string &, double, size_t, double);
+    Bulk_quote(const string &book, double price, size_t qty, double disc) : Disc_quote(book, price, qty, disc) {}
     ~Bulk_quote() = default;
 
     double net_price(size_t) const override;
 };
-
-Bulk_quote::Bulk_quote(const string &book, double p, size_t qty, double disc) : Quote(book, p), min_qty(qty), discount(disc)
-{
-}
 
 double Bulk_quote::net_price(size_t cnt) const
 {
