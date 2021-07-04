@@ -2,9 +2,9 @@
     "configurations": [
         {
             "name": "Linux",
-            "includePath": [
-                "${workspaceFolder}/**"
-            ],
+            // "includePath": [
+            //     "${workspaceFolder}/**"
+            // ],
             "defines": [],
             "cStandard": "c17",
             "cppStandard": "c++17",
