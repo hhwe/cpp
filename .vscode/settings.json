@@ -45,6 +45,11 @@
         "initializer_list": "cpp",
         "iosfwd": "cpp",
         "limits": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "list": "cpp",
+        "bitset": "cpp",
+        "cstring": "cpp",
+        "ctime": "cpp",
+        "iomanip": "cpp"
     }
 }
