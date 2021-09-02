@@ -105,5 +105,29 @@ set/multiset元素的key和value合一：value就是key
 
 无法时使用iterator修改key和value修改，内部使用const_iterator禁止修改key、value，也是一种container adapter，内部都是使用rb_tree实现
 
-map/multimap中，key和value不合一，无法使用iterator修改key但是可以修改data，内部自动将key_type设为const便可禁止修改key
+map/multimap中，key和value不合一，无法使用iterator修改key但是可以修改data，内部自动将key_type设为const便可禁止修改key，还提供operator[]来实现插入一个元素的动作
 
+### 23、hashtable
+
+### 28、iterator分类
+
+``` c++
+  ///  Marking input iterators.
+  struct input_iterator_tag { };
+
+  ///  Marking output iterators.
+  struct output_iterator_tag { };
+
+  /// Forward iterators support a superset of input iterator operations.
+  struct forward_iterator_tag : public input_iterator_tag { };
+
+  /// Bidirectional iterators support a superset of forward iterator
+  /// operations.
+  struct bidirectional_iterator_tag : public forward_iterator_tag { };
+
+  /// Random-access iterators support a superset of bidirectional
+  /// iterator operations.
+  struct random_access_iterator_tag : public bidirectional_iterator_tag { };
+```
+
+两个特殊的迭代器分类：ostream_iterator\istream_itertor

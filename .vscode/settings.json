@@ -50,6 +50,7 @@
         "bitset": "cpp",
         "cstring": "cpp",
         "ctime": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "unordered_set": "cpp"
     }
 }
