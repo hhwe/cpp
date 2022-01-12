@@ -86,3 +86,67 @@ template<class T>    /* ... */;
 
 —END—
 
+上次学习了如何实现c++中的is_same，当然是要参考c++std中提供的这些模板，然后理解自己实现一遍。c++中的enable_if我并没有怎么使用过，但是为了学习这个新的知识，还是要了解一下enable_if的功能。在网上找enable_if的功能的时候，提到了一个c++的原则就替换失败并非错误（SFINAE）。std::enable_if 就是满足条件时类型是有效的，其定义如下：
+
+``` c++
+ template <bool _Pre,typename  _Tp=void >
+    struct enable_if{};
+
+    template <typename _Tp>
+    struct enable_if<true,_Tp> {
+        typedef _Tp type;
+    };
+```
+
+所谓的SFINAE规则就是在编译时进行查找替换，对于重载的函数，如果能够找到合适的就会替换，如果第一个不合适并不会报错，而会使用下一个替换直到最后一个，如果都不满足要求，那么才会报错。出现二义性的话也会报错。std::enable_if的用法如下：
+
+1. 用于类型偏特化
+
+在使用模板编程的时候，可以使用enbale_if的特性根据模板参数的不同特性进行不同的类型选择
+
+示例如下：
+
+``` c++
+//判断类型
+template <typename _Tp>
+struct Smart_pointer : public false_type {};
+
+template <typename _Tp>
+struct Smart_pointer<std::weak_ptr<_Tp>> : public true_type {};
+
+template <typename _Tp>
+struct Smart_pointer<std::shared_ptr<_Tp>> : public true_type {};
+
+template <typename _Tp>
+struct is_smart_pointer : public Smart_pointer<typename std::remove_cv<_Tp>::type>{};
+
+template <typename _Tp>
+typename enable_if<is_smart_pointer<_Tp>::value,void>::type check(_Tp p){
+    std::cout << "is smart pointer" << std::endl;
+}
+template <typename _Tp>
+typename enable_if<!is_smart_pointer<_Tp>::value,void>::type check(_Tp p){
+    std::cout << "not smart pointer" << std::endl;
+}
+void test_enable_if(){
+    int *p = new int(3);
+    std::shared_ptr<int> sp = std::make_shared<int>(3);
+    check(sp);
+    check(p);
+    delete p;
+}
+```
+
+1. 控制函数返回值类型
+
+对于模板函数，有时希望根据不同的模板参数返回不同类型的值，进而给函数模板也赋予类型模板特化的性质。
+
+示例如下：
+
+template <typename _Tp>
+    typename enable_if<std::is_integral<_Tp>::value,bool>::type is_odd(_Tp i){return i&0x1;}
+
+    void test_is_odd(){
+        std::cout << std::boolalpha << is_odd(10) << std::endl;
+    }
+发布于 2020-12-06 20:34
