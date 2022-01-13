@@ -1,6 +1,8 @@
 #ifndef MYSTL_ALLOCATOR_H_
 #define MYSTL_ALLOCATOR_H_
 
+#include "alloc.h"
+#include "construct.h"
 #include <cstddef>
 
 namespace mystl {
@@ -21,16 +23,28 @@ public:
         return ::operator new(n * sizeof(T));
     }
 
-    static void deallocate(pointer p) {
-        return ::operator delete(p);
+    static void deallocate(pointer ptr) {
+        ::operator delete(ptr);
     }
 
-    static void construct(pointer p, const T& value) {
-        ::new ((void*)p) p->T(value);
+    static void deallocate(pointer ptr, size_type /*size*/) {
+        ::operator delete(ptr);
     }
 
-    static void destroy(pointer p) {
-        p->~T();
+    static void construct(pointer ptr, const T& value) {
+        mystl::construct<T>(ptr, value);
+    }
+
+    static void construct(pointer ptr, const T& value) {
+        mystl::construct<T>(ptr, value);
+    }
+
+    static void destroy(pointer ptr) {
+        mystd::destroy<T>(ptr);
+    }
+
+    static void destroy(pointer first, pointer last) {
+        mystd::destroy<T>(first, last);
     }
 };
 } // namespace mystl
