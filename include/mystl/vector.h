@@ -23,41 +23,41 @@ public:
 
     // Iterators
     iterator begin() {
-        return begin_;
+        return first_;
     }
 
     iterator end() {
-        return end_;
+        return finish_;
     }
 
     // Capacity
     size_type size() const {
-        return size_type(end_ - begin_);
+        return size_type(finish_ - first_);
     }
 
     size_type capacity() const {
-        return size_type(capacity_ - begin_)
+        return size_type(capacity_ - first_)
     }
 
     bool empty() const {
-        return begin_ == end_;
+        return first_ == finish_;
     }
 
     // Element access
     reference operator[](size_type n) {
-        return *(begin_ + n);
+        return *(first_ + n);
     }
 
     reference at(size_type n) {
-        return *(begin_ + n);
+        return *(first_ + n);
     }
 
     reference front() {
-        return *(begin_);
+        return *(first_);
     }
 
     reference back() {
-        return *(end_);
+        return *(finish_);
     }
 
     // Modifiers
@@ -66,65 +66,77 @@ public:
         iterator new_begin = Alloc::allocate(len);
         iterator new_end = new_begin;
         try {
-            new_end = uninitialized_copy(begin_, pos, new_begin); // TODO: use move
+            new_end = uninitialized_copy(first_, pos, new_begin); // TODO: use move
             construct(new_end, val);
             ++new_end;
-            // new_end = uninitialized_copy(pos, end_, new_end);
+            // new_end = uninitialized_copy(pos, finish_, new_end);
         } catch (const std::exception& e) {
             std::cerr << e.what() << '\n';
             destroy(new_begin, new_end);
             Alloc::deallocate(new_begin, len);
             throw;
         }
-        destroy(begin_, end_);
+        destroy(first_, finish_);
         deallocate();
 
-        begin_ = new_begin;
-        end_ = new_end;
+        first_ = new_begin;
+        finish_ = new_end;
         capacity_ = new_begin + len;
     }
 
     void push_back(const value_type& val) {
-        if (end_ != capacity_) {
-            construct(end_, val);
-            ++end_;
+        if (finish_ != capacity_) {
+            construct(finish_, val);
+            ++finish_;
         } else {
-            realloc_insert(end_, val);
+            realloc_insert(finish_, val);
         }
     }
 
     void pop_back() {
-        --end_;
-        destroy(end_);
+        --finish_;
+        destroy(finish_);
     }
 
     iterator erase(iterator first, iterator last) {
-        iterator i = copy(last, end_, first);
+        iterator i = copy(last, finish_, first);
     }
 
     iterator erase(iterator pos) {
-        if (pos + 1 != end_) {
-            copy(pos + 1, end_, pos);
+        if (pos + 1 != finish_) {
+            copy(pos + 1, finish_, pos);
         }
-        --end_;
-        destroy(end_);
+        --finish_;
+        destroy(finish_);
         return pos;
     }
 
+    void insert(iterator pos, size_type n, const T&x)
+    {
+        if (n <= 0) {
+            return;
+        }
+
+        if (capacity_ - finish_ >= n) {
+            size_type elems_after = finish_ - pos;
+            iterator
+        }
+    }
+
     void clear() {
-        erase(begin_, end_);
+        erase(first_, finish_);
     }
 
     // Constructor and Destructor
     void fill_initialize(size_type n, const_reference val) {
-        begin_ = Alloc::allocate(n);
+        first_ = Alloc::allocate(n);
         std::uninitialized_fill_n(result, n, x);
-        end_ = begin_ + n;
-        capacity_ = end_;
+        finish_ = first_ + n;
+        capacity_ = finish_;
     }
 
     vector() :
-        begin_(0), end_(0), capacity_(0) {
+        first_(0), finish_(0), capacity_(0) {
     }
 
     vector(size_type n, const_reference val) {
@@ -136,13 +148,13 @@ public:
     }
 
     ~vector() {
-        Alloc::destroy(begin_, end_);
-        Alloc::deallocate(begin_, end_);
+        Alloc::destroy(first_, finish_);
+        Alloc::deallocate(first_, finish_);
     }
 
 protected:
-    iterator begin_;
-    iterator end_;
+    iterator first_;
+    iterator finish_;
     iterator capacity_;
 };
 
