@@ -20,8 +20,7 @@ option(CPP_WITH_TESTS "Compile and (for jsoncpp_check) run JsonCpp test executab
 # option(BUILD_STATIC_LIBS "Build jsoncpp_lib as a static library." ON)
 # option(BUILD_OBJECT_LIBS "Build jsoncpp_lib as a object library." ON)
 
-add_subdirectory(include)
-add_subdirectory(src)
+add_subdirectory(app)
 
 #install the example
 if(CPP_WITH_TESTS)

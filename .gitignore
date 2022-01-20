@@ -33,3 +33,4 @@
 
 # Exclude 
 debug
+build/
