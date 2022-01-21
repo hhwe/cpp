@@ -38,7 +38,7 @@ inline void destroy(T* ptr) {
 
 template <typename ForwardIterator>
 inline void destroy(ForwardIterator first, ForwardIterator last) {
-    __destroy(first, last, std::false_type); // TODO: type triats
+    // __destroy(first, last, std::false_type); // TODO: type triats
 }
 
 } // namespace mystl

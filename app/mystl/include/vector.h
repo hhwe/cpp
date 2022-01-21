@@ -1,6 +1,7 @@
 #ifndef MYSTL_VECTOE_H_
 #define MYSTL_VECTOE_H_
 
+#include <iostream>
 #include "allocator.h"
 #include "construct.h"
 
@@ -21,6 +22,31 @@ public:
     using const_iterator = const value_type*;
     using data_allocator = Alloc;
 
+    // Constructor and Destructor
+    void fill_initialize(size_type n, const_reference val) {
+        first_ = Alloc::allocate(n);
+        std::uninitialized_fill_n(first_, n, val);
+        finish_ = first_ + n;
+        capacity_ = finish_;
+    }
+
+    vector() :
+        first_(0), finish_(0), capacity_(0) {
+    }
+
+    vector(size_type n, const_reference val) {
+        fill_initialize(n, val);
+    }
+
+    vector(size_type n) {
+        fill_initialize(n, T());
+    }
+
+    ~vector() {
+        Alloc::destroy(first_, finish_);
+        Alloc::deallocate(first_, finish_);
+    }
+
     // Iterators
     iterator begin() {
         return first_;
@@ -36,7 +62,7 @@ public:
     }
 
     size_type capacity() const {
-        return size_type(capacity_ - first_)
+        return size_type(capacity_ - first_);
     }
 
     bool empty() const {
@@ -77,7 +103,7 @@ public:
             throw;
         }
         destroy(first_, finish_);
-        deallocate();
+        // deallocate(); TODO：
 
         first_ = new_begin;
         finish_ = new_end;
@@ -111,45 +137,19 @@ public:
         return pos;
     }
 
-    void insert(iterator pos, size_type n, const T&x)
-    {
+    void insert(iterator pos, size_type n, const T& x) {
         if (n <= 0) {
             return;
         }
 
         if (capacity_ - finish_ >= n) {
             size_type elems_after = finish_ - pos;
-            iterator
+            // iterator
         }
     }
 
     void clear() {
         erase(first_, finish_);
-    }
-
-    // Constructor and Destructor
-    void fill_initialize(size_type n, const_reference val) {
-        first_ = Alloc::allocate(n);
-        std::uninitialized_fill_n(result, n, x);
-        finish_ = first_ + n;
-        capacity_ = finish_;
-    }
-
-    vector() :
-        first_(0), finish_(0), capacity_(0) {
-    }
-
-    vector(size_type n, const_reference val) {
-        fill_initialize(n, val);
-    }
-
-    explicit vector(size_type n) {
-        fill_initialize(n, T());
-    }
-
-    ~vector() {
-        Alloc::destroy(first_, finish_);
-        Alloc::deallocate(first_, finish_);
     }
 
 protected:

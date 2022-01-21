@@ -3,12 +3,25 @@
 
 namespace mystl {
 
-template <class InputIterator, class ForwardIterator>
+template <typename InputIterator, typename ForwardIterator>
 ForwardIterator uninitialized_copy(InputIterator first, InputIterator last,
                                    ForwardIterator result) {
-    for (; first != last; ++result, ++first) {
-        
-    }
+    // TODO typename __type_traits<T>::is_POD_type;
+    return copy(first, last, result);
+}
+
+template <typename InputIterator, typename ForwardIterator>
+ForwardIterator uninitialized_fill(InputIterator first, InputIterator last,
+                                   ForwardIterator result) {
+    // TODO typename __type_traits<T>::is_POD_type;
+    return fill(first, last, result);
+}
+
+template <typename InputIterator, typename ForwardIterator>
+ForwardIterator uninitialized_fill_n(InputIterator first, std::size_t n,
+                                     ForwardIterator result) {
+    // TODO typename __type_traits<T>::is_POD_type;
+    return fill_n(first, n, result);
 }
 
 } // namespace mystl

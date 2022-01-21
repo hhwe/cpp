@@ -24,5 +24,5 @@ add_subdirectory(app)
 
 #install the example
 if(CPP_WITH_TESTS)
-    add_subdirectory(test)
+    # add_subdirectory(test)
 endif()

@@ -35,16 +35,12 @@ public:
         mystl::construct<T>(ptr, value);
     }
 
-    static void construct(pointer ptr, const T& value) {
-        mystl::construct<T>(ptr, value);
-    }
-
     static void destroy(pointer ptr) {
-        mystd::destroy<T>(ptr);
+        mystl::destroy<T>(ptr);
     }
 
     static void destroy(pointer first, pointer last) {
-        mystd::destroy<T>(first, last);
+        mystl::destroy<T>(first, last);
     }
 };
 } // namespace mystl

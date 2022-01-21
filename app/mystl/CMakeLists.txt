@@ -1,13 +1,11 @@
-file(GLOB INCLUDE_FILES "*.h")
+project(mystl)
 
-install(FILES
-    ${INCLUDE_FILES}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/json)
+file(GLOB INCLUDE_FILES "include/*.h")
+file(GLOB SRC_FILES "src/*.cc")
+file(GLOB TEST_FILES "test/*.cc")
 
+include_directories(${PROJECT_SOURCE_DIR}/include)
+message("include_directories" ${PROJECT_SOURCE_DIR}/include)
 
-
-
-    include_directories(${PROJECT_SOURCE_DIR}/include)
-    set(APP_SRC mystl_test.cpp)
-    set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-    add_executable(mystl_test ${APP_SRC})
+add_executable(mystl_test ${TEST_FILES})
+# add_executable(mystl ${SRC_FILES})
