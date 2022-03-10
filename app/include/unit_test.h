@@ -39,15 +39,17 @@ public:
     int Run() {
         for (auto testCase : testCases_) {
             currentTestCase_ = testCase;
-            std::cout << "[Run TestCase] " << testCase->name_ << std::endl;
+            std::cout << ">>>>[Run TestCase] " << testCase->name_ << std::endl;
             testCase->Run();
             if (testCase->result_) {
                 passedTestCaseNum_++;
             } else {
                 failedTestCaseNum_++;
             }
+            std::cout << "[TestCase Result] Passed:" << testCase->passedPredicateNum_
+                      << " Failed:" << testCase->failedPredicateNum_ << std::endl;
         }
-        std::cout << "[UnitTest]\tPassed:" << passedTestCaseNum_ << "\tFailed:" << failedTestCaseNum_ << std::endl;
+        std::cout << "\n[UnitTest Result] Passed-TestCase:" << passedTestCaseNum_ << " Failed-TestCase:" << failedTestCaseNum_ << std::endl;
         return 0;
     }
 
@@ -109,7 +111,7 @@ inline int RUN_ALL_TESTS() {
 
 #define EXPECT_BOOL_HELPER_(op, val)                                             \
     do {                                                                         \
-        if (op && val) {                                                         \
+        if (op == val) {                                                         \
             UnitTest::GetInstance()->currentTestCase_->passedPredicateNum_++;    \
         } else {                                                                 \
             UnitTest::GetInstance()->currentTestCase_->failedPredicateNum_++;    \
