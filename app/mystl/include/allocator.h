@@ -20,7 +20,7 @@ public:
     using difference_type = std::ptrdiff_t;
 
     static pointer allocate(size_type n) {
-        return ::operator new(n * sizeof(T));
+        return reinterpret_cast<pointer>(::operator new(n * sizeof(T)));
     }
 
     static void deallocate(pointer ptr) {

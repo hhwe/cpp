@@ -54,5 +54,5 @@
         "unordered_set": "cpp",
         "complex": "cpp"
     },
-    "cmake.configureOnOpen": true
+    "cmake.configureOnOpen": true,
 }

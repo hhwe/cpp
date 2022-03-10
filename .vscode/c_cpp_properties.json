@@ -12,7 +12,8 @@
             "includePath": [
                 "${default}",
                 "${workspaceFolder}/app/**"
-            ]
+            ],
+            "configurationProvider": "ms-vscode.cmake-tools"
         }
     ],
     "version": 4
