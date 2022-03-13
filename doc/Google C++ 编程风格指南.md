@@ -6,7 +6,7 @@
     版本4.45
     原作者
         Benjy Weinberger, Craig Silverstein, Gregory Eitzmann, Mark Mentovai, Tashana Landray
-    翻译：
+    翻译:
         YuleFox, Yang.Y, acgtyrant, lilinsanity
 
 - [Google Style Guide](http://google-styleguide.googlecode.com/)
@@ -89,10 +89,10 @@ Google主导的开源项目均符合本指南的规定.
 实际上是其它头文件的特定平台(platform-specific)扩展部分. 这些文件就要用`.inc`文件扩展名. 
 
 如果`.h`文件声明了一个模板或内联函数, 同时也在该文件加以定义. 凡是有用到这些的`.cc`文件, 就得统统包
-含该头文件, 否则程序可能会在构建中链接失败. 不要把这些定义放到分离的`-inl.h`文件里(译者注：过去该规范
+含该头文件, 否则程序可能会在构建中链接失败. 不要把这些定义放到分离的`-inl.h`文件里(译者注:过去该规范
 曾提倡把定义放到`-inl.h`里过). 
 
-有个例外：如果某函数模板为所有相关模板参数显式实例化, 或本身就是某类的一个私有成员, 那么它就只能定
+有个例外:如果某函数模板为所有相关模板参数显式实例化, 或本身就是某类的一个私有成员, 那么它就只能定
 义在实例化该模板的`.cc`文件里. 
 
 
@@ -125,15 +125,15 @@ Google主导的开源项目均符合本指南的规定.
 - 前置声明可能会被库的后续更改所破坏. 前置声明函数或模板有时会妨碍头文件开发者变动其API.
     例如扩大形参类型, 加个自带默认参数的模板形参等等. 
 - 前置声明来自命名空间std::的symbol时, 其行为未定义. 
-- 很难判断什么时候该用前置声明, 什么时候该用 #include. 极端情况下, 用前置声明代替includes甚至都会暗暗地改变代码的含义：
+- 很难判断什么时候该用前置声明, 什么时候该用 #include. 极端情况下, 用前置声明代替includes甚至都会暗暗地改变代码的含义:
 如果#include被B和D的前置声明替代, test()就会调用f(void*). *前置声明了不少来自头文件的
 symbol时, 就会比单单一行的include冗长. *仅仅为了能前置声明而重构代码(比如用指针成员代替
 对象成员)会使代码变得更慢更复杂.
 
 **结论:**
 - 尽量避免前置声明那些定义在其他项目中的实体.
-- 函数：总是使用#include.
-- 类模板：优先使用#include.
+- 函数:总是使用#include.
+- 类模板:优先使用#include.
 
 至于什么时候包含头文件, 参见name-and-order-of-includes. 
 
@@ -213,9 +213,9 @@ foo.h有明确说明它会自动向您提供bar.h中的symbol.不过, 凡是cc�
 #include "foo/public/bar.h"
 ```
 
-例外：
+例外:
 有时, 平台特定(system-specific)代码需要条件编译(conditional includes), 这些代码可以放到其它includes
-之后. 当然, 您的平台特定代码也要够简练且独立, 比如：
+之后. 当然, 您的平台特定代码也要够简练且独立, 比如:
 
 ``` c++
 #include "foo/public/fooserver.h"
@@ -260,7 +260,7 @@ using指示(using-directive). 禁止使用内联命名空间(inline namespace).
 
 举例来说, 两个不同项目的全局作用域都有一个类Foo, 这样在编译或运行时造成冲突. 如果每个项目将代
 码置于不同名字空间中, project1::Foo和project2::Foo作为不同符号自然不会冲突.
-内联命名空间会自动把内部的标识符放到外层作用域, 比如：
+内联命名空间会自动把内部的标识符放到外层作用域, 比如:
 
 ``` c++
 namespace X {
@@ -443,7 +443,7 @@ int i;
 i=f(); // 坏——初始化和声明分离
 int j=g(); // 好——初始化时声明
 
-vector< int >v; // 用花括号初始化更好
+vector<int>v; // 用花括号初始化更好
 v.push_back(1); 
 v.push_back(2); 
 vector<int> v = { 1, 2 }; // 好, 开始就初始化
@@ -474,7 +474,7 @@ for ( int i= 0 ; i< 1000000 ; ++i) {
 
 ### 2.5. 静态和全局变量
 
-> Tip: 禁止使用class类型的静态或全局变量：它们会导致难以发现的bug和不确定的构造和析构函数调用顺序. 
+> Tip: 禁止使用class类型的静态或全局变量:它们会导致难以发现的bug和不确定的构造和析构函数调用顺序. 
 不过constexpr变量除外, 毕竟它们又不涉及动态初始化或析构. 
 
 静态生存周期的对象, 即包括了全局变量, 静态变量, 静态类成员变量和函数静态变量, 都必须是原生数据类型
@@ -487,7 +487,7 @@ for ( int i= 0 ; i< 1000000 ; ++i) {
 
 同理, 全局和静态变量在程序中断时会被析构, 无论所谓中断是从main()返回还是对exit()的调用. 析构顺
 序正好与构造函数调用的顺序相反. 但既然构造顺序未定义, 那么析构顺序当然也就不定了. 比如, 在程序结束时某
-静态变量已经被析构了, 但代码还在跑——比如其它线程——并试图访问它且失败；再比如, 一个静态string变量也
+静态变量已经被析构了, 但代码还在跑——比如其它线程——并试图访问它且失败;再比如, 一个静态string变量也
 许会在一个引用了前者的其它变量析构之前被析构掉. 
 改善以上析构问题的办法之一是用quick_exit()来代替exit()并中断程序. 它们的不同之处是前者不会执行
 任何析构, 也不会执行atexit()所绑定的任何handlers.如果您想在执行quick_exit()来中断时执行某handler
@@ -852,7 +852,7 @@ Google用了很多自己实现的技巧/工具使C++代码更加健壮, 我们�
 所有权是一种登记／管理动态内存和其它资源的技术. 动态分配出的对象的所有主是一个对象或函数, 后者负责确保当前者无用时就自动销毁前者. 所有权有时可以共享, 那么就由最后一个所有主来负责销毁它. 甚至也可以不用共享, 在代码中直接把所有权传递给其它对象. 
 
 其实您可以把智能指针当成一个重载了*和->的「对象」来看. 智能指针类型被用来自动化所有权的登
-记工作, 来确保执行销毁义务到位. std::unique_ptr是C++11新推出的一种智能指针类型, 用来表示动态分配出的对象的「独一无二」所有权；当std::unique_ptr离开作用域, 对象就会被销毁. 不能复制std::unique_ptr, 但可以把它移动(move)给新所有主. std::shared_ptr同样表示动态分配对象的所有权, 但可以被共享, 也可以被复制；对象的所有权由所有复制者共同拥有, 最后一个复制者被销毁时, 对象也会随着被销毁. 
+记工作, 来确保执行销毁义务到位. std::unique_ptr是C++11新推出的一种智能指针类型, 用来表示动态分配出的对象的「独一无二」所有权;当std::unique_ptr离开作用域, 对象就会被销毁. 不能复制std::unique_ptr, 但可以把它移动(move)给新所有主. std::shared_ptr同样表示动态分配对象的所有权, 但可以被共享, 也可以被复制;对象的所有权由所有复制者共同拥有, 最后一个复制者被销毁时, 对象也会随着被销毁. 
 
 **优点:**
 - 如果没有清晰、逻辑条理的所有权安排, 不可能管理好动态分配的内存. 
@@ -863,7 +863,7 @@ Google用了很多自己实现的技巧/工具使C++代码更加健壮, 我们�
 - 对于const对象来说, 智能指针简单易用, 也比深度复制高效. 
 
 **缺点:**
-- 不得不用指针(不管是智能的还是原生的)来表示和传递所有权. 指针语义可要比值语义复杂得许多了, 特别是在API里：您不光要操心所有权, 还要顾及别名, 生命周期, 可变性(mutability)以及其它大大小小问题. 
+- 不得不用指针(不管是智能的还是原生的)来表示和传递所有权. 指针语义可要比值语义复杂得许多了, 特别是在API里:您不光要操心所有权, 还要顾及别名, 生命周期, 可变性(mutability)以及其它大大小小问题. 
 - 其实值语义的开销经常被高估, 所以就所有权的性能来说, 可不能光只考虑可读性以及复杂性. 
 - 如果API依赖所有权的传递, 就会害得客户端不得不用单一的内存管理模型. 
 - 销毁资源并回收的相关代码不是很明朗. 
@@ -873,8 +873,8 @@ Google用了很多自己实现的技巧/工具使C++代码更加健壮, 我们�
 - 某些极端情况下, 所有权被共享的对象永远不会被销毁, 比如引用死循环(cyclic references). 
 - 智能指针并不能够完全代替原生指针. 
     
-**决定：**
-如果必须使用动态分配, 倾向于保持分配者的所有权. 如果其他地方要使用这个对象, 最好传递它的拷贝, 或者传递一个不用改变所有权的指针或引用. 倾向于使用std::unique_ptr来明确所有权传递, 例如：
+**决定:**
+如果必须使用动态分配, 倾向于保持分配者的所有权. 如果其他地方要使用这个对象, 最好传递它的拷贝, 或者传递一个不用改变所有权的指针或引用. 倾向于使用std::unique_ptr来明确所有权传递, 例如:
 
 ``` c++
 std::unique_ptr<Foo>FooFactory(); 
@@ -927,7 +927,7 @@ void Foo( const string&in, string*out);
 
 事实上这在Google Code是一个硬性约定: 输入参数是值参或const引用, 输出参数为指针. 输入参数可以是const指针, 但决不能是非const的引用参数, 除非用于交换, 比如swap().
 
-有时候, 在输入形参中用const T*指针比const T&更明智. 比如：
+有时候, 在输入形参中用const T*指针比const T&更明智. 比如:
 - 您会传null指针. 
 - 函数要把指针或对地址的引用赋值给输入形参. 
 
@@ -973,7 +973,7 @@ void Analyze(const char* text, size_t textlen);
 通过重载参数不同的同名函数, 令代码更加直观. 模板化代码需要重载, 同时为使用者带来便利.
 
 **缺点:**
-如果函数单单靠不同的参数类型而重载(acgtyrant注：这意味着参数数量不变), 读者就得十分熟悉C++五花八门的匹配规则, 以了解匹配过程具体到底如何. 另外, 当派生类只重载了某个函数的部分变体, 继承语义容易令人困惑. 
+如果函数单单靠不同的参数类型而重载(acgtyrant注:这意味着参数数量不变), 读者就得十分熟悉C++五花八门的匹配规则, 以了解匹配过程具体到底如何. 另外, 当派生类只重载了某个函数的部分变体, 继承语义容易令人困惑. 
 
 **结论:**
 如果您打算重载一个函数, 可以试试改在函数名里加上参数信息. 例如, 用AppendString() 和
@@ -987,10 +987,10 @@ AppendInt()等, 而不是一口气重载多个Append().
 当您有依赖缺省参数的函数时, 您也许偶尔会修改修改这些缺省参数. 通过缺省参数, 不用再为个别情况而特意定义一大堆函数了. 与函数重载相比, 缺省参数语法更为清晰, 代码少, 也很好地区分了「必选参数」和「可选参数」. 
 
 **缺点:**
-缺省参数会干扰函数指针, 害得后者的函数签名(function signature)往往对不上所实际要调用的函数签名. 即在一个现有函数添加缺省参数, 就会改变它的类型, 那么调用其地址的代码可能会出错, 不过函数重载就没这问题了. 此外, 缺省参数会造成臃肿的代码, 毕竟它们在每一个调用点(call site)都有重复(acgtyrant注：我猜可能是因为调用函数的代码表面上看来省去了不少参数, 但编译器在编译时还是会在每一个调用代码里统统补上所有默认实参信息, 造成大量的重复). 函数重载正好相反, 毕竟它们所谓的「缺省参数」只会出现在函数定义里. 
+缺省参数会干扰函数指针, 害得后者的函数签名(function signature)往往对不上所实际要调用的函数签名. 即在一个现有函数添加缺省参数, 就会改变它的类型, 那么调用其地址的代码可能会出错, 不过函数重载就没这问题了. 此外, 缺省参数会造成臃肿的代码, 毕竟它们在每一个调用点(call site)都有重复(acgtyrant注:我猜可能是因为调用函数的代码表面上看来省去了不少参数, 但编译器在编译时还是会在每一个调用代码里统统补上所有默认实参信息, 造成大量的重复). 函数重载正好相反, 毕竟它们所谓的「缺省参数」只会出现在函数定义里. 
 
 **结论:**
-由于缺点并不是很严重, 有些人依旧偏爱缺省参数胜于函数重载. 所以除了以下情况, 我们要求必须显式提供所有参数(acgtyrant注：即不能再通过缺省参数来省略参数了). 
+由于缺点并不是很严重, 有些人依旧偏爱缺省参数胜于函数重载. 所以除了以下情况, 我们要求必须显式提供所有参数(acgtyrant注:即不能再通过缺省参数来省略参数了). 
 1. 位于`.cc`文件里的静态函数或匿名空间函数, 毕竟都只能在局部文件里调用该函数了. 
 2. 可以在构造函数里用缺省参数, 毕竟不可能取得它们的地址. 
 3. 可以用来模拟变长数组. 
@@ -1030,10 +1030,10 @@ string StrCat(const AlphaNum&a,
 > Tip: 我们不使用C++异常.
 
 **优点:**
-- 异常允许应用高层决定如何处理在底层嵌套函数中「不可能发生」的失败(failures), 不用管那些含糊且容易出错的错误代码(acgtyrant注：error code, 我猜是Ｃ语言函数返回的非零int值). 
+- 异常允许应用高层决定如何处理在底层嵌套函数中「不可能发生」的失败(failures), 不用管那些含糊且容易出错的错误代码(acgtyrant注:error code, 我猜是Ｃ语言函数返回的非零int值). 
 - 很多现代语言都用异常. 引入异常使得C++与Python, Java以及其它类C++的语言更一脉相承. 
 - 有些第三方C++库依赖异常, 禁用异常就不好用了. 
-- 异常是处理构造函数失败的唯一途径. 虽然可以用工厂函数(acgtyrant注：factory function, 出自C++的一种设计模式, 即「简单工厂模式」)或Init()方法代替异常, 但是前者要求在堆栈分配内存, 后者会导致刚创建的实例处于"无效"状态. 
+- 异常是处理构造函数失败的唯一途径. 虽然可以用工厂函数(acgtyrant注:factory function, 出自C++的一种设计模式, 即「简单工厂模式」)或Init()方法代替异常, 但是前者要求在堆栈分配内存, 后者会导致刚创建的实例处于"无效"状态. 
 - 在测试框架里很好用. 
 
 
@@ -1203,10 +1203,10 @@ const的位置:有人喜欢int const *foo形式, 不喜欢const int* foo, 他们
 变量可以被声明成constexpr以表示它是真正意义上的常量, 即在编译时和运行时都不变. 函数或构造函数也可以被声明成constexpr, 以用来定义constexpr变量. 
 
 **优点:**
-如今constexpr就可以定义浮点式的真￿常量, 不用再依赖字面值了；也可以定义用户自定义类型上的常量；甚至也可以定义函数调用所返回的常量. 
+如今constexpr就可以定义浮点式的真￿常量, 不用再依赖字面值了;也可以定义用户自定义类型上的常量;甚至也可以定义函数调用所返回的常量. 
 
 **缺点:**
-若过早把变量优化成constexpr变量, 将来又要把它改为常规变量时, 挺麻烦的；当前对constexpr函数和构造函数中允许的限制可能会导致这些定义中解决的方法模糊. 
+若过早把变量优化成constexpr变量, 将来又要把它改为常规变量时, 挺麻烦的;当前对constexpr函数和构造函数中允许的限制可能会导致这些定义中解决的方法模糊. 
 
 **结论:**
 靠constexpr特性, 方才实现了C++在接口上打造真正常量机制的可能. 好好用constexpr来定义真￿常量以及支持常量的函数. 避免复杂的函数定义, 以使其能够与constexpr一起使用. 千万别痴心妄想地想靠constexpr来强制代码「内联」. 
@@ -1229,7 +1229,7 @@ C++中整型大小因编译器和体系结构的不同而不同.
 
 不要使用uint32_t等无符号整型, 除非你是在表示一个位组而不是一个数值, 或是你需要定义二进制补码溢出. 尤其是不要为了指出数值永不会为负, 而使用无符号类型. 相反, 你应该使用断言来保护数据.如果您的代码涉及容器返回的大小(size), 确保其类型足以应付容器各种可能的用法. 
 
-拿不准时, 类型越大越好. 小心整型类型转换和整型提升(acgtyrant注：integer promotions, 比如int与unsigned int运算时, 前者被提升为unsigned int而有可能溢出), 总有意想不到的后果. 关于无符号整数:有些人, 包括一些教科书作者, 推荐使用无符号类型表示非负数. 这种做法试图达到自我文档化. 但是, 在C语言中, 这一优点被由其导致的bug所淹没. 看看下面的例子:
+拿不准时, 类型越大越好. 小心整型类型转换和整型提升(acgtyrant注:integer promotions, 比如int与unsigned int运算时, 前者被提升为unsigned int而有可能溢出), 总有意想不到的后果. 关于无符号整数:有些人, 包括一些教科书作者, 推荐使用无符号类型表示非负数. 这种做法试图达到自我文档化. 但是, 在C语言中, 这一优点被由其导致的bug所淹没. 看看下面的例子:
 ``` c++
 for ( unsignedint i=foo.Length()- 1 ; i>= 0 ; --i) ...
 ```
@@ -1294,7 +1294,7 @@ uint64_t my_mask = 3ULL << 48;
 
 - 不要在`.h`文件中定义宏.
 - 在马上要使用时才进行#define, 使用后要立即#undef.
-- 不要只是对已经存在的宏使用#undef, 选择一个不会冲突的名称；
+- 不要只是对已经存在的宏使用#undef, 选择一个不会冲突的名称;
 - 不要试图使用展开后会导致C++构造不稳定的宏, 不然也至少要附上文档说明其行为.
 - 不要用##处理函数, 类和变量的名字. 
 
@@ -1313,12 +1313,12 @@ uint64_t my_mask = 3ULL << 48;
 
 ``` c++
 Struct data; 
-Struct data; memset(&data, 0, **sizeof** (data)); 
+Struct data; memset(&data, 0, sizeof (data)); 
 Warning:
 memset(&data, 0, sizeof (Struct)); 
-**if** (raw_size< **sizeof** ( **int** )) {
+if (raw_size< sizeof ( int )) {
 LOG(ERROR)<<"compressed record not big enough for count: "<<raw_size; 
-**return** false; 
+return false; 
 }
 ```
 
@@ -1327,194 +1327,184 @@ LOG(ERROR)<<"compressed record not big enough for count: "<<raw_size;
 > Tip: 用auto绕过烦琐的类型名, 只要可读性好就继续用, 别用在局部变量之外的地方. 
 
 **定义:**
-C++11中, 若变量被声明成auto, 那它的类型就会被自动匹配成初始化表达式的类型. 您可以用auto
-来复制初始化或绑定引用. 
+C++11中, 若变量被声明成auto, 那它的类型就会被自动匹配成初始化表达式的类型. 您可以用auto来复制初始化或绑定引用. 
+``` c++
 vector<string>v; 
 ...
-auto s1=v[ 0 ]; // 创建一份 v[0] 的拷贝. 
-constauto &s2=v[ 0 ]; // s2 是 v[0] 的一个引用. 
+auto s1=v[0]; // 创建一份 v[0] 的拷贝. 
+const auto &s2=v[0]; // s2 是 v[0] 的一个引用. 
+```
+
 **优点:**
-C++类型名有时又长又臭, 特别是涉及模板或命名空间的时候. 就像：
+C++类型名有时又长又臭, 特别是涉及模板或命名空间的时候. 就像:
+``` c++
 sparse_hash_map<string, int >::iterator iter=m.find(val); 
-返回类型好难读, 代码目的也不够一目了然. 重构其：
-auto iter=m.find(val); 
+```
+返回类型好难读, 代码目的也不够一目了然. 重构其:
+``` c++
+auto iter=m.find(val);
+``` 
 好多了. 
-没有auto的话, 我们不得不在同一个表达式里写同一个类型名两次, 无谓的重复, 就像：
+没有auto的话, 我们不得不在同一个表达式里写同一个类型名两次, 无谓的重复, 就像:
+```c++
 diagnostics::ErrorStatus*status= new diagnostics::ErrorStatus("xyz"); 
-有了auto, 可以更方便地用中间变量, 显式编写它们的类型轻松点. 
+```
+有了auto, 可以更方便地用中间变量, 显式编写它们的类型轻松点.
+
 **缺点:**
-类型够明显时, 特别是初始化变量时, 代码才会够一目了然. 但以下就不一样了：
+类型够明显时, 特别是初始化变量时, 代码才会够一目了然. 但以下就不一样了:
+``` c++
 auto i=x.Lookup(key); 
+```
 看不出其类型是啥, x的类型声明恐怕远在几百行之外了. 
+
 程序员必须会区分auto和const auto&的不同之处, 否则会复制错东西. 
-auto和C++11列表初始化的合体令人摸不着头脑：
+
+auto和C++11列表初始化的合体令人摸不着头脑:
+
+``` c++
 auto x( 3 ); // 圆括号. 
 auto y{ 3 }; // 大括号. 
 ```
 
-```
-它们不是同一回事——x是int, y则是std::initializer_list<int>. 其它一般不可见的代理类型
-(acgtyrant注：normally-invisible proxy types, 它涉及到C++鲜为人知的坑：Why is vector<bool> not
-a STL container?)也有大同小异的陷阱. 
+它们不是同一回事——x是int, y则是std::initializer_list<int>. 其它一般不可见的代理类型(acgtyrant注:normally-invisible proxy types, 它涉及到C++鲜为人知的坑:[Why is vector<bool> not
+a STL container?]())也有大同小异的陷阱. 
+
 如果在接口里用auto, 比如声明头文件里的一个常量, 那么只要仅仅因为程序员一时修改其值而导致类型
 变化的话——API要翻天覆地了. 
-**结论:**
-auto只能用在局部变量里用. 别用在文件作用域变量, 命名空间作用域变量和类数据成员里. 永远别列
-表初始化auto变量. 
-auto还可以和C++11特性「尾置返回类型(trailing return type)」一起用, 不过后者只能用在lambda
-表达式里. 
 
-### 5.20. 初始化㺞ࡍ
+**结论:**
+auto只能用在局部变量里用. 别用在文件作用域变量, 命名空间作用域变量和类数据成员里. 永远别列表初始化auto变量. 
+auto还可以和C++11特性「尾置返回类型(trailing return type)」一起用, 不过后者只能用在lambda表达式里. 
+
+### 5.20. 初始化列表
 
 > Tip: 你可以用列表初始化. 
+
 早在C++03里, 聚合类型(aggregate types)就已经可以被列表初始化了, 比如数组和不自带构造函数的结构
-体：
+体:
 
-**struct** Point { **int** x; **int** y; }; 
+``` c++
+struct Point { int x; int y; }; 
 Point p={ 1, 2 }; 
-
 ```
-C++11中, 该特性得到进一步的推广, 任何对象类型都可以被列表初始化. 示范如下：
-```
-_// Vector_ 接收了一个初始化列表. 
+C++11中, 该特性得到进一步的推广, 任何对象类型都可以被列表初始化. 示范如下:
+``` c++
+// Vector 接收了一个初始化列表. 
 vector<string>v{"foo", "bar"}; 
 
 // 不考虑细节上的微妙差别, 大致上相同. 
 // 您可以任选其一. 
 vector<string>v={"foo", "bar"}; 
 
-// 可以配合 _new_ 一起用. 
-**auto** p= **new** vector<string>{"foo", "bar"}; 
+// 可以配合 new 一起用. 
+auto p= new vector<string>{"foo", "bar"}; 
 
-_// map_ 接收了一些 _pair, _ 列表初始化大显神威. 
-map< **int**, string>m={{ 1, "one"}, { 2, " 2 "}}; 
+// map 接收了一些 pair, 列表初始化大显神威. 
+map< int, string>m={{ 1, "one"}, { 2, " 2 "}}; 
 
 // 初始化列表也可以用在返回类型上的隐式转换. 
-vector< **int** >test_function() { **return** { 1, 2, 3 }; }
+vector<int>test_function() { return { 1, 2, 3 }; }
 
 // 初始化列表可迭代. 
-**for** ( **inti**: {- 1, - 2, - 3 }) {}
+for (int i: {- 1, - 2, - 3 }) {}
 
 // 在函数调用里用列表初始化. 
-void TestFunction2(vector< **int** >v) {}
+void TestFunction2(vector<int>v) {}
 TestFunction2({ 1, 2, 3 }); 
-
 ```
-用户自定义类型也可以定义接收std::initializer_list<T>的构造函数和赋值运算符, 以自动列表初始化：
-**classMyType** {
-**public**:
-_// std::initializer_list_ 专门接收 _init_ 列表. 
+
+用户自定义类型也可以定义接收`std::initializer_list<T>`的构造函数和赋值运算符, 以自动列表初始化:
+``` c++
+class MyType {
+public:
+// std::initializer_list 专门接收 init 列表. 
 // 得以值传递. 
-MyType(std::initializer_list< **int** >init_list) {
-**for** ( **inti**: init_list) append(i); 
+MyType(std::initializer_list<int>init_list) {
+for (int i: init_list) append(i); 
 }
-MyType& **operator** =(std::initializer_list< **int** >init_list) {
+MyType& operator = (std::initializer_list<int>init_list) {
 clear(); 
-**for** ( **inti**: init_list) append(i); 
+for (int i: init_list) append(i); 
 }
 }; 
 MyType m{ 2, 3, 5, 7 }; 
-
 ```
-最后, 列表初始化也适用于常规数据类型的构造, 哪怕没有接收std::initializer_list<T>的构造函数. 
-**double** d{1.23}; 
-_// MyOtherType_ 没有 _std::initializer_list_ 构造函数, 
+
+最后, 列表初始化也适用于常规数据类型的构造, 哪怕没有接收`std::initializer_list<T>`的构造函数. 
+
+``` c++
+double d{1.23}; 
+// MyOtherType 没有 std::initializer_list 构造函数, 
 // 直接上接收常规类型的构造函数. 
-**classMyOtherType** {
-**public**:
-**explicit** MyOtherType(string); 
-MyOtherType( **int**, string); 
+class MyOtherType {
+public:
+    explicit MyOtherType(string); 
+    MyOtherType(int, string); 
 }; 
 MyOtherType m={ 1, "b"}; 
 // 不过如果构造函数是显式的( _explict_ ), 您就不能用 _`= {}`_ 了. 
 MyOtherType m{"b"}; 
-
 ```
-千万别直接列表初始化auto变量, 看下一句, 估计没人看得懂：
 
+千万别直接列表初始化auto变量, 看下一句, 估计没人看得懂:
+
+``` c++
 Warning:
 auto d={1.23}; // d 即是 std::initializer_list<double>
-**auto** d= **double** {1.23}; // 善哉 _-- d_ 即为 _double, _ 并非 _std::initializer_list._
-
+auto d= double {1.23}; // 善哉 _-- d_ 即为 _double, _ 并非 _std::initializer_list._
 ```
 至于格式化, 参见braced-initializer-list-format.
 
-### 5.21. Lambda 㺞䗴ᕅ
+### 5.21. Lambda 表达式
 
 > Tip: 适当使用lambda表达式. 别用默认lambda捕获, 所有捕获都要显式写出来. 
 
 **定义:**
-Lambda表达式是创建匿名函数对象的一种简易途径, 常用于把函数当参数传, 例如：
-```
-
-```
+Lambda表达式是创建匿名函数对象的一种简易途径, 常用于把函数当参数传, 例如:
+``` c++
 std::sort(v.begin(), v.end(), []( int x, int y) {
 return Weight(x)<Weight(y); 
 }); 
+```
 C++11首次提出Lambdas, 还提供了一系列处理函数对象的工具, 比如多态包装器(polymorphic
 wrapper)std::function.
+
 **优点:**
 - 传函数对象给STL算法, Lambdas最简易, 可读性也好. 
-- Lambdas, std::functions和std::bind可以搭配成通用回调机制(general purpose callback mechanism)；
-    写接收有界函数为参数的函数也很容易了. 
+- Lambdas, std::functions和std::bind可以搭配成通用回调机制(general purpose callback mechanism); 写接收有界函数为参数的函数也很容易了. 
+
 **缺点:**
 - Lambdas的变量捕获略旁门左道, 可能会造成悬空指针. 
-- Lambdas可能会失控；层层嵌套的匿名函数难以阅读. 
-    **结论:**
-- 按format小用lambda表达式怡情. 
-- 禁用默认捕获, 捕获都要显式写出来. 打比方, 比起[=](int x) {return x + n; }, 您该写成[n](int x)
-    {return x + n; }才对, 这样读者也好一眼看出n是被捕获的值. 
-- 匿名函数始终要简短, 如果函数体超过了五行, 那么还不如起名(acgtyrant注：即把lambda表达式赋值给对
-    象), 或改用函数. 
-- 如果可读性更好, 就显式写出lambd的尾置返回类型, 就像auto.
+- Lambdas可能会失控; 层层嵌套的匿名函数难以阅读. 
 
-### 5.22. ′′′′ᶵ编程
+**结论:**
+- 按format小用lambda表达式怡情. 
+- 禁用默认捕获, 捕获都要显式写出来. 打比方, 比起[=](int x) { return x + n; }, 您该写成[n](int x) { return x + n; }才对, 这样读者也好一眼看出n是被捕获的值. 
+- 匿名函数始终要简短, 如果函数体超过了五行, 那么还不如起名(acgtyrant注:即把lambda表达式赋值给对象), 或改用函数. 
+- 如果可读性更好, 就显式写出lambda的尾置返回类型, 就像auto.
+
+### 5.22. 模板编程
 
 > Tip: 不要使用复杂的模板编程
 
 **定义:**
-模板编程指的是利用c++模板实例化机制是图灵完备性, 可以被用来实现编译时刻的类型判断的一系列
-编程技巧
-
+模板编程指的是利用c++模板实例化机制是图灵完备性, 可以被用来实现编译时刻的类型判断的一系列编程技巧
 
 **优点:**
-模板编程能够实现非常灵活的类型安全的接口和极好的性能, 一些常见的工具比如Google Test, std::tuple, 
-std::function和Boost.Spirit.这些工具如果没有模板是实现不了的
-
+模板编程能够实现非常灵活的类型安全的接口和极好的性能, 一些常见的工具比如Google Test, std::tuple, std::function和Boost.Spirit.这些工具如果没有模板是实现不了的
 
 **缺点:**
-- 模板编程所使用的技巧对于使用c++不是很熟练的人是比较晦涩, 难懂的. 在复杂的地方使用模板的代码让人
-    更不容易读懂, 并且debug和维护起来都很麻烦
-- 模板编程经常会导致编译出错的信息非常不友好: 在代码出错的时候, 即使这个接口非常的简单, 模板内部复杂
-    的实现细节也会在出错信息显示. 导致这个编译出错信息看起来非常难以理解.
-- 大量的使用模板编程接口会让重构工具(Visual Assist X, Refactor for C++等等)更难发挥用途. 首先模板的
-    代码会在很多上下文里面扩展开来, 所以很难确认重构对所有的这些展开的代码有用, 其次有些重构工具只对已
-    经做过模板类型替换的代码的AST有用. 因此重构工具对这些模板实现的原始代码并不有效, 很难找出哪些需
-    要重构.
-
-
+- 模板编程所使用的技巧对于使用c++不是很熟练的人是比较晦涩, 难懂的. 在复杂的地方使用模板的代码让人更不容易读懂, 并且debug和维护起来都很麻烦
+- 模板编程经常会导致编译出错的信息非常不友好: 在代码出错的时候, 即使这个接口非常的简单, 模板内部复杂的实现细节也会在出错信息显示. 导致这个编译出错信息看起来非常难以理解.
+- 大量的使用模板编程接口会让重构工具(Visual Assist X, Refactor for C++等等)更难发挥用途. 首先模板的代码会在很多上下文里面扩展开来, 所以很难确认重构对所有的这些展开的代码有用, 其次有些重构工具只对已经做过模板类型替换的代码的AST有用. 因此重构工具对这些模板实现的原始代码并不有效, 很难找出哪些需要重构.
 
 **结论:**
+- 模板编程有时候能够实现更简洁更易用的接口, 但是更多的时候却适得其反. 因此模板编程最好只用在少量的基础组件, 基础数据结构上, 因为模板带来的额外的维护成本会被大量的使用给分担掉
+- 在使用模板编程或者其他复杂的模板技巧的时候, 你一定要再三考虑一下. 考虑一下你们团队成员的平均水平是否能够读懂并且能够维护你写的模板代码. 或者一个非c++程序员和一些只是在出错的时候偶尔看一下代码的人能够读懂这些错误信息或者能够跟踪函数的调用流程. 如果你使用递归的模板实例化, 或者类型列表, 或者元函数, 又或者表达式模板, 或者依赖SFINAE, 或者sizeof的trick手段来检查函数是否重载, 那么这说明你模板用的太多了, 这些模板太复杂了, 我们不推荐使用
+- 如果你使用模板编程, 你必须考虑尽可能的把复杂度最小化, 并且尽量不要让模板对外暴漏. 你最好只在实现里面使用模板, 然后给用户暴露的接口里面并不使用模板, 这样能提高你的接口的可读性. 并且你应该在这些使用模板的代码上写尽可能详细的注释. 你的注释里面应该详细的包含这些代码是怎么用的, 这些模板生成出来的代码大概是什么样子的. 还需要额外注意在用户错误使用你的模板代码的时候需要输出更人性化的出错信息. 因为这些出错信息也是你的接口的一部分, 所以你的代码必须调整到这些错误信息在用户看起来应该是非常容易理解, 并且用户很容易知道如何修改这些错误
 
-#### • 模板编程有时候能够实现更简洁更易用的接口, 但是更多的时候却适得其反. 因此模板编程最好只用在少量的基
-
-#### 础组件, 基础数据结构上, 因为模板带来的额外的维护成本会被大量的使用给分担掉
-
-#### • 在使用模板编程或者其他复杂的模板技巧的时候, 你一定要再三考虑一下. 考虑一下你们团队成员的平均水平是
-
-```
-否能够读懂并且能够维护你写的模板代码. 或者一个非c++程序员和一些只是在出错的时候偶尔看一下代码的
-人能够读懂这些错误信息或者能够跟踪函数的调用流程. 如果你使用递归的模板实例化, 或者类型列表, 或者元
-函数, 又或者表达式模板, 或者依赖SFINAE, 或者sizeof的trick手段来检查函数是否重载, 那么这说明你模板
-用的太多了, 这些模板太复杂了, 我们不推荐使用
-- 如果你使用模板编程, 你必须考虑尽可能的把复杂度最小化, 并且尽量不要让模板对外暴漏. 你最好只在实现里
-    面使用模板, 然后给用户暴露的接口里面并不使用模板, 这样能提高你的接口的可读性. 并且你应该在这些使用
-    模板的代码上写尽可能详细的注释. 你的注释里面应该详细的包含这些代码是怎么用的, 这些模板生成出来的代
-    码大概是什么样子的. 还需要额外注意在用户错误使用你的模板代码的时候需要输出更人性化的出错信息. 因为
-    这些出错信息也是你的接口的一部分, 所以你的代码必须调整到这些错误信息在用户看起来应该是非常容易理
-    解, 并且用户很容易知道如何修改这些错误
-
-### 5.23. Boost ᓉ
+### 5.23. Boost 库
 
 > Tip: 只使用Boost中被认可的库.
 
@@ -1522,36 +1512,27 @@ std::function和Boost.Spirit.这些工具如果没有模板是实现不了的
 Boost库集是一个广受欢迎, 经过同行鉴定, 免费开源的C++库集.
 
 **优点:**
-Boost代码质量普遍较高, 可移植性好, 填补了C++标准库很多空白, 如型别的特性, 更完善的绑定器, 更
-好的智能指针. 
+Boost代码质量普遍较高, 可移植性好, 填补了C++标准库很多空白, 如型别的特性, 更完善的绑定器, 更好的智能指针. 
 
 **缺点:**
-某些Boost库提倡的编程实践可读性差, 比如元编程和其他高级模板技术, 以及过度"函数化"的编程风
-格.
+某些Boost库提倡的编程实践可读性差, 比如元编程和其他高级模板技术, 以及过度"函数化"的编程风格.
 
 **结论:**
-为了向阅读和维护代码的人员提供更好的可读性, 我们只允许使用Boost一部分经认可的特性子集. 目前
-允许使用以下库:
+为了向阅读和维护代码的人员提供更好的可读性, 我们只允许使用Boost一部分经认可的特性子集. 目前允许使用以下库:
 - Call Traits: boost/call_traits.hpp
 - Compressed Pair: boost/compressed_pair.hpp
-- <The Boost Graph Library (BGL): boost/graph, except serialization (adj_list_serialize.
-    hpp) and parallel/distributed algorithms and data structures(boost/graph/parallel/*andboost/
-    graph/distributed/*)
+- <The Boost Graph Library (BGL): boost/graph, except serialization (adj_list_serialize.hpp) and parallel/distributed algorithms and data structures(boost/graph/parallel/*andboost/graph/distributed/*)
 - Property Map: boost/property_map.hpp
-- The part ofIteratorthat deals with defining iterators: boost/iterator/iterator_adaptor.hpp, 
-    boost/iterator/iterator_facade.hpp, andboost/function_output_iterator.hpp
-- The part ofPolygonthat deals with Voronoi diagram construction and doesn"t depend on the rest
-    of Polygon: boost/polygon/voronoi_builder.hpp, boost/polygon/voronoi_diagram.hpp, and
-    boost/polygon/voronoi_geometry_type.hpp
-
-
+- The part ofIteratorthat deals with defining iterators: boost/iterator/iterator_adaptor.hpp, boost/iterator/iterator_facade.hpp, andboost/function_output_iterator.hpp
+- The part ofPolygonthat deals with Voronoi diagram construction and doesn"t depend on the restof Polygon: boost/polygon/voronoi_builder.hpp, boost/polygon/voronoi_diagram.hpp, andboost/polygon/voronoi_geometry_type.hpp
 - Bimap: boost/bimap
 - Statistical Distributions and Functions: boost/math/distributions
 - Multi-index: boost/multi_index
 - Heap: boost/heap
 - The flat containers fromContainer: boost/container/flat_map, andboost/container/flat_set
+
 我们正在积极考虑增加其它Boost特性, 所以列表中的规则将不断变化.
-以下库可以用, 但由于如今已经被C++ 11标准库取代, 不再鼓励：
+以下库可以用, 但由于如今已经被C++ 11标准库取代, 不再鼓励:
 - Pointer Container: boost/ptr_container, 改用std::unique_ptr
 - Array: boost/array.hpp, 改用std::array
 
@@ -1561,19 +1542,15 @@ Boost代码质量普遍较高, 可移植性好, 填补了C++标准库很多空�
 
 **定义:**
 C++11有众多语言和库上的"变革<https: //en.wikipedia.org/wiki/C%2B%2B11>"_. 
+
 **优点:**
-在二〇一四年八月之前, C++11一度是官方标准, 被大多C++编译器支持. 它标准化很多我们早先就
-在用的C++扩展, 简化了不少操作, 大大改善了性能和安全. 
+在二〇一四年八月之前, C++11一度是官方标准, 被大多C++编译器支持. 它标准化很多我们早先就在用的C++扩展, 简化了不少操作, 大大改善了性能和安全. 
+
 **缺点:**
-C++11相对于前身, 复杂极了： 1300 页vs 800页！很多开发者也不怎么熟悉它. 于是从长远来看, 前
-者特性对代码可读性以及维护代价难以预估. 我们说不准什么时候采纳其特性, 特别是在被迫依赖老实工
-具的项目上. 
-和 5.23. Boost 库一样, 有些C++11扩展提倡实则对可读性有害的编程实践——就像去除冗余检查(比
-如类型名)以帮助读者, 或是鼓励模板元编程等等. 有些扩展在功能上与原有机制冲突, 容易招致困惑以
-及迁移代价. 
+C++11相对于前身, 复杂极了: 1300 页vs 800页! 很多开发者也不怎么熟悉它. 于是从长远来看, 前者特性对代码可读性以及维护代价难以预估. 我们说不准什么时候采纳其特性, 特别是在被迫依赖老实工具的项目上. 和 5.23. Boost 库一样, 有些C++11扩展提倡实则对可读性有害的编程实践——就像去除冗余检查(比如类型名)以帮助读者, 或是鼓励模板元编程等等. 有些扩展在功能上与原有机制冲突, 容易招致困惑以及迁移代价.
+
 **缺点:**
-C++11特性除了个别情况下, 可以用一用. 除了本指南会有不少章节会加以讨若干C++11特性之外, 
-以下特性最好不要用：
+C++11特性除了个别情况下, 可以用一用. 除了本指南会有不少章节会加以讨若干C++11特性之外, 以下特性最好不要用:
 - 尾置返回类型, 比如用auto foo() -> int代替int foo(). 为了兼容于现有代码的声明风格. 
 - 编译时合数<ratio>, 因为它涉及一个重模板的接口风格. 
 - <cfenv>和<fenv.h>头文件, 因为编译器尚不支持. 
@@ -1581,48 +1558,34 @@ C++11特性除了个别情况下, 可以用一用. 除了本指南会有不少�
 
 ### 译者 acgtyrant 笔记
 
-```
-1.实际上, 缺省参数会改变函数签名的前提是改变了它接收的参数数量, 比如把void a()改成void a(int b =
-0), 开发者改变其代码的初衷也许是, 在不改变「代码兼容性」的同时, 又提供了可选int参数的余地, 然而这
-终究会破坏函数指针上的兼容性, 毕竟函数签名确实变了. 
-2.此外把自带缺省参数的函数地址赋值给指针时, 会丢失缺省参数信息. 
-```
+1. 实际上, 缺省参数会改变函数签名的前提是改变了它接收的参数数量, 比如把void a()改成void a(int b = 0), 开发者改变其代码的初衷也许是, 在不改变「代码兼容性」的同时, 又提供了可选int参数的余地, 然而这终究会破坏函数指针上的兼容性, 毕竟函数签名确实变了. 
+2. 此外把自带缺省参数的函数地址赋值给指针时, 会丢失缺省参数信息. 
+3. 我还发现滥用缺省参数会害得读者光只看调用代码的话, 会误以为其函数接受的参数数量比实际上还要少. 
+4. friend实际上只对函数／类赋予了对其所在类的访问权限, 并不是有效的声明语句. 所以除了在头文件类内部写friend函数／类, 还要在类作用域之外正式地声明一遍, 最后在对应的`.cc`文件加以定义. 
+5. 本风格指南都强调了「友元应该定义在同一文件内, 避免代码读者跑到其它文件查找使用该私有成员的类」. 那么可以把其声明放在类声明所在的头文件, 定义也放在类定义所在的文件. 
+6. 由于友元函数／类并不是类的一部分, 自然也不会是类可调用的公有接口, 于是我主张全集中放在类的尾部, 即的数据成员之后, 参考声明顺序. 
+7. 对使用C++异常处理应具有怎样的态度？非常值得一读. 
+8. 注意初始化const对象时, 必须在初始化的同时值初始化. 
+9. 用断言代替无符号整型类型, 深有启发. 
+10. auto在涉及迭代器的循环语句里挺常用. 
+11. Should the trailing return type syntax style become the default for new C++11 programs?讨论了auto与尾置返回类型一起用的全新编码风格, 值得一看. 
 
-#### 3.我还发现滥用缺省参数会害得读者光只看调用代码的话, 会误以为其函数接受的参数数量比实际上还要少. 
+## 6. 命名约定
 
-```
-4.friend实际上只对函数／类赋予了对其所在类的访问权限, 并不是有效的声明语句. 所以除了在头文件类内部
-写friend函数／类, 还要在类作用域之外正式地声明一遍, 最后在对应的`.cc`文件加以定义. 
-5.本风格指南都强调了「友元应该定义在同一文件内, 避免代码读者跑到其它文件查找使用该私有成员的类」. 那
-么可以把其声明放在类声明所在的头文件, 定义也放在类定义所在的文件. 
-6.由于友元函数／类并不是类的一部分, 自然也不会是类可调用的公有接口, 于是我主张全集中放在类的尾部, 
-即的数据成员之后, 参考声明顺序. 
-7.对使用C++异常处理应具有怎样的态度？非常值得一读. 
-8.注意初始化const对象时, 必须在初始化的同时值初始化. 
-9.用断言代替无符号整型类型, 深有启发. 
-10.auto在涉及迭代器的循环语句里挺常用. 
-11.Should the trailing return type syntax style become the default for new C++11 programs?讨论了auto与尾置
-返回类型一起用的全新编码风格, 值得一看. 
-```
-## 6. ળ੃㓜ᇐ
+最重要的一致性规则是命名管理. 命名风格快速获知名字代表是什么东东: 类型?变量?函数?常量?宏... ?甚至不需要去查找类型声明. 我们大脑中的模式匹配引擎可以非常可靠的处理这些命名规则. 命名规则具有一定随意性, 但相比按个人喜好命名, 一致性更重要, 所以不管你怎么想, 规则总归是规则.
 
-#### 最重要的一致性规则是命名管理. 命名风格快速获知名字代表是什么东东: 类型?变量?函数?常量?宏... ?甚
+### 6.1. 通用命名规则
 
-#### 至不需要去查找类型声明. 我们大脑中的模式匹配引擎可以非常可靠的处理这些命名规则.
+> Tip: 函数命名, 变量命名, 文件命名要有描述性;少用缩写. 
 
-#### 命名规则具有一定随意性, 但相比按个人喜好命名, 一致性更重要, 所以不管你怎么想, 规则总归是规则.
-
-### 6.1. 䙐⭞ળ੃㿺ࡏ
-
-> Tip: 函数命名, 变量命名, 文件命名要有描述性；少用缩写. 
 尽可能给有描述性的命名, 别心疼空间, 毕竟让代码易于新读者理解很重要. 不要用只有项目开发者能理解的缩
 写, 也不要通过砍掉几个字母来缩写单词. 
 
-**int** price_count_reader; // 无缩写
-**int** num_errors; // " _num_ " 本来就很常见
-**int** num_dns_connections; // 人人都知道 " _DNS_ " 是啥
+``` c++
+int price_count_reader; // 无缩写
+int num_errors; // " _num_ " 本来就很常见
+int num_dns_connections; // 人人都知道 " _DNS_ " 是啥
 
-```
 Warning:
 int n; // 莫名其妙. 
 int nerr; // 怪缩写. 
@@ -1632,16 +1595,17 @@ int pc_reader; // "pc" 有太多可能的解释了.
 int cstmr_id; // 有删减若干字母. 
 ```
 
-### 6.2. ᮽԬળ੃
+### 6.2. 文件命名
 
-> Tip: 文件名要全部小写, 可以包含下划线(_)或连字符(-). 按项目约定来. 如果并没有项目约定, "_"更好. 
+> Tip: 文件名要全部小写, 可以包含下划线(_)或连字符(-). 按项目约定来. 如果并没有项目约定, (_)更好. 
+
 可接受的文件命名:
-
+```
 * my_useful_class.cc
 * my-useful-class.cc
 * myusefulclass.cc
 * muusefulclass_test.cc // ``_unittest``和``_regtest`` 已弃用. 
-
+```
 C++文件要以`.cc`结尾, 头文件以`.h`结尾. 专门插入文本的文件则以`.inc`结尾, 参见 _1.1. Self-contained_ 头
 文件. 
 不要使用已经存在于/usr/include下的文件名(Yang.Y注: 即编译器搜索系统头文件的路径), 如db.h.
@@ -1649,138 +1613,134 @@ C++文件要以`.cc`结尾, 头文件以`.h`结尾. 专门插入文本的文件�
 foo_bar.h和foo_bar.cc, 对应于类FooBar.
 内联函数必须放在`.h`文件中. 如果内联函数比较短, 就直接放在`.h`中.
 
-### 6.3. 类型ળ੃
+### 6.3. 类型命名
 
 > Tip: 类型名称的每个单词首字母均大写, 不包含下划线: MyExcitingClass, MyExcitingEnum.
 
-```
 所有类型命名——类, 结构体, 类型定义(typedef), 枚举——均使用相同约定. 例如:
+``` c++
 // classes and structs
-classUrlTable { ...
-classUrlTableTester { ...
+class UrlTable { ...
+class UrlTableTester { ...
 struct UrlTableProperties { ...
 
 // typedefs
-typedef hash_map<UrlTableProperties*, string>PropertiesMap; 
+typedef hash_map<UrlTableProperties*, string> PropertiesMap; 
 
 // enums
 enum UrlTableErrors { ...
-
-### 6.4. 变䠅ળ੃
-
-> Tip: 变量名一律小写, 单词之间用下划线连接. 类的成员变量以下划线结尾, 但结构体的就不用, 如: :
-a_local_variable, a_struct_data_member, a_class_data_member_.
-
-```
-普通变量命名:
-举例:
 ```
 
-```
+### 6.4. 变量命名
+
+> Tip: 变量名一律小写, 单词之间用下划线连接. 类的成员变量以下划线结尾, 但结构体的就不用, 如: a_local_variable, a_struct_data_member, a_class_data_member_.
+
+普通变量命名, 举例:
+
+``` c++
 string table_name; //可-用下划线. 
 string tablename; //可-全小写. 
 
 Warning:
 string tableName; // 差 - 混合大小写. 
 ```
-#### 类数据成员：
 
-#### 不管是静态的还是非静态的, 类数据成员都可以和普通变量一样, 但要接下划线. 
+类数据成员, 不管是静态的还是非静态的, 类数据成员都可以和普通变量一样, 但要接下划线. 
 
 ``` c++
-classTableInfo {
+class TableInfo {
 ...
 private:
-string table_name_; // 可 - 尾后加下划线. 
-string tablename_; // 可. 
-static Pool<TableInfo>*pool_; // 可. 
+    string table_name_; // 可 - 尾后加下划线. 
+    string tablename_; // 可. 
+    static Pool<TableInfo>* pool_; // 可. 
 }; 
-结构体变量:
-不管是静态的还是非静态的, 结构体数据成员都可以和普通变量一样, 不用像类那样接下划线:
-struct UrlTableProperties {
-string name; 
-int num_entries; 
-}
-结构体与类的讨论参考结构体 vs. 类一节.
-全局变量:
-对全局变量没有特别要求, 少用就好, 但如果你要用, 可以用g_或其它标志作为前缀, 以便更好的区分局
-部变量.
+```
 
-### 6.5. ᑮ䠅ળ੃
+结构体变量, 不管是静态的还是非静态的, 结构体数据成员都可以和普通变量一样, 不用像类那样接下划线:
+``` c++
+struct UrlTableProperties {
+    string name; 
+    int num_entries; 
+};
+```
+
+全局变量: 对全局变量没有特别要求, 少用就好, 但如果你要用, 可以用g_或其它标志作为前缀, 以便更好的区分局部变量.
+
+### 6.5. 常量命名
 
 > Tip: 在全局或类里的常量名称前加k: kDaysInAWeek.且除去开头的k之外每个单词开头字母均大写. 
+
 所有编译时常量, 无论是局部的, 全局的还是类中的, 和其他变量稍微区别一下. k后接大写字母开头的单词:
-**constint** kDaysInAWeek= 7 ; 
+``` c++
+const int kDaysInAWeek= 7 ; 
+```
 这规则适用于编译时的局部作用域常量, 不过要按变量规则来命名也可以. 
 
-### 6.6. ࠳数ળ੃
+### 6.6. 函数命名
 
+> Tip: 常规函数使用大小写混合, 取值和设值函数则要求与变量名匹配: MyExcitingFunction(), MyExcitingMethod(), my_exciting_member_variable(), set_my_exciting_member_variable().
 
-> Tip: 常规函数使用大小写混合, 取值和设值函数则要求与变量名匹配: MyExcitingFunction(), 
-MyExcitingMethod(), my_exciting_member_variable(), set_my_exciting_member_variable().
-
-```
 常规函数:
 函数名的每个单词首字母大写, 没有下划线. 
-如果您的某函数出错时就要直接crash, 那么就在函数名加上OrDie. 但这函数本身必须集成在产品代码
-里, 且平时也可能会出错. 
+如果您的某函数出错时就要直接crash, 那么就在函数名加上OrDie. 但这函数本身必须集成在产品代码里, 且平时也可能会出错. 
+``` c++
 AddTableEntry()
 DeleteUrl()
 OpenFileOrDie()
+```
 取值和设值函数:
 取值(Accessors)和设值(Mutators)函数要与存取的变量名匹配. 这儿摘录一个类, num_entries_是该
 类的实例变量:
+``` c++
 classMyClass {
 public:
-...
-int num_entries() const { return num_entries_; }
-void set_num_entries( int num_entries) { num_entries_=num_entries; }
+    ...
+    int num_entries() const { return num_entries_; }
+    void set_num_entries( int num_entries) { num_entries_=num_entries; }
 
 private:
 int num_entries_; 
-}; 
+};
+```
 其它非常短小的内联函数名也可以用小写字母, 例如. 如果你在循环中调用这样的函数甚至都不用缓存其
 返回值, 小写命名就可以接受.
 
-### 6.7. 名字空间ળ੃
+### 6.7. 名字空间命名
 
 > Tip: 名字空间用小写字母命名, 并基于项目名称和目录结构: google_awesome_project.
 
-```
 关于名字空间的讨论和如何命名, 参考名字空间一节.
 
-### 6.8. ᷐Ѵળ੃
+### 6.8. 枚举命名
 
 > Tip: 枚举的命名应当和常量或宏一致: kEnumName或是ENUM_NAME.
 
-ঋ⤢Ⲻ᷐Ѵٲᓊ䈛Վݾ䟽⭞ᑮ䠅Ⲻળ੃ᯯᕅ**. ** ռᇅᯯᕅⲺળ੃ҕਥԛ᧛਍**. ** ᷐Ѵ੃ **UrlTableErrors(** ԛ਀ **AlternateUrlTableErrors)** ᱥ类型 **, ** ᡶԛ㾷⭞ཝቅߏ␭ਾⲺᯯᕅ**. **
-
-
-**enum** UrlTableErrors {
+``` c++
+enum UrlTableErrors {
 kOK= 0, 
 kErrorOutOfMemory, 
 kErrorMalformedInput, 
 }; 
-**enum** AlternateUrlTableErrors {
+enum AlternateUrlTableErrors {
 OK = 0, 
 OUT_OF_MEMORY= 1, 
 MALFORMED_INPUT= 2, 
-}; 
-2009 年 1 月之前, 我们一直建议采用宏的方式命名枚举值. 由于枚举值和宏之间的命名冲突, 直接导致了很多问
-题. 由此, 这里改为优先选择常量风格的命名方式. 新代码应该尽可能优先使用常量风格. 但是老代码没必要切换到常
-量风格, 除非宏风格确实会产生编译期问题.
+};
+```
+2009 年 1 月之前, 我们一直建议采用宏的方式命名枚举值. 由于枚举值和宏之间的命名冲突, 直接导致了很多问题. 由此, 这里改为优先选择常量风格的命名方式. 新代码应该尽可能优先使用常量风格. 但是老代码没必要切换到常量风格, 除非宏风格确实会产生编译期问题.
 
-### 6.9. ᇅળ੃
+### 6.9. 宏命名
 
 > Tip: 你并不打算使用宏, 对吧?如果你一定要用, 像这样命名: MY_MACRO_THAT_SCARES_SMALL_CHILDREN.
 
-```
 参考预处理宏; 通常不应该使用宏. 如果不得不用, 其命名像枚举命名一样全部大写, 使用下划线:
+``` c++
+#define ROUND(x) ...
+#define PI_ROUNDED 3.0
 ```
-_#define ROUND(x) ...
-#define PI_ROUNDED 3.0_
 
-### 6.10. ળ੃㿺ࡏⲺ⢯ׁ
+### 6.10. 命名规则特例ׁ
 
 > Tip: 如果你命名的实体与已有C/C++实体相似, 可参考现有命名策略.
 
@@ -1795,82 +1755,67 @@ sparse_hash_map:
 STL相似实体; 参照STL命名约定
 LONGLONG_MAX:
 常量, 如同INT_MAX
+```
 
 ### 译者 acgtyrant 笔记
 
-```
-1.感觉Google 的命名约定很高明, 比如写了简单的类 QueryResult, 接着又可以直接定义一个变量
-query_result, 区分度很好；再次, 类内变量以下划线结尾, 那么就可以直接传入同名的形参, 比如
-```
 
-```
-TextQuery::TextQuery(std::string word): word_(word) {}, 其中word_自然是类内私有成员. 
-```
-## 7. ⌞䠀
+1.感觉Google 的命名约定很高明, 比如写了简单的类 QueryResult, 接着又可以直接定义一个变量query_result, 区分度很好;再次, 类内变量以下划线结尾, 那么就可以直接传入同名的形参, 比如TextQuery::TextQuery(std::string word): word_(word) {}, 其中word_自然是类内私有成员. 
 
-#### 注释虽然写起来很痛苦, 但对保证代码可读性至关重要. 下面的规则描述了如何注释以及在哪儿注释. 当然也要
+## 7. 注释
 
-#### 记住: 注释固然很重要, 但最好的代码本身应该是自文档化. 有意义的类型名和变量名, 要远胜过要用注释解释的含糊
+注释虽然写起来很痛苦, 但对保证代码可读性至关重要. 下面的规则描述了如何注释以及在哪儿注释. 当然也要记住: 注释固然很重要, 但最好的代码本身应该是自文档化. 有意义的类型名和变量名, 要远胜过要用注释解释的含糊不清的名字.
 
-#### 不清的名字.
+你写的注释是给代码读者看的: 下一个需要理解你的代码的人. 慷慨些吧, 下一个人可能就是你!
 
-#### 你写的注释是给代码读者看的: 下一个需要理解你的代码的人. 慷慨些吧, 下一个人可能就是你!
-
-### 7.1. ⌞䠀风格
+### 7.1. 注释风格
 
 > Tip: 使用//或/* */, 统一就好.
 
-``` c++
 //或/* */都可以; 但//更常用. 要在如何注释及注释风格上确保统一.
 
-### 7.2. ᮽԬ⌞䠀
+### 7.2. 文件注释
 
 > Tip: 在每一个文件开头加入版权公告, 然后是文件内容描述.
 
-```
 法律公告和作者信息:
 每个文件都应该包含以下项, 依次是:
 - 版权声明(比如, Copyright 2008 Google Inc.)
 - 许可证. 为项目选择合适的许可证版本(比如, Apache 2.0, BSD, LGPL, GPL)
 - 作者: 标识文件的原始作者.
-如果你对原始作者的文件做了重大修改, 将你的信息添加到作者信息里. 这样当其他人对该文件有疑问时
-可以知道该联系谁.
+
+如果你对原始作者的文件做了重大修改, 将你的信息添加到作者信息里. 这样当其他人对该文件有疑问时可以知道该联系谁.
 文件内容:
 紧接着版权许可和作者信息之后, 每个文件都要用注释描述文件内容.
-通常, `.h`文件要对所声明的类的功能和用法作简单说明..cc文件通常包含了更多的实现细节或算法技巧
-讨论, 如果你感觉这些实现细节或算法技巧讨论对于理解`.h`文件有帮助, 可以将该注释挪到`.h`, 并在`.cc`
-中指出文档在`.h`.
-不要简单的在`.h`和`.cc`间复制注释. 这种偏离了注释的实际意义.
 
-### 7.3. 类⌞䠀
+通常, `.h`文件要对所声明的类的功能和用法作简单说明..cc文件通常包含了更多的实现细节或算法技巧讨论, 如果你感觉这些实现细节或算法技巧讨论对于理解`.h`文件有帮助, 可以将该注释挪到`.h`, 并在`.cc`中指出文档在`.h`.不要简单的在`.h`和`.cc`间复制注释. 这种偏离了注释的实际意义.
+
+### 7.3. 类注释
 
 > Tip: 每个类的定义都要附带一份注释, 描述类的功能和用法.
 
-
-_// Iterates over the contents of a GargantuanTable. Sample usage:
+``` c++
+// Iterates over the contents of a GargantuanTable. Sample usage:
 // GargantuanTable_Iterator* iter = table->NewIterator(); 
 // for (iter->Seek("foo"); !iter->done(); iter->Next()) {
 // process(iter->key(), iter->value()); 
 // }
 // delete iter; _
-**classGargantuanTable_Iterator** {
+class GargantuanTable_Iterator {
 ...
 }; 
+```
+如果你觉得已经在文件顶部详细描述了该类, 想直接简单的来上一句"完整描述见文件顶部"也不打紧, 但务必确保有这类注释.
 
-如果你觉得已经在文件顶部详细描述了该类, 想直接简单的来上一句"完整描述见文件顶部"也不打紧, 但务必确
-保有这类注释.
-如果类有任何同步前提, 文档说明之. 如果该类的实例可被多线程访问, 要特别注意文档说明多线程环境下相关的
-规则和常量使用.
+如果类有任何同步前提, 文档说明之. 如果该类的实例可被多线程访问, 要特别注意文档说明多线程环境下相关的规则和常量使用.
 
-### 7.4. ࠳数⌞䠀
+### 7.4. 函数注释
 
 > Tip: 函数声明处注释描述函数功能; 定义处描述函数实现.
 
-```
 函数声明:
-注释位于声明之前, 对函数功能及用法进行描述. 注释使用叙述式("Opens the file")而非指令式("Open
-the file"); 注释只是为了描述函数, 而不是命令函数做什么. 通常, 注释不会描述函数如何工作. 那是函数
-定义部分的事情.
+注释位于声明之前, 对函数功能及用法进行描述. 注释使用叙述式("Opens the file")而非指令式("Open the file"); 注释只是为了描述函数, 而不是命令函数做什么. 通常, 注释不会描述函数如何工作. 那是函数定义部分的事情.
+
 函数声明处注释的内容:
 - 函数的输入输出.
 - 对类成员函数而言: 函数调用期间对象是否需要保持引用参数, 是否会释放这些参数.
@@ -1879,7 +1824,8 @@ the file"); 注释只是为了描述函数, 而不是命令函数做什么. 通�
 - 是否存在函数使用上的性能隐患.
 - 如果函数是可重入的, 其同步前提是什么?
 举例如下:
-_// Returns an iterator for this table. It is the client's
+``` c++
+// Returns an iterator for this table. It is the client's
 // responsibility to delete the iterator when it is done with it, 
 // and it must not use the iterator once the GargantuanTable object
 // on which the iterator was created has been deleted.
@@ -1890,252 +1836,223 @@ _// Returns an iterator for this table. It is the client's
 // Iterator* iter = table->NewIterator(); 
 // iter->Seek(""); 
 // return iter; _
-
-
-``` c++
 // If you are going to immediately seek to another place in the
 // returned iterator, it will be faster to use NewIterator()
 // and avoid the extra seek.
 Iterator*GetIterator() const ; 
-但也要避免罗罗嗦嗦, 或做些显而易见的说明. 下面的注释就没有必要加上"returns false otherwise", 因为
-已经暗含其中了:
+```
+但也要避免罗罗嗦嗦, 或做些显而易见的说明. 下面的注释就没有必要加上"returns false otherwise", 因为已经暗含其中了:
+``` c++
 // Returns true if the table cannot hold any more entries.
-bool IsTableFull(); 
-注释构造/析构函数时, 切记读代码的人知道构造/析构函数是干啥的, 所以"destroys this object"这样的
-注释是没有意义的. 注明构造函数对参数做了什么(例如, 是否取得指针所有权)以及析构函数清理了什么.
-如果都是些无关紧要的内容, 直接省掉注释. 析构函数前没有注释是很正常的.
-函数
-**定义:**
-每个函数定义时要用注释说明函数功能和实现要点. 比如说说你用的编程技巧, 实现的大致步骤, 或解释如
-此实现的理由, 为什么前半部分要加锁而后半部分不需要.
-不要从`.h`文件或其他地方的函数声明处直接复制注释. 简要重述函数功能是可以的, 但注释重点要放在
-如何实现上.
+bool IsTableFull();
+```
+注释构造/析构函数时, 切记读代码的人知道构造/析构函数是干啥的, 所以"destroys this object"这样的注释是没有意义的. 注明构造函数对参数做了什么(例如, 是否取得指针所有权)以及析构函数清理了什么. 如果都是些无关紧要的内容, 直接省掉注释. 析构函数前没有注释是很正常的.
 
-### 7.5. 变䠅⌞䠀
+函数定义:
+每个函数定义时要用注释说明函数功能和实现要点. 比如说说你用的编程技巧, 实现的大致步骤, 或解释如此实现的理由, 为什么前半部分要加锁而后半部分不需要. 不要从`.h`文件或其他地方的函数声明处直接复制注释. 简要重述函数功能是可以的, 但注释重点要放在如何实现上.
+
+### 7.5. 变量注释
 
 > Tip: 通常变量名本身足以很好说明变量用途. 某些情况下, 也需要额外的注释说明.
 
-```
 类数据成员:
 每个类数据成员(也叫实例变量或成员变量)都应该用注释说明用途. 如果变量可以接受NULL或-1等警
 戒值, 须加以说明. 比如:
+``` c++
 private:
-// Keeps track of the total number of entries in the table.
-// Used to ensure we do not go over the limit. -1 means
-// that we don't yet know how many entries the table has.
-int num_total_entries_; 
+    // Keeps track of the total number of entries in the table.
+    // Used to ensure we do not go over the limit. -1 means
+    // that we don't yet know how many entries the table has.
+    int num_total_entries_;
+```
 全局变量:
 和数据成员一样, 所有全局变量也要注释说明含义及用途. 比如:
+``` c++
 // The total number of tests cases that we run through in this regression test.
-constint kNumTestCases= 6 ; 
+constint kNumTestCases= 6 ;
+```
 
-### 7.6. ᇔ⧦⌞䠀
+### 7.6. 实现注释
 
 > Tip: 对于代码中巧妙的, 晦涩的, 有趣的, 重要的地方加以注释.
 
-
-#### 代码前注释:
-
-#### 巧妙或复杂的代码段前要加注释. 比如:
+代码前注释:
+巧妙或复杂的代码段前要加注释. 比如:
 
 ``` c++
 // Divide result by two, taking into account that x
 // contains the carry from the add.
 for ( int i= 0 ; i<result->size(); i++) {
-x=(x<< 8 )+(*result)[i]; 
-(*result)[i]=x>> 1 ; 
-x&= 1 ; 
+    x=(x<< 8 )+(*result)[i]; 
+    (*result)[i]=x>> 1 ; 
+    x&= 1 ; 
 }
 ```
+
 行注释:
 比较隐晦的地方要在行尾加入注释. 在行尾空两格进行注释. 比如:
-_// If we have enough memory, mmap the data portion too._
+``` c++
+// If we have enough memory, mmap the data portion too._
 mmap_budget=max<int64>( 0, mmap_budget-index_->length()); 
-**if** (mmap_budget>=data_size_&&!MmapData(mmap_chunk_bytes, mlock))
-**return** ; _// Error already logged._
+if (mmap_budget>=data_size_&&!MmapData(mmap_chunk_bytes, mlock))
+    return ; _// Error already logged.
+```
 注意, 这里用了两段注释分别描述这段代码的作用, 和提示函数返回时错误已经被记入日志.
 如果你需要连续进行多行注释, 可以使之对齐获得更好的可读性:
-DoSomething(); _// Comment here so the comments line up._
-DoSomethingElseThatIsLonger(); _// Comment here so there are two spaces between
-// the code and the comment._
-{ // One space before comment when opening a new scope is allowed, 
-// thus the comment lines up with the following comments and code._
-DoSomethingElse(); _// Two spaces before line comments normally._
+``` c++
+DoSomething(); // Comment here so the comments line up.
+DoSomethingElseThatIsLonger(); // Comment here so there are two spaces between
+// the code and the comment.
+{   // One space before comment when opening a new scope is allowed, 
+    // thus the comment lines up with the following comments and code.
+    DoSomethingElse(); // Two spaces before line comments normally.
 }
+```
 
 NULL, true/false, 1, 2, 3...:
 向函数传入NULL, 布尔值或整数时, 要注释说明含义, 或使用常量让代码望文知意. 例如, 对比:
 
-```
+``` c++
 Warning:
 bool success=CalculateSomething(interesting_value, 
 10, 
 false, 
 NULL); // What are these arguments??
-```
-#### 和:
 
-```
 bool success=CalculateSomething(interesting_value, 
 10, // Default base value.
 false, // Not the first time we're calling this.
 NULL); // No callback.
-或使用常量或描述性变量:
 ```
 
-```
+或使用常量或描述性变量:
+``` c++
 constint kDefaultBaseValue= 10 ; 
 constbool kFirstTimeCalling=false; 
 Callback*null_callback=NULL; 
 bool success=CalculateSomething(interesting_value, 
-kDefaultBaseValue, 
-kFirstTimeCalling, 
-null_callback); 
+                                kDefaultBaseValue, 
+                                kFirstTimeCalling, 
+                                null_callback); 
+```
 不允许:
 注意永远不要用自然语言翻译代码作为注释. 要假设读代码的人C++水平比你高, 即便他/她可能不知
 道你的用意:
 
 Warning:
+``` c++
 // 现在, 检查 b 数组并确保 i 是否存在, 
 // 下一个元素是 i+1.
 ... // 天哪. 令人崩溃的注释.
+```
 
-### 7.7. ḽ⛯, ᤲߏ和䈣⌋
+### 7.7. 标点, 拼写和语法
 
 > Tip: 注意标点, 拼写和语法; 写的好的注释比差的要易读的多.
 
-注释的通常写法是包含正确大小写和结尾句号的完整语句. 短一点的注释(如代码行尾注释)可以随意点, 依然要
-注意风格的一致性. 完整的语句可读性更好, 也可以说明该注释是完整的, 而不是一些不成熟的想法.
-虽然被别人指出该用分号时却用了逗号多少有些尴尬, 但清晰易读的代码还是很重要的. 正确的标点, 拼写和语法
-对此会有所帮助.
+注释的通常写法是包含正确大小写和结尾句号的完整语句. 短一点的注释(如代码行尾注释)可以随意点, 依然要注意风格的一致性. 完整的语句可读性更好, 也可以说明该注释是完整的, 而不是一些不成熟的想法.
 
-### 7.8. TODO ⌞䠀
+虽然被别人指出该用分号时却用了逗号多少有些尴尬, 但清晰易读的代码还是很重要的. 正确的标点, 拼写和语法对此会有所帮助.
+
+### 7.8. TODO 注释
 
 > Tip: 对那些临时的, 短期的解决方案, 或已经够好但仍不完美的代码使用TODO注释.
 
-TODO注释要使用全大写的字符串TODO, 在随后的圆括号里写上你的大名, 邮件地址, 或其它身份标识. 冒号是可
-选的. 主要目的是让添加注释的人(也是可以请求提供更多细节的人)可根据规范的TODO格式进行查找. 添加TODO
-注释并不意味着你要自己来修正.
+TODO注释要使用全大写的字符串TODO, 在随后的圆括号里写上你的大名, 邮件地址, 或其它身份标识. 冒号是可选的. 主要目的是让添加注释的人(也是可以请求提供更多细节的人)可根据规范的TODO格式进行查找. 添加TODO注释并不意味着你要自己来修正.
+``` c++
+// TODO(kl@gmail.com): Use a "*" here for concatenation operator.
+// TODO(Zeke) change this to use relations.
+```
+如果加TODO是为了在"将来某一天做某事", 可以附上一个非常明确的时间"Fix by November 2005"), 或者一个明确的事项("Remove this code when all clients can handle XML responses.").
 
-_// TODO(kl@gmail.com): Use a "*" here for concatenation operator.
-// TODO(Zeke) change this to use relations._
-如果加TODO是为了在"将来某一天做某事", 可以附上一个非常明确的时间"Fix by November 2005"), 或者一个
-明确的事项("Remove this code when all clients can handle XML responses.").
+### 7.9. 弃用注释
 
-### 7.9. ᔹ⭞⌞䠀
+> Tip: 通过弃用注释(DEPRECATED comments)以标记某接口点(interface points)已弃用. 
 
-
-> Tip: 通过弃用注释(DEPRECATEDcomments)以标记某接口点(interface points)已弃用. 
-
-您可以写上包含全大写的DEPRECATED的注释, 以标记某接口为弃用状态. 注释可以放在接口声明前, 或者同一
-行. 
-在DEPRECATED一词后, 留下您的名字, 邮箱地址以及括号补充. 
-仅仅标记接口为DEPRECATED并不会让大家不约而同地弃用, 您还得亲自主动修正调用点(callsites), 或是找个
-帮手. 
-修正好的代码应该不会再涉及弃用接口点了, 着实改用新接口点. 如果您不知从何下手, 可以找标记弃用注释的
-当事人一起商量. 
+您可以写上包含全大写的DEPRECATED的注释, 以标记某接口为弃用状态. 注释可以放在接口声明前, 或者同一行. 在DEPRECATED一词后, 留下您的名字, 邮箱地址以及括号补充. 
+仅仅标记接口为DEPRECATED并不会让大家不约而同地弃用, 您还得亲自主动修正调用点(callsites), 或是找个帮手. 
+修正好的代码应该不会再涉及弃用接口点了, 着实改用新接口点. 如果您不知从何下手, 可以找标记弃用注释的当事人一起商量. 
 
 ### 译者 (YuleFox) 笔记
 
-```
-1.关于注释风格, 很多C++的coders更喜欢行注释, C coders或许对块注释依然情有独钟, 或者在文件头大段
-大段的注释时使用块注释; 
-2.文件注释可以炫耀你的成就, 也是为了捅了篓子别人可以找你; 
-3.注释要言简意赅, 不要拖沓冗余, 复杂的东西简单化和简单的东西复杂化都是要被鄙视的; 
-4.对于Chinese coders来说, 用英文注释还是用中文注释, it is a problem, 但不管怎样, 注释是为了让别人看懂, 难
-道是为了炫耀编程语言之外的你的母语或外语水平吗；
-5.注释不要太乱, 适当的缩进才会让人乐意看. 但也没有必要规定注释从第几列开始(我自己写代码的时候总喜欢
-这样), UNIX/LINUX下还可以约定是使用tab还是space, 个人倾向于space; 
-6.TODO很不错, 有时候, 注释确实是为了标记一些未完成的或完成的不尽如人意的地方, 这样一搜索, 就知道还
+1. 关于注释风格, 很多C++的coders更喜欢行注释, C coders或许对块注释依然情有独钟, 或者在文件头大段大段的注释时使用块注释; 
+2. 文件注释可以炫耀你的成就, 也是为了捅了篓子别人可以找你; 
+3. 注释要言简意赅, 不要拖沓冗余, 复杂的东西简单化和简单的东西复杂化都是要被鄙视的; 
+4. 对于Chinese coders来说, 用英文注释还是用中文注释, it is a problem, 但不管怎样, 注释是为了让别人看懂, 难道是为了炫耀编程语言之外的你的母语或外语水平吗;
+5. 注释不要太乱, 适当的缩进才会让人乐意看. 但也没有必要规定注释从第几列开始(我自己写代码的时候总喜欢这样), UNIX/LINUX下还可以约定是使用tab还是space, 个人倾向于space; 
+6. TODO很不错, 有时候, 注释确实是为了标记一些未完成的或完成的不尽如人意的地方, 这样一搜索, 就知道还
 有哪些活要干, 日志都省了.
-```
-## 8. 格ᕅ
 
-#### 代码风格和格式确实比较随意, 但一个项目中所有人遵循同一风格是非常容易的. 个体未必同意下述每一处格式
+## 8. 格式
 
-#### 规则, 但整个项目服从统一的编程风格是很重要的, 只有这样才能让所有人能很轻松的阅读和理解代码.
+代码风格和格式确实比较随意, 但一个项目中所有人遵循同一风格是非常容易的. 个体未必同意下述每一处格式规则, 但整个项目服从统一的编程风格是很重要的, 只有这样才能让所有人能很轻松的阅读和理解代码.
 
-```
 另外, 我们写了一个emacs配置文件来帮助你正确的格式化代码.
 
-### 8.1. 㺂长ᓜ
+### 8.1. 行长度
 
 > Tip: 每一行代码字符数不超过80.
 
-```
 我们也认识到这条规则是有争议的, 但很多已有代码都已经遵照这一规则, 我们感觉一致性更重要.
 
 **优点:**
-提倡该原则的人主张强迫他们调整编辑器窗口大小很野蛮. 很多人同时并排开几个代码窗口, 根本没有多
-余空间拉伸窗口. 大家都把窗口最大尺寸加以限定, 并且 80 列宽是传统标准. 为什么要改变呢?
+提倡该原则的人主张强迫他们调整编辑器窗口大小很野蛮. 很多人同时并排开几个代码窗口, 根本没有多余空间拉伸窗口. 大家都把窗口最大尺寸加以限定, 并且 80 列宽是传统标准. 为什么要改变呢?
 
 **缺点:**
-反对该原则的人则认为更宽的代码行更易阅读. 80列的限制是上个世纪 60 年代的大型机的古板缺陷; 现
-代设备具有更宽的显示屏, 很轻松的可以显示更多代码.
-```
-
+反对该原则的人则认为更宽的代码行更易阅读. 80列的限制是上个世纪 60 年代的大型机的古板缺陷; 现代设备具有更宽的显示屏, 很轻松的可以显示更多代码.
 
 **结论:**
+80 个字符是最大值.
 
-#### 80 个字符是最大值.
-
-#### 特例:
-
-#### • 如果一行注释包含了超过 80 字符的命令或URL, 出于复制粘贴的方便允许该行超过 80 字符.
-
+特例:
+- 如果一行注释包含了超过 80 字符的命令或URL, 出于复制粘贴的方便允许该行超过 80 字符.
 - 包含长路径的#include语句可以超出 80 列. 但应该尽量避免.
 - 头文件保护可以无视该原则.
 
-### 8.2. 䶔 ASCII ᆍᅮ
+### 8.2. 非 ASCII 字符
 
 > Tip: 尽量不使用非ASCII字符, 使用时必须使用UTF-8编码.
 
-即使是英文, 也不应将用户界面的文本硬编码到源代码中, 因此非ASCII字符要少用. 特殊情况下可以适当包含
-此类字符. 如, 代码分析外部数据文件时, 可以适当硬编码数据文件中作为分隔符的非ASCII字符串; 更常见的是(不
-需要本地化的)单元测试代码可能包含非ASCII字符串. 此类情况下, 应使用UTF-8编码, 因为很多工具都可以理解
-和处理UTF-8编码.
-十六进制编码也可以, 能增强可读性的情况下尤其鼓励——比如"\xEF\xBB\xBF"在Unicode中是零宽度无间断
-的间隔符号, 如果不用十六进制直接放在UTF-8格式的源文件中, 是看不到的.
-(Yang.Y注: "\xEF\xBB\xBF"通常用作UTF-8 with BOM编码标记)
-用u8前缀以把带uXXXX转义序列的字符串字面值编码成UTF-8.不要用在本身就带UTF-8字符的字符串字面
-值上, 因为如果编译器不把源代码识别成UTF-8, 输出就会出错. 
+即使是英文, 也不应将用户界面的文本硬编码到源代码中, 因此非ASCII字符要少用. 特殊情况下可以适当包含此类字符. 如, 代码分析外部数据文件时, 可以适当硬编码数据文件中作为分隔符的非ASCII字符串; 更常见的是(不需要本地化的)单元测试代码可能包含非ASCII字符串. 此类情况下, 应使用UTF-8编码, 因为很多工具都可以理解和处理UTF-8编码.
+
+十六进制编码也可以, 能增强可读性的情况下尤其鼓励——比如"\xEF\xBB\xBF"在Unicode中是零宽度无间断的间隔符号, 如果不用十六进制直接放在UTF-8格式的源文件中, 是看不到的.(Yang.Y注: "\xEF\xBB\xBF"通常用作UTF-8 with BOM编码标记)
+
+用u8前缀以把带uXXXX转义序列的字符串字面值编码成UTF-8.不要用在本身就带UTF-8字符的字符串字面值上, 因为如果编译器不把源代码识别成UTF-8, 输出就会出错. 
+
 别用C++11的char16_t和char32_t, 它们和UTF-8文本没有关系, wchar_t同理, 除非您写的代码要调用
 Windows API, 后者有用到wchar_t扩展. 
 
-### 8.3. グ格䘎ᱥ࡬㺞փ
+### 8.3. 空格还是制表符
 
 > Tip: 只使用空格, 每次缩进 2 个空格.
 
-```
 我们使用空格缩进. 不要在代码中使用制符表. 你应该设置编辑器将制符表转为空格.
 
-### 8.4. ࠳数༦᱄фᇐѿ
+### 8.4. 函数声明与定义
 
 > Tip: 返回类型和函数名在同一行, 参数也尽量放在同一行, 如果放不下就对形参分行. 
 
-```
 函数看上去像这样:
+``` c++
 ReturnType ClassName::FunctionName(Type par_name1, Type par_name2) {
 DoSomething(); 
 ...
 }
-如果同一行文本太多, 放不下所有参数:
-```
-
-```
+// 如果同一行文本太多, 放不下所有参数:
 ReturnType ClassName::ReallyLongFunctionName(Type par_name1, Type par_name2, 
-Type par_name3) {
-DoSomething(); 
-...
+                                             Type par_name3) {
+    DoSomething(); 
+    ...
 }
-甚至连第一个参数都放不下:
+// 甚至连第一个参数都放不下:
 ReturnType LongClassName::ReallyReallyReallyLongFunctionName(
-Type par_name1, // 4 空格缩进
-Type par_name2, 
-Type par_name3) {
-DoSomething(); // 2 空格缩进
-...
+        Type par_name1, // 4 空格缩进
+        Type par_name2, 
+        Type par_name3) {
+    DoSomething(); // 2 空格缩进    
+    ...
 }
+```
 注意以下几点:
 - 如果返回类型和函数名在一行放不下, 分行. 
 - 如果返回类型那个与函数声明或定义分行了, 不要缩进. 
@@ -2149,170 +2066,164 @@ DoSomething(); // 2 空格缩进
 - 所有形参应尽可能对齐; 
 - 缺省缩进为 2 个空格; 
 - 换行后的参数保持 4 个空格的缩进; 
-    如果有些参数没有用到, 在函数定义处将参数名注释起来:
-       // 接口中形参恒有命名. 
-       **classShape** {
-          **public**:
-             **virtualvoid** Rotate( **double** radians)= 0 ; 
-       }
-
+    
+如果有些参数没有用到, 在函数定义处将参数名注释起来:
 ``` c++
-// 声明中形参恒有命名. 
-classCircle: public Shape {
+// 接口中形参恒有命名. 
+class Shape {
 public:
-virtualvoid Rotate( double radians); 
+    virtual void Rotate( double radians)= 0 ; 
+}
+
+// 声明中形参恒有命名. 
+class Circle: public Shape {
+public:
+    virtual void Rotate( double radians); 
 }
 
 // 定义中注释掉无用变量. 
 void Circle::Rotate( double /*radians*/ ) {}
-```
 
-```
-Warning:
+// Warning:
 // 差 - 如果将来有人要实现, 很难猜出变量是干什么用的. 
 void Circle::Rotate( double ) {}
+```
 
-### 8.5. Lambda 㺞䗴ᕅ
+### 8.5. Lambda 表达式
 
-> Tip: 其它函数怎么格式化形参和函数体, Lambda表达式就怎么格式化；捕获列表同理. 
+> Tip: 其它函数怎么格式化形参和函数体, Lambda表达式就怎么格式化; 捕获列表同理. 
+
 若用引用捕获, 在变量名和&之间不留空格. 
-
-**int** x= 0 ; 
-**auto** add_to_x=[&x]( **int** n) { x+=n; }; 
-
+``` c++
+int x= 0 ; 
+auto add_to_x=[&x]( int n) { x+=n; }; 
 ```
+
 短lambda就写得和内联函数一样. 
-```
-std::set< **int** >blacklist={ 7, 8, 9 }; 
-std::vector< **int** >digits={ 3, 9, 1, 8, 4, 7, 1 }; 
-digits.erase(std::remove_if(digits.begin(), digits.end(), [&blacklist]( **int** i) {
-**return** blacklist.find(i)!=blacklist.end(); 
+``` c++
+std::set<int>blacklist={ 7, 8, 9 }; 
+std::vector<int>digits={ 3, 9, 1, 8, 4, 7, 1 }; 
+digits.erase(std::remove_if(digits.begin(), digits.end(), [&blacklist]( int i) {
+    return blacklist.find(i)!=blacklist.end(); 
 }), 
 digits.end()); 
-
-### 8.6. ࠳数䈹⭞
-
-> Tip: 要么一行写完函数调用, 要么在圆括号里对参数分行, 要么参数另起一行且缩进四格. 如果没有其它顾虑的
-话, 尽可能精简行数, 比如把多个参数适当地放在同一行里. 
-函数调用遵循如下形式：
-
-**bool** retval=DoSomething(argument1, argument2, argument3); 
-
 ```
-如果同一行放不下, 可断为多行, 后面每一行都和第一个实参对齐, 左圆括号后和右圆括号前不要留空格：
-**bool** retval=DoSomething(averyveryveryverylongargument1, 
-argument2, argument3); 
-参数也可以放在次行, 缩进四格：
-**if** (... ) {
+
+### 8.6. 函数调用
+
+> Tip: 要么一行写完函数调用, 要么在圆括号里对参数分行, 要么参数另起一行且缩进四格. 如果没有其它顾虑的话, 尽可能精简行数, 比如把多个参数适当地放在同一行里. 
+
+函数调用遵循如下形式:
+``` c++
+bool retval=DoSomething(argument1, argument2, argument3); 
+// 如果同一行放不下, 可断为多行, 后面每一行都和第一个实参对齐, 左圆括号后和右圆括号前不要留空格:
+bool retval=DoSomething(averyveryveryverylongargument1, 
+                        argument2, argument3); 
+// 参数也可以放在次行, 缩进四格:
+if (... ) {
 ...
 ...
-**if** (... ) {
-DoSomething(
-argument1, argument2, _// 4_ 空格缩进
-
-
-argument3, argument4); 
+if (... ) {
+    DoSomething(
+        argument1, argument2, // 4 空格缩进
+        argument3, argument4); 
 }
-把多个参数放在同一行, 是为了减少函数调用所需的行数, 除非影响到可读性. 有人认为把每个参数都独立成
-行, 不仅更好读, 而且方便编辑参数. 不过, 比起所谓的参数编辑, 我们更看重可读性, 且后者比较好办：
-如果一些参数本身就是略复杂的表达式, 且降低了可读性. 那么可以直接创建临时变量描述该表达式, 并传递给
-函数：
-
-**int** my_heuristic =scores[x]*y+bases[x]; 
-**bool** retval=DoSomething(my_heuristic, x, y, z); 
-
 ```
-或者放着不管, 补充上注释：
-**bool** retval=DoSomething(scores[x]*y+bases[x], _// Score heuristic._
-x, y, z); 
-如果某参数独立成行, 对可读性更有帮助的话, 就这么办. 
-此外, 如果一系列参数本身就有一定的结构, 可以酌情地按其结构来决定参数格式：
+把多个参数放在同一行, 是为了减少函数调用所需的行数, 除非影响到可读性. 有人认为把每个参数都独立成行, 不仅更好读, 而且方便编辑参数. 不过, 比起所谓的参数编辑, 我们更看重可读性, 且后者比较好办:
 
+如果一些参数本身就是略复杂的表达式, 且降低了可读性. 那么可以直接创建临时变量描述该表达式, 并传递给
+函数:
+
+``` c++
+int my_heuristic =scores[x]*y+bases[x]; 
+bool retval=DoSomething(my_heuristic, x, y, z); 
+// 或者放着不管, 补充上注释:
+bool retval=DoSomething(scores[x] * y + bases[x], // Score heuristic.
+                        x, y, z); 
+```
+如果某参数独立成行, 对可读性更有帮助的话, 就这么办. 
+此外, 如果一系列参数本身就有一定的结构, 可以酌情地按其结构来决定参数格式:
+``` c++
 // 通过 _3x3_ 矩阵转换 _widget._
 my_widget.Transform(x1, x2, x3, 
-y1, y2, y3, 
-z1, z2, z3); 
-
-### 8.7. ࡍ㺞ࡓခौ格ᕅ
+                    y1, y2, y3, 
+                    z1, z2, z3); 
+```
+### 8.7. 列表初始化格式
 
 > Tip: 您平时怎么格式化函数调用, 就怎么格式化 _5.20._ 列表初始化. 
-如果列表初始化伴随着名字, 比如类型或变量名, 您可以当名字是函数、{}是函数调用的括号来格式化它. 反
-之, 就当它有个长度为零的名字. 
 
+如果列表初始化伴随着名字, 比如类型或变量名, 您可以当名字是函数、{}是函数调用的括号来格式化它. 反之, 就当它有个长度为零的名字. 
+``` c++
 // 一行列表初始化示范. 
-**return** {foo, bar}; 
+return {foo, bar}; 
 functioncall({foo, bar}); 
-pair< **int**, **int** >p{foo, bar}; 
+pair< int, int >p{foo, bar}; 
 
 // 当不得不断行时. 
 SomeFunction(
-{"assume a zero-length name before {"}, 
-some_other_function_parameter); 
+    {"assume a zero-length name before {"}, 
+    some_other_function_parameter); 
 SomeType variable{
-some, other, values, 
-{"assume a zero-length name before {"}, 
-SomeOtherType{
-"Very long string requiring the surrounding breaks.", 
-some, other values}, 
-
-
-SomeOtherType{"Slightly shorter string", 
-some, other, values}}; 
+    some, other, values, 
+    {"assume a zero-length name before {"}, 
+    SomeOtherType{
+        "Very long string requiring the surrounding breaks.", 
+        some, other values}, 
+    SomeOtherType{"Slightly shorter string", 
+    some, other, values}}; 
 SomeType variable{
-"This is too long to fit all in one line"}; 
+    "This is too long to fit all in one line"}; 
 MyType m={ //_ 注意了, 您可以在 _{_ 前断行. 
-superlongvariablename1, 
-superlongvariablename2, 
-{ **short**, interior, list}, 
-{interiorwrappinglist, 
-interiorwrappinglist2}}; 
+    superlongvariablename1, 
+    superlongvariablename2, 
+    { **short**, interior, list}, 
+    {interiorwrappinglist, 
+    interiorwrappinglist2}}; 
+```
 
-### 8.8. ᶗԬ䈣ਛ
+### 8.8. 条件语句
 
 > Tip: 倾向于不在圆括号内使用空格. 关键字if和else另起一行.
 
 对基本条件语句有两种可以接受的格式. 一种在圆括号和条件之间有空格, 另一种没有.
-最常见的是没有空格的格式. 哪种都可以, 但保持一致性. 如果你是在修改一个文件, 参考当前已有格式. 如果是
-写新的代码, 参考目录下或项目中其它文件. 还在徘徊的话, 就不要加空格了.
+最常见的是没有空格的格式. 哪种都可以, 但保持一致性. 如果你是在修改一个文件, 参考当前已有格式. 如果是写新的代码, 参考目录下或项目中其它文件. 还在徘徊的话, 就不要加空格了.
 
-```
+``` c++
 if (condition) { 圆括号里没空格紧邻. 
 ... // 2空格缩进. 
 } else { // else与if的右括号同一行. 
 ...
 }
-如果你更喜欢在圆括号内部加空格:
+// 如果你更喜欢在圆括号内部加空格:
 if ( condition ) { // 圆括号与空格紧邻 - 不常见
 ... // 2 空格缩进. 
 } else { // else 与 if 的右括号同一行. 
 ...
 }
-注意所有情况下if和左圆括号间都有个空格. 右圆括号和左大括号之间也要有个空格:
-
-Warning:
+// 注意所有情况下if和左圆括号间都有个空格. 右圆括号和左大括号之间也要有个空格:
+// Warning:
 if (condition) // 差 - IF 后面没空格. 
 if (condition){ // 差 - { 前面没空格. 
 if (condition){ // 变本加厉地差. 
 
 if (condition) { // 可 - IF 和 { 都与空格紧邻. 
-如果能增强可读性, 简短的条件语句允许写在同一行. 只有当语句简单并且没有使用else子句时使用:
-```
-
-```
+// 如果能增强可读性, 简短的条件语句允许写在同一行. 只有当语句简单并且没有使用else子句时使用:
 if (x==kFoo) returnnew Foo(); 
 if (x==kBar) returnnew Bar(); 
-如果语句有else分支则不允许:
+// 如果语句有else分支则不允许:
 
-Warning:
+// Warning:
 // 不可以这样子 - 当有 ELSE 分支时 IF 块却只有一行
 if (x) DoThis(); 
 else DoThat(); 
 ```
-#### 通常, 单行语句不需要使用大括号, 如果你喜欢用也没问题; 复杂的条件或循环语句用大括号可读性会更好. 也有
+
+通常, 单行语句不需要使用大括号, 如果你喜欢用也没问题; 复杂的条件或循环语句用大括号可读性会更好. 也有
 
 一些项目要求if必须总是使用大括号:
 
-```
+``` c++
 if (condition)
 DoSomething(); // 2 空格缩进. 
 
@@ -2343,17 +2254,15 @@ bar;
 }
 ```
 
-### 8.9. ᗠ⧥和ᔶީ䘿᤟䈣ਛ
+### 8.9. 循环和开关选择语句
 
 > Tip: switch语句可以使用大括号分段, 以表明cases之间不是连在一起的. 在单语句循环里, 括号可用可不用. 
 空循环体应使用{}或continue.
 
-switch语句中的case块可以使用大括号也可以不用, 取决于你的个人喜好. 如果用的话, 要按照下文所述的方
-法.
-如果有不满足case条件的枚举值, switch应该总是包含一个default匹配(如果有输入值没有case去处理, 编
-译器将报警). 如果default应该永远执行不到, 简单的加条assert:
+switch语句中的case块可以使用大括号也可以不用, 取决于你的个人喜好. 如果用的话, 要按照下文所述的方法.
+如果有不满足case条件的枚举值, switch应该总是包含一个default匹配(如果有输入值没有case去处理, 编译器将报警). 如果default应该永远执行不到, 简单的加条assert:
 
-```
+``` c++
 switch (var) {
 case 0: { // 2 空格缩进
 ... // 4 空格缩进
@@ -2367,14 +2276,14 @@ default: {
 assert(false); 
 }
 }
-在单语句循环里, 括号可用可不用：
+// 在单语句循环里, 括号可用可不用:
 for ( int i= 0 ; i<kSomeNumber; ++i)
 printf("I love you \n "); 
 
 for ( int i= 0 ; i<kSomeNumber; ++i) {
 printf("I take it back \n "); 
 }
-空循环体应使用{}或continue, 而不是一个简单的分号.
+// 空循环体应使用{}或continue, 而不是一个简单的分号.
 while (condition) {
 // 反复循环直到条件失效. 
 }
@@ -2385,43 +2294,44 @@ Warning:
 while (condition); // 差 - 看起来仅仅只是 while/loop 的部分之一. 
 ```
 
-### 8.10. 指䪾和引用㺞䗴ᕅ
+### 8.10. 指针和引用表达式
 
 > Tip: 句点或箭头前后不要有空格. 指针/地址操作符(*, &)之后不能有空格.
 
-```
 下面是指针和引用表达式的正确使用范例:
+``` c++
 x=*p; 
 p=&x; 
 x=r.y; 
 x=r->y; 
 ```
-⌞ᝅ **: ** ஀
 
+**注意:**
 - 在访问成员时, 句点或箭头前后没有空格.
 - 指针操作符*或&后没有空格.
 在声明指针变量或参数时, 星号与类型或变量名紧挨都可以:
-// 好样的, 空格前置. 
-**char** *c; 
-**const** string&str; 
 
 ``` c++
+// 好样的, 空格前置. 
+char *c; 
+const string&str; 
+
 // 好样的, 空格后置. 
 char *c; // 但别忘了 "char* c, *d, *e, ... ; "!
 const string&str; 
 
-Warning:
+// Warning:
 char *c; // 差 - * 两边都有空格
 const string&str; // 差 - & 两边都有空格. 
 ```
-#### 在单个文件内要保持风格一致, 所以, 如果是修改现有文件, 要遵照该文件的风格.
+在单个文件内要保持风格一致, 所以, 如果是修改现有文件, 要遵照该文件的风格.
 
-### 8.11. ᐹቊ㺞䗴ᕅ
+### 8.11. 布尔表达式
 
 > Tip: 如果一个布尔表达式超过标准行宽, 断行方式要统一一下.
 
-```
 下例中, 逻辑与(&&)操作符总位于行尾:
+``` c++
 if (this_one_thing>this_other_thing&&
 a_third_thing==a_fourth_thing&&
 yet_another&last_one) {
@@ -2430,56 +2340,56 @@ yet_another&last_one) {
 ```
 
 注意, 上例的逻辑与(&&)操作符均位于行尾. 这格式在Google里很常见, 您要把所有操作符放在开头也可以. 
-可以考虑额外插入圆括号, 合理使用的话对增强可读性是很有帮助的. 此外直接用符号形式的操作符, 比如&&和~, 
-不要用词语形式的and和compl.
+可以考虑额外插入圆括号, 合理使用的话对增强可读性是很有帮助的. 此外直接用符号形式的操作符, 比如&&和~, 不要用词语形式的and和compl.
 
-### 8.12. ٲ数䘊ഔ࠳
+### 8.12. 函数返回值
 
 > Tip: return表达式里时没必要都用圆括号. 
 
-```
 假如您写x = epr时本来就会加上括号, 那return expr; 也可如法炮制. 
 函数返回时不要使用圆括号:
+``` c++
 return result; // 返回值很简单, 没有圆括号. 
 // 可以用圆括号把复杂表达式圈起来, 改善可读性. 
 return (some_long_condition&&
 another_condition); 
 
-Warning:
+// Warning:
 return (value); // 毕竟您从来不会写 var = (value); 
-return (result); // return 可不是函数！
+return (result); // return 可不是函数! 
+```
 
-### 8.13. 变䠅਀数组ࡓခौ
+### 8.13. 变量及数组初始化
 
 > Tip: 用=, ()和{}均可.
 
-您可以用=, ()和{}, 以下都对：
-**int** x= 3 ; 
-**int** x( 3 ); 
-**int** x{ 3 }; 
+您可以用=, ()和{}, 以下都对:
+``` c++
+int x= 3 ; 
+int x( 3 ); 
+int x{ 3 }; 
 stringname("Some Name"); 
 string name="Some Name"; 
 string name{"Some Name"}; 
+```
 请务必小心列表初始化{... }用std::initializer_list构造函数初始化出的类型. 非空列表初始化就会
 优先调用std::initializer_list, 不过空列表初始化除外, 后者原则上会调用默认构造函数. 为了强制禁用
 std::initializer_list构造函数, 请改用括号. 
 
-```
-vector< int >v( 100, 1 ); // A vector of 100 1s.
-vector< int >v{ 100, 1 }; // A vector of 100, 1.
-此外, 列表初始化不允许整型类型的四舍五入, 这可以用来避免一些类型上的编程失误. 
-```
-
 ``` c++
+vector<int>v( 100, 1 ); // A vector of 100 1s.
+vector<int>v{ 100, 1 }; // A vector of 100, 1.
+// 此外, 列表初始化不允许整型类型的四舍五入, 这可以用来避免一些类型上的编程失误. 
 int pi(3.14); // 可 -- pi == 3.
 int pi{3.14}; // Compile error: narrowing conversion.
+```
 
-### 8.14. 人༺⨼指Ԛ
+### 8.14. 预处理指令
 
 > Tip: 预处理指令不要缩进, 从行首开始.
 
-```
 即使预处理指令位于缩进代码块中, 指令也应从行首开始.
+``` c++
 // 可 - directives at beginning of line
 if (lopsided_score) {
 #if DISASTER_PENDING // 正确 -- 行开头起. 
@@ -2488,43 +2398,42 @@ DropEverything();
 BackToNormal(); 
 }
 
-Warning:
+// Warning:
 // 差 - indented directives
 if (lopsided_score) {
-#if DISASTER_PENDING // 错了！ "#if" 应该放在行开头
+#if DISASTER_PENDING // 错了!  "#if" 应该放在行开头
 DropEverything(); 
-#endif // 错了！ "#endif" 不要缩进
+#endif // 错了!  "#endif" 不要缩进
 BackToNormal(); 
 }
+```
 
-### 8.15. 类格ᕅ
+### 8.15. 类格式
 
 > Tip: 访问控制块的声明依次序是public:, protected:, private:, 每次缩进 1 个空格.
 
-```
 类声明(对类注释不了解的话, 参考类注释)的基本格式如下:
-classMyClass: public OtherClass {
+``` c++
+class MyClass: public OtherClass {
 public: // 注意有 1 空格缩进!
-MyClass(); // 照常, 2 空格缩进. 
-explicit MyClass( int var); 
-~MyClass() {}
+    MyClass(); // 照常, 2 空格缩进. 
+    explicit MyClass( int var); 
+    ~MyClass() {}
 
-void SomeFunction(); 
-void SomeFunctionThatDoesNothing() {
-}
-```
-
-```
-void set_some_var( int var) { some_var_=var; }
-int some_var() const { return some_var_; }
+    void SomeFunction(); 
+    void SomeFunctionThatDoesNothing() {
+    }
+    void set_some_var( int var) { some_var_=var; }
+    int some_var() const { return some_var_; }
 
 private:
-bool SomeInternalFunction(); 
+    bool SomeInternalFunction(); 
 
-int some_var_; 
-int some_other_var_; 
-DISALLOW_COPY_AND_ASSIGN(MyClass); 
+    int some_var_; 
+    int some_other_var_; 
+    DISALLOW_COPY_AND_ASSIGN(MyClass); 
 }; 
+```
 注意事项:
 - 所有基类名应在 80 列限制下尽量与子类名放在同一行.
 - 关键词public:, protected:, private: 要缩进 1 个空格.
@@ -2533,16 +2442,15 @@ DISALLOW_COPY_AND_ASSIGN(MyClass);
 - public放在最前面, 然后是protected, 最后是private.
 - 关于声明顺序的规则请参考声明顺序一节.
 
-### 8.16. 㺞ࡍٲခࡓ数࠳ᶺ䙖
+### 8.16. 构造函数初始化列表
 
 > Tip: 构造函数初始值列表放在同一行或按四格缩进并排几行.
 
-```
 下面两种初始值列表方式都可以接受:
-// 当全放在一行合适时：
+``` c++
+// 当全放在一行合适时:
 MyClass::MyClass( int var): some_var_(var), some_other_var_(var+ 1 ) {
-或
-// 如果要断成多行, 缩进四格, 冒号放在第一行初始化句：
+// 如果要断成多行, 缩进四格, 冒号放在第一行初始化句:
 MyClass::MyClass( int var)
 : some_var_(var), // 4 空格缩进
 some_other_var_(var+ 1 ) { // 对准
@@ -2550,15 +2458,13 @@ some_other_var_(var+ 1 ) { // 对准
 DoSomething(); 
 ...
 }
+```
 
-### 8.17. 名字空间格ᕅौ
+### 8.17. 名字空间格式化
 
 > Tip: 名字空间内容不缩进.
 
-```
 名字空间不要增加额外的缩进层次, 例如:
-```
-
 ``` c++
 namespace {
 
@@ -2567,9 +2473,9 @@ void foo() { // 正确. 命名空间内没有额外的缩进.
 }
 
 } // namespace
-不要缩进名字空间:
+// 不要缩进名字空间:
 
-Warning:
+// Warning:
 namespace {
 
 // 错, 缩进多余了. 
@@ -2578,19 +2484,18 @@ void foo() {
 }
 
 } // namespace
-```
-#### 声明嵌套命名空间时, 每命名空间都独立成行. 
 
-``` c++
+// 声明嵌套命名空间时, 每命名空间都独立成行. 
 namespace foo {
 namespace bar {
+```
 
-### 8.18. ≪ᒩ⮏ⲳ
+### 8.18. 水平留白
 
 > Tip: 水平留白的使用因地制宜. 永远不要在行尾添加没意义的留白.
 
-```
 常规:
+``` c++
 void f( bool b) { // 左大括号前恒有空格. 
 ...
 int i= 0 ; // 分号前不加空格. 
@@ -2605,13 +2510,9 @@ void Reset() { baz_= 0 ; } // 用括号把大括号与实现分开.
 ...
 ```
 
-#### 添加冗余的留白会给其他人编辑时造成额外负担. 因此, 行尾不要留空格. 如果确定一行代码已经修改完
+添加冗余的留白会给其他人编辑时造成额外负担. 因此, 行尾不要留空格. 如果确定一行代码已经修改完毕, 将多余的空格去掉; 或者在专门清理空格时去掉(确信没有其他人在处理). (Yang.Y注: 现在大部分代码编辑器稍加设置后, 都支持自动删除行首/行尾空格, 如果不支持, 考虑换一款编辑器或IDE)循环和条件语句:
 
-毕, 将多余的空格去掉; 或者在专门清理空格时去掉(确信没有其他人在处理). (Yang.Y注: 现在大部分代
-码编辑器稍加设置后, 都支持自动删除行首/行尾空格, 如果不支持, 考虑换一款编辑器或IDE)
-循环和条件语句:
-
-```
+``` c++
 if (b) { // if 条件语句和循环语句关键字后均有空格. 
 } else { // else 前后有空格. 
 }
@@ -2621,14 +2522,14 @@ for ( int i= 0 ; i< 5 ; ++i) {
 switch ( i ) { // 循环和条件语句的圆括号里可以与空格紧邻. 
 if ( test ) { // 圆括号, 但这很少见. 总之要一致. 
 for ( int i= 0 ; i< 5 ; ++i ) {
-for ( ; i< 5 ; ++i) { // 循环里内 ; 后恒有空格, ； 前可以加个空格. 
+for ( ; i< 5 ; ++i) { // 循环里内 ; 后恒有空格, ; 前可以加个空格. 
 switch (i) {
 case 1: // switch case 的冒号前无空格. 
 ...
 case 2: break ; // 如果冒号有代码, 加个空格. 
 ```
-操作符:
 
+操作符:
 ``` c++
 // 赋值操作系统前后恒有空格. 
 x= 0 ; 
@@ -2645,8 +2546,8 @@ x=- 5 ;
 if (x&&!y)
 ...
 ```
-模板和转换:
 
+模板和转换:
 ``` c++
 // 尖叫括号 (< and >) 不与空格紧邻, < 前没有空格, >( 之间也没有. 
 vector<string>x; 
@@ -2658,117 +2559,83 @@ set<list<string>>x; // 在 C++11 代码里可以这样用了.
 set<list<string>>x; // C++03 中要在 > > 里留个空格. 
 
 // 您或许可以在 < < 里加上一对对称的空格. 
-```
-
-```
 set<list<string>>x; 
+```
 
-### 8.19. ම⴪⮏ⲳ
+### 8.19. 垂直留白
 
 > Tip: 垂直留白越少越好.
 
-这不仅仅是规则而是原则问题了: 不在万不得已, 不要使用空行. 尤其是: 两个函数定义之间的空行不要超过 2
-行, 函数体首尾不要留空行, 函数体中也不要随意添加空行.
-基本原则是: 同一屏可以显示的代码越多, 越容易理解程序的控制流. 当然, 过于密集的代码块和过于疏松的代码
-块同样难看, 取决于你的判断. 但通常是垂直留白越少越好.
-空行心得如下：
+这不仅仅是规则而是原则问题了: 不在万不得已, 不要使用空行. 尤其是: 两个函数定义之间的空行不要超过 2行, 函数体首尾不要留空行, 函数体中也不要随意添加空行.
 
+基本原则是: 同一屏可以显示的代码越多, 越容易理解程序的控制流. 当然, 过于密集的代码块和过于疏松的代码块同样难看, 取决于你的判断. 但通常是垂直留白越少越好.
+
+空行心得如下:
 - 函数体内开头或结尾的空行可读性微乎其微. 
 - 在多重if-else块里加空行或许有点可读性. 
 
 ### 译者 (YuleFox) 笔记
 
-#### 1.对于代码格式, 因人, 系统而异各有优缺点, 但同一个项目中遵循同一标准还是有必要的; 
-
-#### 2.行宽原则上不超过 80 列, 把 22 寸的显示屏都占完, 怎么也说不过去; 
-
-```
-3.尽量不使用非ASCII字符, 如果使用的话, 参考UTF-8格式(尤其是UNIX/Linux下, Windows下可以考虑宽
+1. 对于代码格式, 因人, 系统而异各有优缺点, 但同一个项目中遵循同一标准还是有必要的; 
+2. 行宽原则上不超过 80 列, 把 22 寸的显示屏都占完, 怎么也说不过去; 
+3. 尽量不使用非ASCII字符, 如果使用的话, 参考UTF-8格式(尤其是UNIX/Linux下, Windows下可以考虑宽
 字符), 尽量不将字符串常量耦合到代码中, 比如独立出资源文件, 这不仅仅是风格问题了; 
-4.UNIX/Linux下无条件使用空格, MSVC的话使用Tab也无可厚非; 
-5.函数参数, 逻辑条件, 初始化列表: 要么所有参数和函数名放在同一行, 要么所有参数并排分行; 
-6.除函数定义的左大括号可以置于行首外, 包括函数/类/结构体/枚举声明, 各种语句的左大括号置于行尾, 所有右
-大括号独立成行; 
-7.. /->操作符前后不留空格, */&不要前后都留, 一个就可, 靠左靠右依各人喜好; 
-8.预处理指令/命名空间不使用额外缩进, 类/结构体/枚举/函数/语句使用缩进; 
-9.初始化用=还是()依个人喜好, 统一就好; 
-10.return不要加(); 
-11.水平/垂直留白不要滥用, 怎么易读怎么来.
-12.关于UNIX/Linux风格为什么要把左大括号置于行尾(`.cc`文件的函数实现处, 左大括号位于行首), 我的理解是
-代码看上去比较简约, 想想行首除了函数体被一对大括号封在一起之外, 只有右大括号的代码看上去确实也舒服; 
-Windows风格将左大括号置于行首的优点是匹配情况一目了然.
+4. UNIX/Linux下无条件使用空格, MSVC的话使用Tab也无可厚非; 
+5. 函数参数, 逻辑条件, 初始化列表: 要么所有参数和函数名放在同一行, 要么所有参数并排分行; 
+6. 除函数定义的左大括号可以置于行首外, 包括函数/类/结构体/枚举声明, 各种语句的左大括号置于行尾, 所有右大括号独立成行; 
+7. . /->操作符前后不留空格, */&不要前后都留, 一个就可, 靠左靠右依各人喜好; 
+8. 预处理指令/命名空间不使用额外缩进, 类/结构体/枚举/函数/语句使用缩进; 
+9. 初始化用=还是()依个人喜好, 统一就好; 
+10. return不要加(); 
+11. 水平/垂直留白不要滥用, 怎么易读怎么来.
+12. 关于UNIX/Linux风格为什么要把左大括号置于行尾(`.cc`文件的函数实现处, 左大括号位于行首), 我的理解是代码看上去比较简约, 想想行首除了函数体被一对大括号封在一起之外, 只有右大括号的代码看上去确实也舒服; Windows风格将左大括号置于行首的优点是匹配情况一目了然.
 
 ### 译者 acgtyrant 笔记
 
-#### 1. 80 行限制事实上有助于避免代码可读性失控, 比如超多重嵌套块, 超多重函数调用等等. 
-
-```
-2.Linux上设置好了Locale就几乎一劳永逸设置好所有开发环境的编码, 不像奇葩的Windows.
-3.Google强调有一对if-else时, 不论有没有嵌套, 都要有大括号. Apple正好有栽过跟头.
-4.其实我主张指针／地址操作符与变量名紧邻, int* a, bvsint *a, b, 新手会误以为前者的b是int *变量, 
-但后者就不一样了, 高下立判. 
-```
-
-```
-5.在这风格指南里我才刚知道C++原来还有所谓的Alternative operator representations, 大概没人用吧. 
-6.注意构造函数初始值列表(Constructer Initializer List)与列表初始化(Initializer List)是两码事, 我就差点
-混淆了它们的翻译. 
-7.事实上, 如果您熟悉英语本身的书写规则, 就会发现该风格指南在格式上的规定与英语语法相当一脉相承. 
-比如普通标点符号和单词后面还有文本的话, 总会留一个空格；特殊符号与单词之间就不用留了, 比如if
+1. 80 行限制事实上有助于避免代码可读性失控, 比如超多重嵌套块, 超多重函数调用等等. 
+2. Linux上设置好了Locale就几乎一劳永逸设置好所有开发环境的编码, 不像奇葩的Windows.
+3. Google强调有一对if-else时, 不论有没有嵌套, 都要有大括号. Apple正好有栽过跟头.
+4. 其实我主张指针／地址操作符与变量名紧邻, int* a, bvsint *a, b, 新手会误以为前者的b是int *变量, 但后者就不一样了, 高下立判. 
+5. 在这风格指南里我才刚知道C++原来还有所谓的Alternative operator representations, 大概没人用吧. 
+6. 注意构造函数初始值列表(Constructer Initializer List)与列表初始化(Initializer List)是两码事, 我就差点混淆了它们的翻译. 
+7. 事实上, 如果您熟悉英语本身的书写规则, 就会发现该风格指南在格式上的规定与英语语法相当一脉相承. 
+比如普通标点符号和单词后面还有文本的话, 总会留一个空格;特殊符号与单词之间就不用留了, 比如if
 (true)中的圆括号与true.
-8.本风格指南没有明确规定void函数里要不要用return语句, 不过就Google开源项目leveldb并没有写；此外
-从Is a blank return statement at the end of a function whos return type is void necessary?来看, return; 比
-return ; 更约定俗成(事实上cpplint会对后者报错, 指出分号前有多余的空格), 且可用来提前跳出函数栈. 
-```
-## 9. ׁ⢯ࡏ㿺
+8. 本风格指南没有明确规定void函数里要不要用return语句, 不过就Google开源项目leveldb并没有写;此外从Is a blank return statement at the end of a function whos return type is void necessary?来看, return; 比return ; 更约定俗成(事实上cpplint会对后者报错, 指出分号前有多余的空格), 且可用来提前跳出函数栈. 
 
-#### 前面说明的编程习惯基本都是强制性的. 但所有优秀的规则都允许例外, 这里就是探讨这些特例.
+## 9. 规则特例
 
-### 9.1. ⧦ᴿуਾ㿺㤹Ⲻԙ⸷
+前面说明的编程习惯基本都是强制性的. 但所有优秀的规则都允许例外, 这里就是探讨这些特例.
+
+### 9.1. 现有不符合既定编程风格的代码
 
 > Tip: 对于现有不符合既定编程风格的代码可以网开一面.
 
-当你修改使用其他风格的代码时, 为了与代码原有风格保持一致可以不使用本指南约定. 如果不放心可以与代码
-原作者或现在的负责人员商讨, 记住, 一致性包括原有的一致性.
+当你修改使用其他风格的代码时, 为了与代码原有风格保持一致可以不使用本指南约定. 如果不放心可以与代码原作者或现在的负责人员商讨, 记住, 一致性包括原有的一致性.
 
-### 9.2. Windows ԙ⸷
+### 9.2. windows 代码
 
-> Tip: Windows程序员有自己的编程习惯, 主要源于Windows头文件和其它Microsoft代码. 我们希望任何人都可以
-顺利读懂你的代码, 所以针对所有平台的C++编程只给出一个单独的指南.
+> Tip: Windows程序员有自己的编程习惯, 主要源于Windows头文件和其它Microsoft代码. 我们希望任何人都可以顺利读懂你的代码, 所以针对所有平台的C++编程只给出一个单独的指南.
 
-```
 如果你习惯使用Windows编码风格, 这儿有必要重申一下某些你可能会忘记的指南:
 - 不要使用匈牙利命名法(比如把整型变量命名成iNum). 使用Google命名约定, 包括对源文件使用`.cc`扩展名.
-- Windows定义了很多原生类型的同义词(YuleFox注: 这一点, 我也很反感), 如DWORD, HANDLE等等. 在调用
-    Windows API时这是完全可以接受甚至鼓励的. 但还是尽量使用原有的C++类型, 例如, 使用const TCHAR *
-    而不是LPCTSTR.
+- Windows定义了很多原生类型的同义词(YuleFox注: 这一点, 我也很反感), 如DWORD, HANDLE等等. 在调用Windows API时这是完全可以接受甚至鼓励的. 但还是尽量使用原有的C++类型, 例如, 使用const TCHAR *而不是LPCTSTR.
 - 使用Microsoft Visual C++进行编译时, 将警告级别设置为 3 或更高, 并将所有warnings当作errors处理.
-- 不要使用#pragma once; 而应该使用Google的头文件保护规则. 头文件保护的路径应该相对于项目根目录
-    (Yang.Y注: 如#ifndef SRC_DIR_BAR_H_, 参考#define保护一节).
-- 除非万不得已, 不要使用任何非标准的扩展, 如#pragma和__declspec.允许使用__declspec(dllimport)和
-    __declspec(dllexport); 但你必须通过宏来使用, 比如DLLIMPORT和DLLEXPORT, 这样其他人在分享使用这些
-    代码时很容易就去掉这些扩展.
-在Windows上, 只有很少的一些情况下, 我们可以偶尔违反规则:
-- 通常我们禁止使用多重继承, 但在使用COM和ATL/WTL类时可以使用多重继承. 为了实现COM或
-    ATL/WTL类/接口, 你可能不得不使用多重实现继承.
-
-
-- 虽然代码中不应该使用异常, 但是在ATL和部分STL(包括Visual C++的STL)中异常被广泛使用. 使用
-    ATL时, 应定义_ATL_NO_EXCEPTIONS以禁用异常. 你要研究一下是否能够禁用STL的异常, 如果无法禁用, 启
-    用编译器异常也可以. (注意这只是为了编译STL, 自己代码里仍然不要含异常处理. )
-- 通常为了利用头文件预编译, 每个每个源文件的开头都会包含一个名为StdAfx.h或precompile.h的文件. 为
-    了使代码方便与其他项目共享, 避免显式包含此文件(precompile.cc), 使用/FI编译器选项以自动包含.
+- 不要使用#pragma once; 而应该使用Google的头文件保护规则. 头文件保护的路径应该相对于项目根目录(Yang.Y注: 如#ifndef SRC_DIR_BAR_H_, 参考#define保护一节).
+- 除非万不得已, 不要使用任何非标准的扩展, 如#pragma和__declspec.允许使用__declspec(dllimport)和__declspec(dllexport); 但你必须通过宏来使用, 比如DLLIMPORT和DLLEXPORT, 这样其他人在分享使用这些代码时很容易就去掉这些扩展.在Windows上, 只有很少的一些情况下, 我们可以偶尔违反规则:
+- 通常我们禁止使用多重继承, 但在使用COM和ATL/WTL类时可以使用多重继承. 为了实现COM或ATL/WTL类/接口, 你可能不得不使用多重实现继承.
+- 虽然代码中不应该使用异常, 但是在ATL和部分STL(包括Visual C++的STL)中异常被广泛使用. 使用ATL时, 应定义_ATL_NO_EXCEPTIONS以禁用异常. 你要研究一下是否能够禁用STL的异常, 如果无法禁用, 启用编译器异常也可以. (注意这只是为了编译STL, 自己代码里仍然不要含异常处理. )
+- 通常为了利用头文件预编译, 每个每个源文件的开头都会包含一个名为StdAfx.h或precompile.h的文件. 为了使代码方便与其他项目共享, 避免显式包含此文件(precompile.cc), 使用/FI编译器选项以自动包含.
 - 资源头文件通常命名为resource.h, 且只包含宏的, 不需要遵守本风格指南.
 
-## 10. 㔉ᶕ䈣
+## 10. 结束语
 
 > Tip: 运用常识和判断力, 并保持一致.
 
-编辑代码时, 花点时间看看项目中的其它代码, 并熟悉其风格. 如果其它代码中if语句使用空格, 那么你也要使
-用. 如果其中的注释用星号(*)围成一个盒子状, 你同样要这么做.
-风格指南的重点在于提供一个通用的编程规范, 这样大家可以把精力集中在实现内容而不是表现形式上. 我们展
-示了全局的风格规范, 但局部风格也很重要, 如果你在一个文件中新加的代码和原有代码风格相去甚远, 这就破坏了文
-件本身的整体美观, 也影响阅读, 所以要尽量避免.
+编辑代码时, 花点时间看看项目中的其它代码, 并熟悉其风格. 如果其它代码中if语句使用空格, 那么你也要使用. 如果其中的注释用星号(*)围成一个盒子状, 你同样要这么做.
+
+风格指南的重点在于提供一个通用的编程规范, 这样大家可以把精力集中在实现内容而不是表现形式上. 我们展示了全局的风格规范, 但局部风格也很重要, 如果你在一个文件中新加的代码和原有代码风格相去甚远, 这就破坏了文件本身的整体美观, 也影响阅读, 所以要尽量避免.
+
 好了, 关于编码风格写的够多了; 代码本身才更有趣. 尽情享受吧!
 
 
