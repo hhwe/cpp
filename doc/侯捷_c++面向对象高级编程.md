@@ -180,22 +180,36 @@ class T
 
 通过动态绑定来实现, 通过对象指针找到虚指针, 再通过虚指针找到最终调用的虚函数
 
-## new/delete/new []/delete []
 
-必需成对使用, 否则如果new[]直接使用delete, 只会调用一次析构, 而不会对没给对象执行析构, 导致内存泄漏
+# 内存管理
 
+## new/delete/new []/delete []/new()
+
+必需成对使用, 否则如果new[]直接使用delete, 只会调用一次析构, 而不会对每个对象执行析构, 导致内存泄漏
 
 ``` c++
+// new
 string* ps = new string("hello");
 ==>>
 void* mem = operator new(sizeof("hello")); // 申请内存, operator new内部调用malloc(n)
 ps = static_cast<string*>(mem); // 转型
 ps->string::string("hello"); // 构造函数
 
+// placement new
+string* pc = new(pc) string("placement new");
+==>>
+void* mem = operator new(sizeof("hello"), pc); // 这个重载函数不申请内存, 直接返回传入的pc
+ps = static_cast<string*>(mem); // 转型
+ps->string::string("hello"); // 构造函数
+
+// delete
 delete ps;
 ==>>
 string::~string(ps); // 析构
 operator delete(ps); // 释放内存, operator delete内部调用free(ps)
+
+
+
 ```
 
 由于 `new/delete` 是表达式,所以无法重载,但是可以重载内部的操作符 `operator new/operator delete`
@@ -206,3 +220,9 @@ placement new是operator new的一个重载版本，只是我们很少用到它�
 
 我们知道使用new操作符分配内存需要在堆中查找足够大的剩余空间，这个操作速度是很慢的，而且有可能出现无法分配内存的异常（空间不够）。placement new就可以解决这个问题。我们构造对象都是在一个预先准备好了的内存缓冲区中进行，不需要查找内存，内存分配的时间是常数；而且不会出现在程序运行中途出现内存不足的异常。所以，placement new非常适合那些对时间要求比较高，长时间运行不希望被打断的应用程序。
 
+
+## 重载 operator new/operator delete
+
+全局的operator new/delete最好不要使用, 会影响所有内存的分配与释放
+
+类内重载需要加上static, 如果不加编译器会自动给加上
