@@ -7,12 +7,28 @@
 namespace MyStl {
 class Chunk {
 public:
-    Chunk(unsigned char blockNum, std::size_t blockSize) {
+    Chunk(unsigned char blockNum, std::size_t blockSize) :
+        next(nullptr), prev(nullptr) {
         pBlocks_ = new unsigned char[blockNum * blockSize];
         Reset(blockNum, blockSize);
     }
     ~Chunk() {
         delete pBlocks_;
+    }
+
+    Chunk* StepNext() {
+        return next;
+    }
+
+    void AddToTail(Chunk* tail) {
+        prev = tail;
+        tail->next = this;
+        next = nullptr;
+    }
+
+    void DeleteFromList() {
+        prev->next = next;
+        next->prev = prev;
     }
 
     unsigned char* Allocate(std::size_t blockSize) {
@@ -59,61 +75,58 @@ private:
     unsigned char firstAvailableBlock_;
     unsigned char blocksAvailable_;
     unsigned char* pBlocks_;
+    Chunk* next;
+    Chunk* prev;
 };
 
 class ChunkPool {
 public:
     unsigned char* Allocate() {
-        if (allocChunk_ && allocChunk_->chunk.IsAvailable()) {
-            return allocChunk_->chunk.Allocate(blockSize_);
+        if (allocChunk_ && allocChunk_->IsAvailable()) {
+            return allocChunk_->Allocate(blockSize_);
         }
 
-        ChunkList* p = head;
+        Chunk* p = head.next;
         while (p != nullptr) {
-            if (p->chunk.IsAvailable()) {
+            if (p->IsAvailable()) {
                 allocChunk_ = p;
-                return allocChunk_->chunk.Allocate(blockSize_);
+                return allocChunk_->Allocate(blockSize_);
             }
-            p = p->next;
+            p = p->StepNext();
         }
-        p = new ChunkList(blockNum_, blockSize_);
-        if (tail != nullptr) {
-            tail->next = p;
-            p->prev = tail;
+        p = new Chunk(blockNum_, blockSize_);
+        if (head.prev != nullptr) {
+            p->AddToTail(head.prev);
+        } else {
+            head.next = p;
+            head.prev = p;
         }
-        tail = p;
         allocChunk_ = p;
-        return allocChunk_->chunk.Allocate(blockSize_);
+        return allocChunk_->Allocate(blockSize_);
     }
 
     void Deallocate(unsigned char* ptr) {
         const std::size_t chunkSize = blockNum_ * blockSize_;
-        ChunkList* p = head;
+        Chunk* p = head.next;
         while (p != nullptr) {
-            if (p->chunk.IsInside(ptr, chunkSize)) {
+            if (p->IsInside(ptr, chunkSize)) {
                 deallocChunk_ = p;
                 break;
             }
-            p = p->next;
+            p = p->StepNext();
         }
         if (p == nullptr) {
             return;
         }
-        deallocChunk_->chunk.Deallocate(ptr, blockSize_);
-        if (deallocChunk_->chunk.IsAllBlockFree(blockNum_)) {
-            if (deferChunk_ == nullptr) {
-                deferChunk_ == deallocChunk_;
-                deallocChunk_ = nullptr;
-            } else {
-                deferChunk_->chunk.Deallocate(ptr, blockSize_);
-                if (deferChunk_->prev != nullptr) {
-                    deferChunk_->prev->next = deferChunk_->next;
-                }
-                if (deferChunk_->next != nullptr) {
-                    deferChunk_->next->prev = deferChunk_->prev;
-                }
+        deallocChunk_->Deallocate(ptr, blockSize_);
+        if (deallocChunk_->IsAllBlockFree(blockNum_)) {
+            if (deferChunk_ != nullptr) {
+                deferChunk_->Deallocate(ptr, blockSize_);
+                deferChunk_->DeleteFromList();
                 delete deferChunk_;
             }
+            deferChunk_ = deallocChunk_;
+            deallocChunk_ = nullptr;
         }
     }
 
@@ -121,21 +134,14 @@ private:
     unsigned char blockNum_;
     std::size_t blockSize_;
 
-    struct ChunkList {
-        ChunkList(unsigned char blockNum, std::size_t blockSize) :
-            chunk(blockNum, blockSize), next(nullptr), prev(nullptr) {
-        }
-        ~ChunkList() {
-        }
-        Chunk chunk;
-        ChunkList* next;
-        ChunkList* prev;
+    Chunk* allocChunk_;
+    Chunk* deallocChunk_;
+    Chunk* deferChunk_;
+    struct ChunkHead {
+        Chunk* next;
+        Chunk* prev;
     };
-    ChunkList* head;
-    ChunkList* tail;
-    ChunkList* allocChunk_;
-    ChunkList* deallocChunk_;
-    ChunkList* deferChunk_;
+    ChunkHead head;
 };
 
 template <typename T>
