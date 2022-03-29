@@ -11,14 +11,14 @@
 
 using namespace unit_test;
 
-namespace mystl {
+namespace MyStl {
 namespace test {
 namespace allocator_test {
 
 TEST(allocator) {
     {
         // default allocator for ints
-        mystl::allocator<int> alloc;
+        MyStl::allocator<int> alloc;
 
         // demonstrating the few directly usable members
         EXPECT_TRUE((std::is_same<int, decltype(alloc)::value_type>::value));
@@ -35,7 +35,7 @@ TEST(allocator) {
 
     {
         // default allocator for strings
-        mystl::allocator<std::string> alloc;
+        MyStl::allocator<std::string> alloc;
         // matching traits
         using traits_t = std::allocator_traits<decltype(alloc)>;
 
@@ -58,5 +58,5 @@ TEST(allocator) {
 
 }
 }
-} // namespace mystl::test::allocator_test
+} // namespace MyStl::test::allocator_test
 #endif // !MYTINYSTL_ALLOCATOR_TEST_H_

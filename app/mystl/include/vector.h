@@ -5,9 +5,9 @@
 #include "allocator.h"
 #include "construct.h"
 
-namespace mystl {
+namespace MyStl {
 
-template <typename T, typename Alloc = mystl::allocator<T>>
+template <typename T, typename Alloc = MyStl::allocator<T>>
 class vector {
 public:
     using value_type = T;
@@ -158,6 +158,6 @@ protected:
     iterator capacity_;
 };
 
-} // namespace mystl
+} // namespace MyStl
 
 #endif // MYSTL_VECTOE_H_

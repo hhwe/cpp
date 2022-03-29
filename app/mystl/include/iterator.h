@@ -3,7 +3,7 @@
 
 #include <cstddef>
 
-namespace mystl {
+namespace MyStl {
 
 struct input_iterator_tag {};
 struct output_iterator_tag {};
@@ -29,6 +29,6 @@ struct iterator_traits {
     using pointer = Iterator::Pointer;
     using reference = Iterator::Reference;
 };
-} // namespace mystl
+} // namespace MyStl
 
 #endif // MYSTL_ITERATOR_H_

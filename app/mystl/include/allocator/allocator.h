@@ -4,12 +4,11 @@
 #include "alloc.h"
 #include "construct.h"
 #include <cstddef>
+#include <memory>
 
-namespace mystl {
+namespace MyStl {
 template <typename T>
 class allocator {
-private:
-    /* data */
 public:
     using value_type = T;
     using pointer = T*;
@@ -32,17 +31,17 @@ public:
     }
 
     static void construct(pointer ptr, const T& value) {
-        mystl::construct<T>(ptr, value);
+        MyStl::construct<T>(ptr, value);
     }
 
     static void destroy(pointer ptr) {
-        mystl::destroy<T>(ptr);
+        MyStl::destroy<T>(ptr);
     }
 
     static void destroy(pointer first, pointer last) {
-        mystl::destroy<T>(first, last);
+        MyStl::destroy<T>(first, last);
     }
 };
-} // namespace mystl
+} // namespace MyStl
 
 #endif // MYSTL_ALLOCATOR_H_

@@ -4,7 +4,7 @@
 #include <cstring>
 #include <iostream>
 
-namespace mystl {
+namespace MyStl {
 class String {
 public:
     String(const char* cstr = 0) {
@@ -42,6 +42,6 @@ private:
 std::ostream& operator<<(std::ostream& os, const String& str) {
     return os << str.get_c_str();
 }
-} // namespace mystl
+} // namespace MyStl
 
 #endif // MYSTL_STRING_H_

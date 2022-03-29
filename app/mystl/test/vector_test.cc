@@ -8,7 +8,7 @@
 
 using namespace unit_test;
 
-namespace mystl {
+namespace MyStl {
 namespace test {
 namespace vector_test {
 
@@ -17,5 +17,5 @@ TEST(vector) {
 
 }
 }
-} // namespace mystl::test::vector_test
+} // namespace MyStl::test::vector_test
 #endif // !MYTINYSTL_VECTOR_TEST_H_
