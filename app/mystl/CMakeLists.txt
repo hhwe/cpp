@@ -1,10 +1,11 @@
 project(mystl)
 
-file(GLOB INCLUDE_FILES "include/*.h")
-file(GLOB SRC_FILES "src/*.cc")
+# file(GLOB INCLUDE_FILES "include/*.h")
+# file(GLOB SRC_FILES "src/*.cc")
 file(GLOB TEST_FILES "test/*.cc")
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/include/)
+include_directories(${PROJECT_SOURCE_DIR}/include/allocator)
 message("include_directories" ${PROJECT_SOURCE_DIR}/include)
 
 add_executable(mystl_test ${TEST_FILES})

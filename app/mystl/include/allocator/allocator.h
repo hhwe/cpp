@@ -1,8 +1,9 @@
 #ifndef MYSTL_ALLOCATOR_H_
 #define MYSTL_ALLOCATOR_H_
 
-#include "alloc.h"
 #include "construct.h"
+#include "my_allocator.h"
+
 #include <cstddef>
 #include <memory>
 
@@ -19,11 +20,11 @@ public:
     using difference_type = std::ptrdiff_t;
 
     static pointer allocate(size_type n) {
-        return static_cast<pointer>(::operator new(n * sizeof(T)));
+        return static_cast<pointer>(MyStl::MyAllocator::GetInstance()->Allocate(n));
     }
 
     static void deallocate(pointer ptr) {
-        ::operator delete(ptr);
+        MyStl::MyAllocator::GetInstance()->Deallocate(ptr);
     }
 
     static void deallocate(pointer ptr, size_type /*size*/) {

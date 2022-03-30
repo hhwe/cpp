@@ -1,7 +1,6 @@
 #ifndef MYSTL_MY_ALLOCATOR_H_
 #define MYSTL_MY_ALLOCATOR_H_
 
-#include "alloc.h"
 #include "construct.h"
 
 namespace MyStl {
@@ -79,8 +78,13 @@ private:
     Chunk* prev;
 };
 
-class ChunkPool {
+class Pool {
 public:
+    void Init(std::size_t pageSize, std::size_t blockSize) {
+        blockSize_ = blockSize;
+        blockNum_ = pageSize / blockSize;
+    }
+
     unsigned char* Allocate() {
         if (allocChunk_ && allocChunk_->IsAvailable()) {
             return allocChunk_->Allocate(blockSize_);
@@ -105,20 +109,30 @@ public:
         return allocChunk_->Allocate(blockSize_);
     }
 
-    void Deallocate(unsigned char* ptr) {
+    void Deallocate(unsigned char* ptr, Chunk* chunk) {
+        if (chunk == nullptr) {
+            return;
+        }
+        deallocChunk_ = chunk;
+        deallocChunk_->Deallocate(ptr, blockSize_);
+        FreeChunk(ptr);
+    }
+
+    Chunk* HasBlock(unsigned char* ptr) {
         const std::size_t chunkSize = blockNum_ * blockSize_;
         Chunk* p = head.next;
         while (p != nullptr) {
             if (p->IsInside(ptr, chunkSize)) {
-                deallocChunk_ = p;
                 break;
             }
             p = p->StepNext();
         }
-        if (p == nullptr) {
-            return;
-        }
-        deallocChunk_->Deallocate(ptr, blockSize_);
+        return p;
+    }
+
+private:
+    void FreeChunk(unsigned char* ptr) {
+        // 判断是否是全回收, 保证有两块全回收时才真正释放延迟一块的内存
         if (deallocChunk_->IsAllBlockFree(blockNum_)) {
             if (deferChunk_ != nullptr) {
                 deferChunk_->Deallocate(ptr, blockSize_);
@@ -134,51 +148,72 @@ private:
     unsigned char blockNum_;
     std::size_t blockSize_;
 
-    Chunk* allocChunk_;
-    Chunk* deallocChunk_;
-    Chunk* deferChunk_;
+    Chunk* allocChunk_{nullptr};
+    Chunk* deallocChunk_{nullptr};
+    Chunk* deferChunk_{nullptr};
     struct ChunkHead {
         Chunk* next;
         Chunk* prev;
     };
-    ChunkHead head;
+    ChunkHead head{nullptr, nullptr};
 };
 
-template <typename T>
 class MyAllocator {
 public:
-    using value_type = T;
-    using pointer = T*;
-    using const_pointer = const T*;
-    using reference = T&;
-    using const_reference = const T&;
-    using size_type = std::size_t;
-    using difference_type = std::ptrdiff_t;
+    static MyAllocator* GetInstance() {
+        static MyAllocator* alloc = new MyAllocator();
+        return alloc;
+    }
+    unsigned char* Allocate(std::size_t bytes) {
+        if (bytes > BLOCK_SIZE) {
+            return static_cast<unsigned char*>(::operator new(bytes));
+        }
 
-    static pointer Allocate(size_type n) {
-        return static_cast<pointer>(::operator new(n * sizeof(T)));
+        std::size_t loc = RoundUp(bytes) / ALIGN_SIZE - 1;
+        Pool& pool = pools_[loc];
+        return pool.Allocate();
     }
 
-    static void deallocate(pointer ptr) {
-        ::operator delete(ptr);
+    void Deallocate(unsigned char* ptr) {
+        if (ptr == nullptr) {
+            return;
+        }
+
+        Chunk* chunk = nullptr;
+        std::size_t i = 0;
+        for (; i < POOL_SIZE; ++i) {
+            chunk = pools_[i].HasBlock(ptr);
+            if (chunk == nullptr) {
+                break;
+            }
+        }
+        if (i == POOL_SIZE) {
+            ::operator delete(ptr);
+            return;
+        }
+        pools_[i].Deallocate(ptr, chunk);
     }
 
-    static void deallocate(pointer ptr, size_type /*size*/) {
-        ::operator delete(ptr);
+private:
+    MyAllocator() {
+        for (size_t i = 1; i < POOL_SIZE; i++) {
+            pools_[i].Init(CHUNK_SIZE, i * ALIGN_SIZE);
+        }
+    }
+    ~MyAllocator() = default;
+    // 将任何小额区块的内存需求量上调至与区块大小对齐
+    static std::size_t RoundUp(std::size_t bytes) {
+        return (((bytes) + ALIGN_SIZE - 1) & ~(ALIGN_SIZE - 1));
     }
 
-    static void construct(pointer ptr, const T& value) {
-        MyStl::construct<T>(ptr, value);
-    }
-
-    static void destroy(pointer ptr) {
-        MyStl::destroy<T>(ptr);
-    }
-
-    static void destroy(pointer first, pointer last) {
-        MyStl::destroy<T>(first, last);
-    }
+private:
+    static constexpr std::size_t ALIGN_SIZE = 8;
+    static constexpr std::size_t BLOCK_SIZE = 256;
+    static constexpr std::size_t CHUNK_SIZE = 4096;
+    static constexpr std::size_t POOL_SIZE = BLOCK_SIZE / ALIGN_SIZE;
+    Pool pools_[POOL_SIZE];
 };
+
 } // namespace MyStl
 
 #endif // MYSTL_MY_ALLOCATOR_H_
