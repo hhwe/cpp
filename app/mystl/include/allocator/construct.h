@@ -2,25 +2,26 @@
 #define MYSTL_CONSTRUCT_H_
 
 #include <type_traits>
+#include <utility>
 
 namespace MyStl {
 
 // placement new, call T1::T1()
 template <typename T1>
 inline void construct(T1* ptr) {
-    ::new (static_cast<void*>(ptr)) T1();
+    ::new (ptr) T1();
 }
 
 // placement new, call T1::T1(value)
 template <typename T1, typename T2>
 inline void construct(T1* ptr, const T2& value) {
-    ::new (static_cast<void*>(ptr)) T1(value);
+    ::new (ptr) T1(value);
 }
 
 // placement new, call T1::T1(value)
 template <typename T1, typename... Args>
 inline void construct(T1* ptr, Args&&... args) {
-    ::new (static_cast<void*>(ptr)) T1(std::forward<Args>(args)...);
+    ::new (ptr) T1(std::forward<Args>(args)...);
 }
 
 // destroy, call T::~T()

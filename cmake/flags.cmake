@@ -1,4 +1,4 @@
-set(dir ${CMAKE_CURRENT_SOURCE_DIR}/../build/)
+set(dir ${CMAKE_CURRENT_SOURCE_DIR}/build/)
 set(EXECUTABLE_OUTPUT_PATH ${dir}/bin CACHE PATH "Build directory" FORCE)
 set(LIBRARY_OUTPUT_PATH ${dir}/lib CACHE PATH "Build directory" FORCE)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${dir})

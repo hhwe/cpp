@@ -20,15 +20,15 @@ public:
     using difference_type = std::ptrdiff_t;
 
     static pointer allocate(size_type n) {
-        return static_cast<pointer>(MyStl::MyAllocator::GetInstance()->Allocate(n));
+        return reinterpret_cast<pointer>(MyStl::MyAllocator::GetInstance()->Allocate(n));
     }
 
     static void deallocate(pointer ptr) {
-        MyStl::MyAllocator::GetInstance()->Deallocate(ptr);
+        MyStl::MyAllocator::GetInstance()->Deallocate(reinterpret_cast<unsigned char*>(ptr));
     }
 
     static void deallocate(pointer ptr, size_type /*size*/) {
-        ::operator delete(ptr);
+        deallocate(ptr);
     }
 
     static void construct(pointer ptr, const T& value) {

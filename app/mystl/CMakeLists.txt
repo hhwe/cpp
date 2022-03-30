@@ -1,7 +1,7 @@
 project(mystl)
 
-# file(GLOB INCLUDE_FILES "include/*.h")
-# file(GLOB SRC_FILES "src/*.cc")
+file(GLOB INCLUDE_FILES "include/*.h")
+file(GLOB SRC_FILES "src/*.cc")
 file(GLOB TEST_FILES "test/*.cc")
 
 include_directories(${PROJECT_SOURCE_DIR}/include/)

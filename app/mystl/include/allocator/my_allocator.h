@@ -63,9 +63,9 @@ private:
         firstAvailableBlock_ = 0;
         blocksAvailable_ = blockNum;
 
-        auto p = pBlocks_;
-        for (unsigned char i = 1; i <= blockNum; ++i) {
-            *p = i;
+        unsigned char* p = pBlocks_;
+        for (unsigned char i = 0; i < blockNum; ++i) {
+            *p = (i + 1);
             p += blockSize;
         }
     }
@@ -82,7 +82,8 @@ class Pool {
 public:
     void Init(std::size_t pageSize, std::size_t blockSize) {
         blockSize_ = blockSize;
-        blockNum_ = pageSize / blockSize;
+        std::size_t tmpNum = pageSize / blockSize;
+        blockNum_ = tmpNum > MAX_BLOCK_NUM ? MAX_BLOCK_NUM : tmpNum;
     }
 
     unsigned char* Allocate() {
@@ -145,8 +146,8 @@ private:
     }
 
 private:
-    unsigned char blockNum_;
-    std::size_t blockSize_;
+    unsigned char blockNum_{0};
+    std::size_t blockSize_{0};
 
     Chunk* allocChunk_{nullptr};
     Chunk* deallocChunk_{nullptr};
@@ -156,6 +157,8 @@ private:
         Chunk* prev;
     };
     ChunkHead head{nullptr, nullptr};
+
+    static constexpr unsigned char MAX_BLOCK_NUM = static_cast<unsigned char>(-1);
 };
 
 class MyAllocator {
@@ -196,8 +199,8 @@ public:
 
 private:
     MyAllocator() {
-        for (size_t i = 1; i < POOL_SIZE; i++) {
-            pools_[i].Init(CHUNK_SIZE, i * ALIGN_SIZE);
+        for (std::size_t i = 0; i < POOL_SIZE; i++) {
+            pools_[i].Init(CHUNK_SIZE, (i + 1) * ALIGN_SIZE);
         }
     }
     ~MyAllocator() = default;
@@ -207,7 +210,7 @@ private:
     }
 
 private:
-    static constexpr std::size_t ALIGN_SIZE = 8;
+    static constexpr std::size_t ALIGN_SIZE = 1;
     static constexpr std::size_t BLOCK_SIZE = 256;
     static constexpr std::size_t CHUNK_SIZE = 4096;
     static constexpr std::size_t POOL_SIZE = BLOCK_SIZE / ALIGN_SIZE;

@@ -1,13 +1,14 @@
 ﻿#ifndef MYTINYSTL_ALLOCATOR_TEST_H_
 #define MYTINYSTL_ALLOCATOR_TEST_H_
 
+#include "allocator.h"
+#include "unit_test.h"
+
 #include <memory>
 #include <iostream>
 #include <string>
- 
-
-#include "allocator.h"
-#include "unit_test.h"
+#include <vector>
+#include <deque>
 
 using namespace unit_test;
 
@@ -29,7 +30,7 @@ TEST(allocator) {
         using traits_t = std::allocator_traits<decltype(alloc)>; // The matching trait
         p = traits_t::allocate(alloc, 1);
         traits_t::construct(alloc, p, 7); // construct the int
-        std::cout << *p << '\n';
+        EXPECT_EQ(7, *p);
         traits_t::deallocate(alloc, p, 1); // deallocate space for one int
     }
 
@@ -47,12 +48,30 @@ TEST(allocator) {
         traits_t::construct(alloc, p, "foo");
         traits_t::construct(alloc, p + 1, "bar");
 
-        EXPECT_EQ(p[0], "foo1");
+        EXPECT_EQ(p[0], "foo");
         EXPECT_EQ(p[1], "bar");
 
         traits_t::destroy(alloc, p + 1);
         traits_t::destroy(alloc, p);
         traits_t::deallocate(alloc, p, 2);
+    }
+
+    {
+        std::vector<int, MyStl::allocator<int>> vi;
+        vi.push_back(1);
+        for (int i = 0; i < 500; i++) {
+            vi.push_back(i);
+            EXPECT_EQ(i, vi.back());
+        }
+    }
+
+    {
+        std::deque<int, MyStl::allocator<int>> di;
+        di.push_back(1);
+        for (int i = 0; i < 500; i++) {
+            di.push_back(i);
+            EXPECT_EQ(i, di.back());
+        }
     }
 }
 
