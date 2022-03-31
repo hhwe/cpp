@@ -9,6 +9,11 @@
 #include <string>
 #include <vector>
 #include <deque>
+#include <list>
+#include <array>
+#include <map>
+#include <set>
+#include <algorithm>
 
 using namespace unit_test;
 
@@ -59,15 +64,22 @@ TEST(allocator) {
     {
         std::vector<int, MyStl::allocator<int>> vi;
         vi.push_back(1);
-        for (int i = 0; i < 500; i++) {
+        for (int i = 0; i < 128; i++) {
             vi.push_back(i);
             EXPECT_EQ(i, vi.back());
         }
     }
 
     {
+        std::list<int, MyStl::allocator<int>> li;
+        for (int i = 0; i < 500; i++) {
+            li.push_back(i);
+             EXPECT_EQ(i, li.back());
+        }
+    }
+
+    {
         std::deque<int, MyStl::allocator<int>> di;
-        di.push_back(1);
         for (int i = 0; i < 500; i++) {
             di.push_back(i);
             EXPECT_EQ(i, di.back());

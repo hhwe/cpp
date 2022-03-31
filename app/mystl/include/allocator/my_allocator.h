@@ -6,28 +6,16 @@
 namespace MyStl {
 class Chunk {
 public:
-    Chunk(unsigned char blockNum, std::size_t blockSize) :
-        next(nullptr), prev(nullptr) {
-        pBlocks_ = new unsigned char[blockNum * blockSize];
-        Reset(blockNum, blockSize);
+    Chunk(unsigned char blockNum, std::size_t blockSize) {
+        if (blockNum != 0U && blockSize != 0U) {
+            pBlocks_ = new unsigned char[blockNum * blockSize];
+            Reset(blockNum, blockSize);
+        }
     }
     ~Chunk() {
-        delete pBlocks_;
-    }
-
-    Chunk* StepNext() {
-        return next;
-    }
-
-    void AddToTail(Chunk* tail) {
-        prev = tail;
-        tail->next = this;
-        next = nullptr;
-    }
-
-    void DeleteFromList() {
-        prev->next = next;
-        next->prev = prev;
+        if (pBlocks_ != nullptr) {
+            delete pBlocks_;
+        }
     }
 
     unsigned char* Allocate(std::size_t blockSize) {
@@ -40,9 +28,9 @@ public:
         return result;
     }
 
-    void Deallocate(unsigned char* p, std::size_t blockSize) {
-        *p = firstAvailableBlock_;
-        firstAvailableBlock_ = (p - pBlocks_) / blockSize;
+    void Deallocate(unsigned char* ptr, std::size_t blockSize) {
+        *ptr = firstAvailableBlock_;
+        firstAvailableBlock_ = (ptr - pBlocks_) / blockSize;
         ++blocksAvailable_;
     }
 
@@ -50,8 +38,8 @@ public:
         return blocksAvailable_ > 0U;
     }
 
-    bool IsInside(unsigned char* p, std::size_t chunkSize) {
-        return p >= pBlocks_ && p < pBlocks_ + chunkSize;
+    bool IsInside(unsigned char* ptr, std::size_t chunkSize) {
+        return (ptr >= pBlocks_) && (ptr < pBlocks_ + chunkSize);
     }
 
     bool IsAllBlockFree(unsigned char blockNum_) {
@@ -74,8 +62,69 @@ private:
     unsigned char firstAvailableBlock_;
     unsigned char blocksAvailable_;
     unsigned char* pBlocks_;
-    Chunk* next;
-    Chunk* prev;
+};
+
+// 双向链表保存Chunk
+class ChunkList {
+public:
+    ChunkList(unsigned char blockNum = 0U, std::size_t blockSize = 0U) :
+        next(this), prev(this), chunk(blockNum, blockSize) {
+    }
+
+    unsigned char* Allocate(std::size_t blockSize) {
+        return chunk.Allocate(blockSize);
+    }
+
+    void Deallocate(unsigned char* ptr, std::size_t blockSize) {
+        chunk.Deallocate(ptr, blockSize);
+    }
+
+    bool IsAvailable() {
+        return chunk.IsAvailable();
+    }
+
+    bool IsAllBlockFree(unsigned char blockNum) {
+        return chunk.IsAllBlockFree(blockNum);
+    }
+
+    void InsertAtTail(ChunkList* p) {
+        p->next = this;
+        p->prev = prev;
+        prev->next = p;
+        prev = p;
+    }
+
+    void RemoveSelf() {
+        prev->next = next;
+        next->prev = prev;
+    }
+
+    ChunkList* FindAvailableChunk() {
+        ChunkList* p = this->next;
+        while (p != this) {
+            if (p->chunk.IsAvailable()) {
+                return this;
+            }
+            p = p->next;
+        }
+        return nullptr;
+    }
+
+    ChunkList* FindLocatedChunk(unsigned char* ptr, std::size_t chunkSize) {
+        ChunkList* p = this->next;
+        while (p != this) {
+            if (p->chunk.IsInside(ptr, chunkSize)) {
+                return this;
+            }
+            p = p->next;
+        }
+        return nullptr;
+    }
+
+private:
+    ChunkList* next{nullptr};
+    ChunkList* prev{nullptr};
+    Chunk chunk;
 };
 
 class Pool {
@@ -84,6 +133,7 @@ public:
         blockSize_ = blockSize;
         std::size_t tmpNum = pageSize / blockSize;
         blockNum_ = tmpNum > MAX_BLOCK_NUM ? MAX_BLOCK_NUM : tmpNum;
+        head = new ChunkList();
     }
 
     unsigned char* Allocate() {
@@ -91,26 +141,18 @@ public:
             return allocChunk_->Allocate(blockSize_);
         }
 
-        Chunk* p = head.next;
-        while (p != nullptr) {
-            if (p->IsAvailable()) {
-                allocChunk_ = p;
-                return allocChunk_->Allocate(blockSize_);
-            }
-            p = p->StepNext();
+        ChunkList* p = head->FindAvailableChunk();
+        if (p != nullptr) {
+            allocChunk_ = p;
+            return allocChunk_->Allocate(blockSize_);
         }
-        p = new Chunk(blockNum_, blockSize_);
-        if (head.prev != nullptr) {
-            p->AddToTail(head.prev);
-        } else {
-            head.next = p;
-            head.prev = p;
-        }
+        p = new ChunkList(blockNum_, blockSize_);
+        head->InsertAtTail(p);
         allocChunk_ = p;
         return allocChunk_->Allocate(blockSize_);
     }
 
-    void Deallocate(unsigned char* ptr, Chunk* chunk) {
+    void Deallocate(unsigned char* ptr, ChunkList* chunk) {
         if (chunk == nullptr) {
             return;
         }
@@ -119,16 +161,9 @@ public:
         FreeChunk(ptr);
     }
 
-    Chunk* HasBlock(unsigned char* ptr) {
+    ChunkList* HasBlock(unsigned char* ptr) {
         const std::size_t chunkSize = blockNum_ * blockSize_;
-        Chunk* p = head.next;
-        while (p != nullptr) {
-            if (p->IsInside(ptr, chunkSize)) {
-                break;
-            }
-            p = p->StepNext();
-        }
-        return p;
+        return head->FindLocatedChunk(ptr, chunkSize);
     }
 
 private:
@@ -137,7 +172,7 @@ private:
         if (deallocChunk_->IsAllBlockFree(blockNum_)) {
             if (deferChunk_ != nullptr) {
                 deferChunk_->Deallocate(ptr, blockSize_);
-                deferChunk_->DeleteFromList();
+                deferChunk_->RemoveSelf();
                 delete deferChunk_;
             }
             deferChunk_ = deallocChunk_;
@@ -149,15 +184,10 @@ private:
     unsigned char blockNum_{0};
     std::size_t blockSize_{0};
 
-    Chunk* allocChunk_{nullptr};
-    Chunk* deallocChunk_{nullptr};
-    Chunk* deferChunk_{nullptr};
-    struct ChunkHead {
-        Chunk* next;
-        Chunk* prev;
-    };
-    ChunkHead head{nullptr, nullptr};
-
+    ChunkList* head{nullptr};
+    ChunkList* allocChunk_{nullptr};
+    ChunkList* deallocChunk_{nullptr};
+    ChunkList* deferChunk_{nullptr};
     static constexpr unsigned char MAX_BLOCK_NUM = static_cast<unsigned char>(-1);
 };
 
@@ -182,7 +212,7 @@ public:
             return;
         }
 
-        Chunk* chunk = nullptr;
+        ChunkList* chunk = nullptr;
         std::size_t i = 0;
         for (; i < POOL_SIZE; ++i) {
             chunk = pools_[i].HasBlock(ptr);

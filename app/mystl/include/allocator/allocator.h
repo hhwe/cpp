@@ -19,6 +19,19 @@ public:
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
 
+    allocator() = default;
+    allocator(const allocator&) = default;
+    // 模板构造函数
+    template <class U>
+    allocator(const allocator<U>&){};
+    ~allocator() = default;
+
+    // 用于容器内部节点的内存分配
+    template <class U>
+    struct rebind {
+        typedef allocator<U> other;
+    };
+
     static pointer allocate(size_type n) {
         return reinterpret_cast<pointer>(MyStl::MyAllocator::GetInstance()->Allocate(n));
     }
