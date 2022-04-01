@@ -94,9 +94,9 @@ public:
         prev = p;
     }
 
-    void RemoveSelf() {
-        prev->next = next;
-        next->prev = prev;
+    void Remove(ChunkList* p) {
+        p->prev->next = p->next;
+        p->next->prev = p->prev;
     }
 
     ChunkList* FindAvailableChunk() {
@@ -141,6 +141,12 @@ public:
             return allocChunk_->Allocate(blockSize_);
         }
 
+        if (deferChunk_ != nullptr) {
+            allocChunk_ = deferChunk_;
+            deferChunk_ = nullptr;
+            return allocChunk_->Allocate(blockSize_);
+        }
+
         ChunkList* p = head->FindAvailableChunk();
         if (p != nullptr) {
             allocChunk_ = p;
@@ -172,7 +178,7 @@ private:
         if (deallocChunk_->IsAllBlockFree(blockNum_)) {
             if (deferChunk_ != nullptr) {
                 deferChunk_->Deallocate(ptr, blockSize_);
-                deferChunk_->RemoveSelf();
+                head->Remove(deferChunk_);
                 delete deferChunk_;
             }
             deferChunk_ = deallocChunk_;
@@ -216,15 +222,12 @@ public:
         std::size_t i = 0;
         for (; i < POOL_SIZE; ++i) {
             chunk = pools_[i].HasBlock(ptr);
-            if (chunk == nullptr) {
-                break;
+            if (chunk != nullptr) {
+                pools_[i].Deallocate(ptr, chunk);
+                return;
             }
         }
-        if (i == POOL_SIZE) {
-            ::operator delete(ptr);
-            return;
-        }
-        pools_[i].Deallocate(ptr, chunk);
+        ::operator delete(ptr);
     }
 
 private:

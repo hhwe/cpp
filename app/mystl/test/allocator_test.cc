@@ -64,7 +64,7 @@ TEST(allocator) {
     {
         std::vector<int, MyStl::allocator<int>> vi;
         vi.push_back(1);
-        for (int i = 0; i < 128; i++) {
+        for (int i = 0; i < 500; i++) {
             vi.push_back(i);
             EXPECT_EQ(i, vi.back());
         }
