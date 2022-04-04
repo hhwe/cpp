@@ -59,9 +59,9 @@ private:
     }
 
 private:
-    unsigned char firstAvailableBlock_;
-    unsigned char blocksAvailable_;
-    unsigned char* pBlocks_;
+    unsigned char firstAvailableBlock_{0U};
+    unsigned char blocksAvailable_{0U};
+    unsigned char* pBlocks_{nullptr};
 };
 
 // 双向链表保存Chunk
@@ -133,9 +133,18 @@ public:
         blockSize_ = blockSize;
         std::size_t tmpNum = pageSize / blockSize;
         blockNum_ = tmpNum > MAX_BLOCK_NUM ? MAX_BLOCK_NUM : tmpNum;
-        head = new ChunkList();
+        head = new ChunkList(); //
     }
+    // operator new不能满足内存分配请求时，new-handler函数不只调用一次，而是不断重复，直至找到足够的内存。实现重复调用的代码在条款8里可以看到，这里我用描述性的的语言来说明：一个设计得好的new-handler函数必须实现下面功能中的一种。
+    // * 产生更多的可用内存。这将使operator new下一次分配内存的尝试有可能获得成功。实施这一策略的一个方法是：在程序启动时分配一个大的内存块，然后在第一次调用new-handler时释放。释放时伴随着一些对用户的警告信息，如内存数量太少，下次请求可能会失败，除非又有更多的可用空间。
+    // * 安装另一个不同的new-handler函数。如果当前的new-handler函数不能产生更多的可用内存，可能它会知道另一个new-handler函数可以提供更多的资源。这样的话，当前的new-handler可以安装另一个new-handler来取代它(通过调用set_new_handler)。下一次operator new调用new-handler时，会使用最近安装的那个。(这一策略的另一个变通办法是让new-handler可以改变它自己的运行行为，那么下次调用时，它将做不同的事。方法是使new-handler可以修改那些影响它自身行为的静态或全局数据。)
+    // * 卸除new-handler。也就是传递空指针给set_new_handler。没有安装new-handler，operator new分配内存不成功时就会抛出一个标准的std::bad_alloc类型的异常。
+    // * 抛出std::bad_alloc或从std::bad_alloc继承的其他类型的异常。这样的异常不会被operator new捕捉，所以它们会被送到最初进行内存请求的地方。(抛出别的不同类型的异常会违反operator new异常规范。规范中的缺省行为是调用abort，所以new-handler要抛出一个异常时，一定要确信它是从std::bad_alloc继承来的。想更多地了解异常规范)
+    // * 没有返回。典型做法是调用abort或exit。abort/exit可以在标准c库中找到(还有标准c++库)。
 
+    // ***
+    // The sharing of knowledge, the spirit of encouragement.
+    // By Joel Jiang (江东敏)
     unsigned char* Allocate() {
         if (allocChunk_ && allocChunk_->IsAvailable()) {
             return allocChunk_->Allocate(blockSize_);
@@ -208,7 +217,7 @@ public:
             return static_cast<unsigned char*>(::operator new(bytes));
         }
 
-        std::size_t loc = RoundUp(bytes) / ALIGN_SIZE - 1;
+        std::size_t loc = bytes - 1; // RoundUp(bytes) / ALIGN_SIZE - 1;
         Pool& pool = pools_[loc];
         return pool.Allocate();
     }

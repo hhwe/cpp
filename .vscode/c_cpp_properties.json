@@ -2,16 +2,14 @@
     "configurations": [
         {
             "name": "Linux",
-            // "includePath": [
-            //     "${workspaceFolder}/**"
-            // ],
             "defines": [],
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "gcc-x64",
             "includePath": [
                 "${default}",
-                "${workspaceFolder}/app/**"
+                "${workspaceFolder}/app/**",
+                "${workspaceFolder}/app/mystl/include"
             ],
             "configurationProvider": "ms-vscode.cmake-tools"
         }

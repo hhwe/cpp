@@ -29,6 +29,26 @@ struct iterator_traits {
     using pointer = Iterator::Pointer;
     using reference = Iterator::Reference;
 };
+
+// 针对 pointer 的偏特化版本
+template <typename Iterator>
+struct iterator_traits<Iterator*> {
+    using iterator_category = random_access_iterator_tag;
+    using value_type = Iterator;
+    using difference_type = ptrdiff_t;
+    using pointer = Iterator*;
+    using reference = Iterator&;
+};
+
+// 针对 pointer-to-const 的偏特化版本
+template <typename Iterator>
+struct iterator_traits<const Iterator*> {
+    using iterator_category = random_access_iterator_tag;
+    using value_type = Iterator;
+    using difference_type = ptrdiff_t;
+    using pointer = const Iterator*;
+    using reference = const Iterator&;
+};
 } // namespace MyStl
 
 #endif // MYSTL_ITERATOR_H_

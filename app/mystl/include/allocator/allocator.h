@@ -48,6 +48,11 @@ public:
         MyStl::construct<T>(ptr, value);
     }
 
+    template <typename U, typename... Args>
+    void construct(U* ptr, Args&&... args) {
+        MyStl::construct(ptr, std::forward<Args>(args)...);
+    }
+
     static void destroy(pointer ptr) {
         MyStl::destroy<T>(ptr);
     }
