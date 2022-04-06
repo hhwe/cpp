@@ -45,8 +45,8 @@ OutputIterator adjacent_difference(InputIterator first, InputIterator last,
         *result = prev = *first;
         while (++first != last) {
             val = *first;
-            *++result = binary_op(val, prev)
-                prev = val;
+            *++result = binary_op(val, prev);
+            prev = val;
         }
         ++result;
     }

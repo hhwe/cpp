@@ -49,6 +49,25 @@ struct iterator_traits<const Iterator*> {
     using pointer = const Iterator*;
     using reference = const Iterator&;
 };
+
+template <typename Iterator>
+inline typename iterator_traits<Iterator>::iterator_category
+iterator_category(const Iterator&) {
+    return (typename iterator_traits<Iterator>::iterator_category)();
+}
+
+template <typename Iterator>
+inline typename iterator_traits<Iterator>::value_type*
+value_type(const Iterator&) {
+    return static_cast<typename iterator_traits<Iterator>::value_type*>(0);
+}
+
+template <typename Iterator>
+inline typename iterator_traits<Iterator>::difference_type*
+distance_type(const Iterator&) {
+    return static_cast<typename iterator_traits<Iterator>::difference_type*>(0);
+}
+
 } // namespace MyStl
 
 #endif // MYSTL_ITERATOR_H_
