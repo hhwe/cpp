@@ -4,7 +4,9 @@
 #include <type_traits>
 #include <utility>
 
-namespace MyStl {
+#include "iterator.h"
+
+namespace mystl {
 
 // placement new, call T1::T1()
 template <typename T1>
@@ -53,9 +55,9 @@ inline void destroy_aux(ForwardIterator first, ForwardIterator last, std::true_t
 // https://docs.microsoft.com/en-us/cpp/cpp/trivial-standard-layout-and-pod-types
 template <typename ForwardIterator>
 inline void destroy(ForwardIterator first, ForwardIterator last) {
-    destroy_aux(first, last, std::is_trivial<ForwardIterator>::type);
+    destroy_aux(first, last, std::is_trivially_destructible<typename iterator_traits<ForwardIterator>::value_type>{});
 }
 
-} // namespace MyStl
+} // namespace mystl
 
 #endif // MYSTL_CONSTRUCT_H_

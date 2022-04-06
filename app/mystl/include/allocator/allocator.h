@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <memory>
 
-namespace MyStl {
+namespace mystl {
 template <typename T>
 class allocator {
 public:
@@ -33,11 +33,11 @@ public:
     };
 
     static pointer allocate(size_type n) {
-        return reinterpret_cast<pointer>(MyStl::MyAllocator::GetInstance()->Allocate(n));
+        return reinterpret_cast<pointer>(mystl::MyAllocator::GetInstance()->Allocate(n));
     }
 
     static void deallocate(pointer ptr) {
-        MyStl::MyAllocator::GetInstance()->Deallocate(reinterpret_cast<unsigned char*>(ptr));
+        mystl::MyAllocator::GetInstance()->Deallocate(reinterpret_cast<unsigned char*>(ptr));
     }
 
     static void deallocate(pointer ptr, size_type /*size*/) {
@@ -45,22 +45,22 @@ public:
     }
 
     static void construct(pointer ptr, const T& value) {
-        MyStl::construct<T>(ptr, value);
+        mystl::construct<T>(ptr, value);
     }
 
     template <typename U, typename... Args>
     void construct(U* ptr, Args&&... args) {
-        MyStl::construct(ptr, std::forward<Args>(args)...);
+        mystl::construct(ptr, std::forward<Args>(args)...);
     }
 
     static void destroy(pointer ptr) {
-        MyStl::destroy<T>(ptr);
+        mystl::destroy(ptr);
     }
 
     static void destroy(pointer first, pointer last) {
-        MyStl::destroy<T>(first, last);
+        mystl::destroy(first, last);
     }
 };
-} // namespace MyStl
+} // namespace mystl
 
 #endif // MYSTL_ALLOCATOR_H_

@@ -1,7 +1,7 @@
 #ifndef MYSTL_NUMERIC_H_
 #define MYSTL_NUMERIC_H_
 
-namespace MyStl {
+namespace mystl {
 
 template <typename InputIterator, typename T>
 T accumulate(InputIterator first, InputIterator last, T init) {
@@ -117,6 +117,6 @@ T inner_product(InputIterator1 first1, InputIterator1 last1,
     return init;
 }
 
-} // namespace MyStl
+} // namespace mystl
 
 #endif // MYSTL_NUMERIC_H_

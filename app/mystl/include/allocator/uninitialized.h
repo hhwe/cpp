@@ -1,7 +1,7 @@
 #ifndef MYSTL_UNINITIALIZED_H_
 #define MYSTL_UNINITIALIZED_H_
 
-namespace MyStl {
+namespace mystl {
 
 template <typename InputIterator, typename ForwardIterator>
 ForwardIterator uninitialized_copy(InputIterator first, InputIterator last,
@@ -24,6 +24,6 @@ ForwardIterator uninitialized_fill_n(InputIterator first, std::size_t n,
     return fill_n(first, n, result);
 }
 
-} // namespace MyStl
+} // namespace mystl
 
 #endif // MYSTL_UNINITIALIZED_H_

@@ -17,14 +17,14 @@
 
 using namespace unit_test;
 
-namespace MyStl {
+namespace mystl {
 namespace test {
 namespace allocator_test {
 
 TEST(allocator) {
     {
         // default allocator for ints
-        MyStl::allocator<int> alloc;
+        mystl::allocator<int> alloc;
 
         // demonstrating the few directly usable members
         EXPECT_TRUE((std::is_same<int, decltype(alloc)::value_type>::value));
@@ -41,7 +41,7 @@ TEST(allocator) {
 
     {
         // default allocator for strings
-        MyStl::allocator<std::string> alloc;
+        mystl::allocator<std::string> alloc;
         // matching traits
         using traits_t = std::allocator_traits<decltype(alloc)>;
 
@@ -62,7 +62,7 @@ TEST(allocator) {
     }
 
     {
-        std::vector<int, MyStl::allocator<int>> vi;
+        std::vector<int, mystl::allocator<int>> vi;
         vi.push_back(1);
         for (int i = 0; i < 500; i++) {
             vi.push_back(i);
@@ -71,7 +71,7 @@ TEST(allocator) {
     }
 
     // {
-    //     std::list<int, MyStl::allocator<int>> li;
+    //     std::list<int, mystl::allocator<int>> li;
     //     for (int i = 0; i < 500; i++) {
     //         li.push_back(0x5A);
     //          EXPECT_EQ(i, li.back());
@@ -79,7 +79,7 @@ TEST(allocator) {
     // }
 
     // {
-    //     std::deque<int, MyStl::allocator<int>> di;
+    //     std::deque<int, mystl::allocator<int>> di;
     //     for (int i = 0; i < 500; i++) {
     //         di.push_back(i);
     //         EXPECT_EQ(i, di.back());
@@ -89,5 +89,5 @@ TEST(allocator) {
 
 }
 }
-} // namespace MyStl::test::allocator_test
+} // namespace mystl::test::allocator_test
 #endif // !MYTINYSTL_ALLOCATOR_TEST_H_

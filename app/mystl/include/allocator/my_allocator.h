@@ -3,7 +3,7 @@
 
 #include "construct.h"
 
-namespace MyStl {
+namespace mystl {
 class Chunk {
 public:
     Chunk(unsigned char blockNum, std::size_t blockSize) {
@@ -259,6 +259,6 @@ private:
     Pool pools_[POOL_SIZE];
 };
 
-} // namespace MyStl
+} // namespace mystl
 
 #endif // MYSTL_MY_ALLOCATOR_H_

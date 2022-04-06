@@ -5,9 +5,9 @@
 #include "allocator.h"
 #include "construct.h"
 
-namespace MyStl {
+namespace mystl {
 
-template <typename T, typename Alloc = MyStl::allocator<T>>
+template <typename T, typename Alloc = mystl::allocator<T>>
 class vector {
 public:
     using value_type = T;
@@ -24,14 +24,14 @@ public:
 
     // Constructor and Destructor
     void fill_initialize(size_type n, const_reference val) {
-        first_ = Alloc::allocate(n);
-        std::uninitialized_fill_n(first_, n, val);
-        finish_ = first_ + n;
+        start_ = Alloc::allocate(n);
+        std::uninitialized_fill_n(start_, n, val);
+        finish_ = start_ + n;
         capacity_ = finish_;
     }
 
     vector() :
-        first_(0), finish_(0), capacity_(0) {
+        start_(0), finish_(0), capacity_(0) {
     }
 
     vector(size_type n, const_reference val) {
@@ -43,13 +43,13 @@ public:
     }
 
     ~vector() {
-        Alloc::destroy(first_, finish_);
-        Alloc::deallocate(first_, finish_);
+        Alloc::destroy(start_, finish_);
+        Alloc::deallocate(start_, capacity_ - finish_);
     }
 
     // Iterators
     iterator begin() {
-        return first_;
+        return start_;
     }
 
     iterator end() {
@@ -58,28 +58,28 @@ public:
 
     // Capacity
     size_type size() const {
-        return size_type(finish_ - first_);
+        return size_type(finish_ - start_);
     }
 
     size_type capacity() const {
-        return size_type(capacity_ - first_);
+        return size_type(capacity_ - start_);
     }
 
     bool empty() const {
-        return first_ == finish_;
+        return start_ == finish_;
     }
 
     // Element access
     reference operator[](size_type n) {
-        return *(first_ + n);
+        return *(start_ + n);
     }
 
     reference at(size_type n) {
-        return *(first_ + n);
+        return *(start_ + n);
     }
 
     reference front() {
-        return *(first_);
+        return *(start_);
     }
 
     reference back() {
@@ -92,7 +92,7 @@ public:
         iterator new_begin = Alloc::allocate(len);
         iterator new_end = new_begin;
         try {
-            new_end = uninitialized_copy(first_, pos, new_begin); // TODO: use move
+            new_end = uninitialized_copy(start_, pos, new_begin); // TODO: use move
             construct(new_end, val);
             ++new_end;
             // new_end = uninitialized_copy(pos, finish_, new_end);
@@ -102,10 +102,10 @@ public:
             Alloc::deallocate(new_begin, len);
             throw;
         }
-        destroy(first_, finish_);
+        destroy(start_, finish_);
         // deallocate(); TODO：
 
-        first_ = new_begin;
+        start_ = new_begin;
         finish_ = new_end;
         capacity_ = new_begin + len;
     }
@@ -149,15 +149,15 @@ public:
     }
 
     void clear() {
-        erase(first_, finish_);
+        erase(start_, finish_);
     }
 
 protected:
-    iterator first_;
+    iterator start_;
     iterator finish_;
     iterator capacity_;
 };
 
-} // namespace MyStl
+} // namespace mystl
 
 #endif // MYSTL_VECTOE_H_

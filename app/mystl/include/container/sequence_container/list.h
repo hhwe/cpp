@@ -4,9 +4,9 @@
 #include "allocator.h"
 #include "construct.h"
 
-namespace MyStl {
+namespace mystl {
 
-template <typename T, typename Alloc = MyStl::allocator<T>>
+template <typename T, typename Alloc = mystl::allocator<T>>
 class list {
 public:
     using value_type = T;
@@ -27,6 +27,6 @@ protected:
     iterator capacity_;
 };
 
-} // namespace MyStl
+} // namespace mystl
 
 #endif // MYSTL_LIST_H_

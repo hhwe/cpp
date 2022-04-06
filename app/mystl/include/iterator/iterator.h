@@ -3,7 +3,7 @@
 
 #include <cstddef>
 
-namespace MyStl {
+namespace mystl {
 
 struct input_iterator_tag {};
 struct output_iterator_tag {};
@@ -23,11 +23,11 @@ struct iterator {
 
 template <typename Iterator>
 struct iterator_traits {
-    using iterator_category = Iterator::Category;
-    using value_type = Iterator::Tp;
-    using difference_type = Iterator::Distance;
-    using pointer = Iterator::Pointer;
-    using reference = Iterator::Reference;
+    using iterator_category = typename Iterator::Category;
+    using value_type = typename Iterator::Tp;
+    using difference_type = typename Iterator::Distance;
+    using pointer = typename Iterator::Pointer;
+    using reference = typename Iterator::Reference;
 };
 
 // 针对 pointer 的偏特化版本
@@ -53,7 +53,8 @@ struct iterator_traits<const Iterator*> {
 template <typename Iterator>
 inline typename iterator_traits<Iterator>::iterator_category
 iterator_category(const Iterator&) {
-    return (typename iterator_traits<Iterator>::iterator_category)();
+    using category = typename iterator_traits<Iterator>::iterator_category;
+    return category();
 }
 
 template <typename Iterator>
@@ -68,6 +69,6 @@ distance_type(const Iterator&) {
     return static_cast<typename iterator_traits<Iterator>::difference_type*>(0);
 }
 
-} // namespace MyStl
+} // namespace mystl
 
 #endif // MYSTL_ITERATOR_H_

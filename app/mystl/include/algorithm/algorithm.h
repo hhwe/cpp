@@ -4,7 +4,7 @@
 #include "utility.h"
 #include <type_traits>
 
-namespace MyStl {
+namespace mystl {
 
 template <class ForwardIterator>
 ForwardIterator adjacent_find(ForwardIterator first, ForwardIterator last) {
@@ -433,6 +433,6 @@ template <class ForwardIterator, class T, class Compare>
 bool binary_search(ForwardIterator first, ForwardIterator last,
                    const T& val, Compare comp);
 
-} // namespace MyStl
+} // namespace mystl
 
 #endif // MYSTL_ALGORITHM_H_

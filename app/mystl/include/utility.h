@@ -3,7 +3,7 @@
 
 #include <type_traits>
 
-namespace MyStl {
+namespace mystl {
 
 template <class T1, class T2>
 struct pair {
@@ -50,6 +50,6 @@ void swap(T& a, T& b) {
 //     for (std::size_t i = 0; i < N; ++i) swap(a[i], b[i]);
 // }
 
-} // namespace MyStl
+} // namespace mystl
 
 #endif // MYSTL_UTILITY_H_
