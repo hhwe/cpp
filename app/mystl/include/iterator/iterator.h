@@ -50,6 +50,7 @@ struct iterator_traits<const Iterator*> {
     using reference = const Iterator&;
 };
 
+// 萃取迭代器的类型
 template <typename Iterator>
 inline typename iterator_traits<Iterator>::iterator_category
 iterator_category(const Iterator&) {
@@ -57,16 +58,89 @@ iterator_category(const Iterator&) {
     return category();
 }
 
+// 萃取迭代器的元素类型
 template <typename Iterator>
 inline typename iterator_traits<Iterator>::value_type*
 value_type(const Iterator&) {
     return static_cast<typename iterator_traits<Iterator>::value_type*>(0);
 }
 
+// 萃取迭代器的两个元素间距
 template <typename Iterator>
 inline typename iterator_traits<Iterator>::difference_type*
 distance_type(const Iterator&) {
     return static_cast<typename iterator_traits<Iterator>::difference_type*>(0);
+}
+
+// ====================================================================================
+
+// 反向迭代器
+template <typename Iterator>
+class reverse_iterator : public iterator_traits<Iterator> {
+public: // member types
+    using iterator_type = Iterator;
+    using self = reverse_iterator<Iterator>;
+
+    using iterator_category = typename iterator_traits<Iterator>::iterator_category;
+    using value_type = typename iterator_traits<Iterator>::value_type;
+    using difference_type = typename iterator_traits<Iterator>::difference_type;
+    using pointer = typename iterator_traits<Iterator>::pointer;
+    using reference = typename iterator_traits<Iterator>::reference;
+
+public:
+    reverse_iterator() {
+    }
+    explicit reverse_iterator(iterator_type x) :
+        current_(x) {
+    }
+
+    iterator_type base() const {
+        return current_;
+    }
+
+    reference operator*() const {
+        iterator_type tmp = current_;
+        return *--tmp;
+    }
+
+    pointer operator->() {
+        return &(*this);
+    }
+
+    self& operator++() {
+        --current_;
+        return *this;
+    }
+
+    self& operator++(int) {
+        self tmp = *this;
+        --current_;
+        return tmp;
+    }
+
+    self& operator--() {
+        ++current_;
+        return *this;
+    }
+
+    self& operator--(int) {
+        self tmp = *this;
+        ++current_;
+        return tmp;
+    }
+
+private:
+    iterator_type current_;
+};
+
+template <typename Iterator>
+inline bool operator==(const reverse_iterator<Iterator>& x, const reverse_iterator<Iterator>& y) {
+    return x.base() == y.base();
+}
+
+template <typename Iterator>
+inline bool operator!=(const reverse_iterator<Iterator>& x, const reverse_iterator<Iterator>& y) {
+    return !(x == y);
 }
 
 } // namespace mystl

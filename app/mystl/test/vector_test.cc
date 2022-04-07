@@ -59,6 +59,7 @@ TEST(vector_testCase3) {
     // EXPECT_TRUE(v1 == v2);
     // EXPECT_TRUE(!(v1 != v2);
 }
+
 TEST(vector_testCase4) {
     mystl::vector<int> myvector;
     for (int i = 1; i <= 5; i++) myvector.push_back(i);
@@ -73,6 +74,7 @@ TEST(vector_testCase4) {
         // EXPECT_TRUE(*it == i);
     }
 }
+
 TEST(vector_testCase5) {
     mystl::vector<int> myvector(5); // 5 default-constructed ints
     int i = 0;

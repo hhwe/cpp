@@ -1,8 +1,9 @@
 #ifndef MYSTL_ALGORITHM_H_
 #define MYSTL_ALGORITHM_H_
 
-#include "utility.h"
 #include <type_traits>
+#include <cstring>
+#include "utility.h"
 
 namespace mystl {
 
@@ -205,7 +206,7 @@ OutputIterator __copy_dispatch(InputIterator first, InputIterator last, OutputIt
 
 template <class T>
 T* __copy_t(T* first, T* last, T* result, std::true_type) {
-    memmov(result, first, (last - first) * sizeof(T));
+    std::memmove(result, first, (last - first) * sizeof(T));
     return result;
 }
 
@@ -232,14 +233,14 @@ OutputIterator copy(InputIterator first, InputIterator last, OutputIterator resu
 // 针对 char* 的特化版本
 template <>
 char* copy(const char* first, const char* last, char* result) {
-    memmov(result, first, last - first);
+    std::memmove(result, first, last - first);
     return result;
 }
 
 // 针对 wchar_t* 的特化版本
 template <>
 wchar_t* copy(const wchar_t* first, const wchar_t* last, wchar_t* result) {
-    memmov(result, first, (last - first) * sizeof(wchar_t));
+    std::memmove(result, first, (last - first) * sizeof(wchar_t));
     return result;
 }
 

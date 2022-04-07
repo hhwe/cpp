@@ -5,20 +5,9 @@
 
 namespace mystl {
 
-template <class T1, class T2>
-struct pair {
-    using first_type = T1;
-    using second_type = T2;
-
-    T1 first;
-    T2 second;
-};
-
-template <class T1, class T2>
-pair<T1, T2> make_pair(T1&& x, T2&& y) {
-    return (pair<T1, T2>(forward<T1>(x), forward<T2>(y)));
-}
-
+/*
+ * forward
+ */
 // Forward an lvalue.
 template <typename T>
 constexpr T&& forward(typename std::remove_reference<T>::type& arg) noexcept {
@@ -33,11 +22,17 @@ constexpr T&& forward(typename std::remove_reference<T>::type&& arg) noexcept {
     return static_cast<T&&>(arg);
 }
 
+/*
+ * move
+ */
 template <class T>
 constexpr typename std::remove_reference<T>::type&& move(T&& arg) noexcept {
-    return static_cast<std::remove_reference<T>::type&&>(arg);
+    return static_cast<typename std::remove_reference<T>::type&&>(arg);
 }
 
+/*
+ * swap
+ */
 template <class T>
 void swap(T& a, T& b) {
     T c(std::move(a));
@@ -49,6 +44,23 @@ void swap(T& a, T& b) {
 // void swap(T& a[N], T& b[N]) {
 //     for (std::size_t i = 0; i < N; ++i) swap(a[i], b[i]);
 // }
+
+/*
+ * pair
+ */
+template <class T1, class T2>
+struct pair {
+    using first_type = T1;
+    using second_type = T2;
+
+    T1 first;
+    T2 second;
+};
+
+template <class T1, class T2>
+pair<T1, T2> make_pair(T1&& x, T2&& y) {
+    return pair<T1, T2>(mystl::forward<T1>(x), mystl::forward<T2>(y));
+}
 
 } // namespace mystl
 
