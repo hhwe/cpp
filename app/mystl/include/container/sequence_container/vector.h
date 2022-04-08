@@ -32,7 +32,7 @@ public: // member functions
      * Constructor and Destructor
      */
     vector() :
-        start_(0), finish_(0), capacity_(0) {
+        begin_(0), end_(0), capacity_(0) {
     }
 
     vector(size_type n, const_reference val) {
@@ -44,27 +44,27 @@ public: // member functions
     }
 
     ~vector() {
-        data_allocator::destroy(start_, finish_);
-        data_allocator::deallocate(start_, capacity_ - finish_);
+        data_allocator::destroy(begin_, end_);
+        data_allocator::deallocate(begin_, capacity_ - end_);
     }
 
     /*
      * Iterators
      */
     iterator begin() noexcept {
-        return start_;
+        return begin_;
     }
 
     iterator end() noexcept {
-        return finish_;
+        return end_;
     }
 
     const_iterator begin() const noexcept {
-        return start_;
+        return begin_;
     }
 
     const_iterator end() const noexcept {
-        return finish_;
+        return end_;
     }
 
     reverse_iterator rbegin() noexcept {
@@ -106,13 +106,13 @@ public: // member functions
     }
 
     size_type max_size() const noexcept {
-        return static_cast<size_type>(capacity_ - start_);
+        return static_cast<size_type>(capacity_ - begin_);
     }
 
     void resize(size_type n) {
         if (n < size()) {
-            data_allocator::destroy(start_ + n, finish_);
-            finish_ = start_ + n;
+            data_allocator::destroy(begin_ + n, end_);
+            end_ = begin_ + n;
         } else if (n > size() && n <= capacity()) {
             // TODO:
         }
@@ -122,11 +122,11 @@ public: // member functions
     }
 
     size_type capacity() const noexcept {
-        return size_type(capacity_ - start_);
+        return size_type(capacity_ - begin_);
     }
 
     bool empty() const noexcept {
-        return start_ == finish_;
+        return begin_ == end_;
     }
 
     void reserve(size_type n) {
@@ -139,11 +139,11 @@ public: // member functions
      * Element access
      */
     reference operator[](size_type n) {
-        return *(start_ + n);
+        return *(begin_ + n);
     }
 
     const_reference operator[](size_type n) const {
-        return *(start_ + n);
+        return *(begin_ + n);
     }
 
     reference at(size_type n) {
@@ -155,27 +155,27 @@ public: // member functions
     }
 
     reference front() {
-        return *(start_);
+        return *(begin_);
     }
 
     const_reference front() const {
-        return *(start_);
+        return *(begin_);
     }
 
     reference back() {
-        return *(finish_ - 1);
+        return *(end_ - 1);
     }
 
     const_reference back() const {
-        return *(finish_ - 1);
+        return *(end_ - 1);
     }
 
     pointer data() noexcept {
-        return start_;
+        return begin_;
     }
 
     const_pointer data() const noexcept {
-        return start_;
+        return begin_;
     }
 
     /*
@@ -189,69 +189,159 @@ public: // member functions
     // void assign(initializer_list<value_type> il);
 
     void push_back(const value_type& val) {
-        insert(finish_, val);
+        insert_aux(end_, val);
+    }
+
+    void push_back(value_type&& val) {
+        emplace_back(mystl::move(val));
     }
 
     void pop_back() {
-        --finish_;
-        data_allocator::destroy(finish_);
+        --end_;
+        data_allocator::destroy(end_);
     }
 
-    iterator insert(const_iterator position, const value_type& val);
-    iterator insert(const_iterator position, size_type n, const value_type& val);
-    template <class InputIterator>
-    iterator insert(const_iterator position, InputIterator first, InputIterator last);
-    iterator insert(const_iterator position, value_type&& val);
+    iterator insert(iterator position, const value_type& val) {
+        return insert_aux(position, val);
+    }
+
+    // iterator insert(const_iterator position, size_type n, const value_type& val);
+    // template <class InputIterator>
+    // iterator insert(const_iterator position, InputIterator first, InputIterator last);
+    // iterator insert(const_iterator position, value_type&& val);
     // iterator insert(const_iterator position, initializer_list<value_type> il);
 
-    iterator erase(iterator first, iterator last);
+    iterator erase(iterator position) {
+        return erase(position, position + 1);
+    }
 
-    iterator erase(iterator pos);
+    iterator erase(iterator first, iterator last) {
+        mystl::move(last, end_, first);
+        auto new_end = end_ - (first - last);
+        data_allocator::destroy(new_end, end_);
+        end_ = new_end;
+        return first;
+    }
 
-    void swap(vector& x);
+    void swap(vector& rhs) {
+        if (this != &rhs) {
+            mystl::swap(begin_, rhs.begin_);
+            mystl::swap(end_, rhs.end_);
+            mystl::swap(capacity_, rhs.capacity_);
+        }
+    }
+
     void clear() {
-        erase(start_, finish_);
+        erase(begin_, end_);
     }
 
     template <class... Args>
-    iterator emplace(const_iterator position, Args&&... args);
+    iterator emplace(iterator position, Args&&... args) {
+        return emplace_aux(position, mystl::forward<Args>(args)...);
+    }
+
     template <class... Args>
-    void emplace_back(Args&&... args);
+    void emplace_back(Args&&... args) {
+        emplace_aux(end_, mystl::forward<Args>(args)...);
+    }
 
 private:
     void fill_initialize(size_type n, const_reference val) {
-        start_ = data_allocator::allocate(n);
-        mystl::uninitialized_fill_n(start_, n, val);
-        finish_ = start_ + n;
-        capacity_ = finish_;
+        begin_ = data_allocator::allocate(n);
+        mystl::uninitialized_fill_n(begin_, n, val);
+        end_ = begin_ + n;
+        capacity_ = end_;
     }
 
     void realloc_insert(iterator pos, const_reference val) {
         const size_type len = size() != 0 ? 2 * size() : 1;
-        iterator new_begin = Alloc::allocate(len);
+        iterator new_begin = data_allocator::allocate(len);
         iterator new_end = new_begin;
         try {
-            new_end = uninitialized_copy(start_, pos, new_begin); // TODO: use move
-            construct(new_end, val);
+            new_end = mystl::uninitialized_copy(begin_, pos, new_begin);
+            data_allocator::construct(new_end, val);
             ++new_end;
-            // new_end = uninitialized_copy(pos, finish_, new_end);
-        } catch (const std::exception& e) {
-            std::cerr << e.what() << '\n';
-            destroy(new_begin, new_end);
-            Alloc::deallocate(new_begin, len);
+            new_end = mystl::uninitialized_copy(pos, end_, new_end);
+        } catch (...) {
+            data_allocator::destroy(new_begin, new_end);
+            data_allocator::deallocate(new_begin, len);
             throw;
         }
-        destroy(start_, finish_);
-        // deallocate(); TODO：
+        data_allocator::destroy(begin_, end_);
+        data_allocator::deallocate(begin_, capacity_ - begin_);
 
-        start_ = new_begin;
-        finish_ = new_end;
+        begin_ = new_begin;
+        end_ = new_end;
         capacity_ = new_begin + len;
     }
 
+    iterator insert_aux(iterator pos, const_reference val) {
+        const auto n = pos - begin_;
+        if (end_ != capacity_) {
+            if (pos == end_) {
+                data_allocator::construct(end_, val);
+                ++end_;
+            } else {
+                auto new_end = end_;
+                data_allocator::construct(end_, val);
+                ++new_end;
+                mystl::copy_backward(pos, end_ - 1, end_);
+                *pos = val;
+                end_ = new_end;
+            }
+        } else {
+            realloc_insert(pos, val);
+        }
+        return begin_ + n;
+    }
+
+    template <class... Args>
+    void realloc_emplace(iterator pos, Args&&... args) {
+        const size_type len = size() != 0 ? 2 * size() : 1;
+        iterator new_begin = data_allocator::allocate(len);
+        iterator new_end = new_begin;
+        try {
+            new_end = mystl::uninitialized_move(begin_, pos, new_begin);
+            data_allocator::construct(new_end, mystl::forward<Args>(args)...);
+            ++new_end;
+            new_end = mystl::uninitialized_move(pos, end_, new_end);
+        } catch (...) {
+            data_allocator::destroy(new_begin, new_end);
+            data_allocator::deallocate(new_begin, len);
+            throw;
+        }
+        data_allocator::destroy(begin_, end_);
+        data_allocator::deallocate(begin_, capacity_ - begin_);
+
+        begin_ = new_begin;
+        end_ = new_end;
+        capacity_ = new_begin + len;
+    }
+
+    template <class... Args>
+    iterator emplace_aux(iterator pos, Args&&... args) {
+        const auto n = pos - begin_;
+        if (end_ != capacity_) {
+            if (pos == end_) {
+                data_allocator::construct(end_, mystl::forward<Args>(args)...);
+                ++end_;
+            } else {
+                auto new_end = end_;
+                data_allocator::construct(end_, end_ - 1);
+                ++new_end;
+                mystl::copy_backward(pos, end_ - 1, end_);
+                *pos = value_type(mystl::forward<Args>(args)...);
+                end_ = new_end;
+            }
+        } else {
+            realloc_emplace(pos, mystl::forward<Args>(args)...);
+        }
+        return begin_ + n;
+    }
+
 protected:
-    iterator start_;
-    iterator finish_;
+    iterator begin_;
+    iterator end_;
     iterator capacity_;
 };
 

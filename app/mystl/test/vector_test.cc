@@ -184,14 +184,14 @@ TEST(vector_testCase12) {
     v2.insert(v2.end(), 1);
     // EXPECT_EQ(v1, v2);
 
-    v1.insert(v1.begin() + v1.size() / 2, 10, 0);
-    v2.insert(v2.begin() + v2.size() / 2, 10, 0);
-    // EXPECT_EQ(v1, v2);
+    // v1.insert(v1.begin() + v1.size() / 2, 10, 0);
+    // v2.insert(v2.begin() + v2.size() / 2, 10, 0);
+    // // EXPECT_EQ(v1, v2);
 
-    int arr[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    v1.insert(v1.end(), std::begin(arr), std::end(arr));
-    v2.insert(v2.end(), std::begin(arr), std::end(arr));
-    // EXPECT_EQ(v1, v2);
+    // int arr[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    // v1.insert(v1.end(), std::begin(arr), std::end(arr));
+    // v2.insert(v2.end(), std::begin(arr), std::end(arr));
+    // // EXPECT_EQ(v1, v2);
 }
 
 TEST(vector_testCase13) {

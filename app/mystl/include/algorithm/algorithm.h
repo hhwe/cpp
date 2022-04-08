@@ -230,6 +230,14 @@ OutputIterator copy(InputIterator first, InputIterator last, OutputIterator resu
     return __copy_dispatch<InputIterator, OutputIterator>(first, last, result);
 }
 
+template <class BidirectionalIterator1, class BidirectionalIterator2>
+BidirectionalIterator2 copy_backward(BidirectionalIterator1 first,
+                                     BidirectionalIterator1 last,
+                                     BidirectionalIterator2 result) {
+    while (last != first) { *(--result) = *(--last); }
+    return result;
+}
+
 // 针对 char* 的特化版本
 template <>
 char* copy(const char* first, const char* last, char* result) {
@@ -244,6 +252,19 @@ wchar_t* copy(const wchar_t* first, const wchar_t* last, wchar_t* result) {
     return result;
 }
 
+template <class InputIterator, class OutputIterator>
+OutputIterator move(InputIterator first, InputIterator last, OutputIterator result) {
+    while (first != last) {
+        *result = mystl::move(*first);
+        ++result;
+        ++first;
+    }
+    return result;
+}
+
+/*
+ * set
+ */
 template <class InputIterator1, class InputIterator2, class OutputIterator>
 OutputIterator set_difference(InputIterator1 first1, InputIterator1 last1,
                               InputIterator2 first2, InputIterator2 last2,

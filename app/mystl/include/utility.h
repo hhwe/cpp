@@ -35,9 +35,9 @@ constexpr typename std::remove_reference<T>::type&& move(T&& arg) noexcept {
  */
 template <class T>
 void swap(T& a, T& b) {
-    T c(std::move(a));
-    a = std::move(b);
-    b = std::move(c);
+    T c(mystl::move(a));
+    a = mystl::move(b);
+    b = mystl::move(c);
 }
 
 // template <class T, std::size_t N>
