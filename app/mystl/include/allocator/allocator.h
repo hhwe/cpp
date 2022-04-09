@@ -49,7 +49,7 @@ public:
     }
 
     template <typename U, typename... Args>
-    void construct(U* ptr, Args&&... args) {
+    static void construct(U* ptr, Args&&... args) {
         mystl::construct(ptr, std::forward<Args>(args)...);
     }
 

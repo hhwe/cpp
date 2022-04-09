@@ -327,7 +327,7 @@ private:
                 ++end_;
             } else {
                 auto new_end = end_;
-                data_allocator::construct(end_, end_ - 1);
+                data_allocator::construct(end_, *(end_ - 1));
                 ++new_end;
                 mystl::copy_backward(pos, end_ - 1, end_);
                 *pos = value_type(mystl::forward<Args>(args)...);
