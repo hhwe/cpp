@@ -102,11 +102,11 @@ public: // member functions
      * Capacity
      */
     size_type size() const noexcept {
-        return static_cast<size_type>(-1) / sizeof(value_type);
+        return static_cast<size_type>(capacity_ - begin_);
     }
 
     size_type max_size() const noexcept {
-        return static_cast<size_type>(capacity_ - begin_);
+        return static_cast<size_type>(-1) / sizeof(value_type);
     }
 
     void resize(size_type n) {

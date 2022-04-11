@@ -33,7 +33,7 @@ public:
     };
 
     static pointer allocate(size_type n) {
-        return reinterpret_cast<pointer>(mystl::MyAllocator::GetInstance()->Allocate(n));
+        return reinterpret_cast<pointer>(mystl::MyAllocator::GetInstance()->Allocate(n * sizeof(value_type)));
     }
 
     static void deallocate(pointer ptr) {

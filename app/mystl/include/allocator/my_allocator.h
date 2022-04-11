@@ -68,63 +68,63 @@ private:
 class ChunkList {
 public:
     ChunkList(unsigned char blockNum = 0U, std::size_t blockSize = 0U) :
-        next(this), prev(this), chunk(blockNum, blockSize) {
+        next_(this), prev_(this), chunk_(blockNum, blockSize) {
     }
 
     unsigned char* Allocate(std::size_t blockSize) {
-        return chunk.Allocate(blockSize);
+        return chunk_.Allocate(blockSize);
     }
 
     void Deallocate(unsigned char* ptr, std::size_t blockSize) {
-        chunk.Deallocate(ptr, blockSize);
+        chunk_.Deallocate(ptr, blockSize);
     }
 
     bool IsAvailable() {
-        return chunk.IsAvailable();
+        return chunk_.IsAvailable();
     }
 
     bool IsAllBlockFree(unsigned char blockNum) {
-        return chunk.IsAllBlockFree(blockNum);
+        return chunk_.IsAllBlockFree(blockNum);
     }
 
     void InsertAtTail(ChunkList* p) {
-        p->next = this;
-        p->prev = prev;
-        prev->next = p;
-        prev = p;
+        p->next_ = this;
+        p->prev_ = prev_;
+        prev_->next_ = p;
+        prev_ = p;
     }
 
     void Remove(ChunkList* p) {
-        p->prev->next = p->next;
-        p->next->prev = p->prev;
+        p->prev_->next_ = p->next_;
+        p->next_->prev_ = p->prev_;
     }
 
     ChunkList* FindAvailableChunk() {
-        ChunkList* p = this->next;
+        ChunkList* p = this->next_;
         while (p != this) {
-            if (p->chunk.IsAvailable()) {
+            if (p->chunk_.IsAvailable()) {
                 return this;
             }
-            p = p->next;
+            p = p->next_;
         }
         return nullptr;
     }
 
     ChunkList* FindLocatedChunk(unsigned char* ptr, std::size_t chunkSize) {
-        ChunkList* p = this->next;
+        ChunkList* p = this->next_;
         while (p != this) {
-            if (p->chunk.IsInside(ptr, chunkSize)) {
+            if (p->chunk_.IsInside(ptr, chunkSize)) {
                 return this;
             }
-            p = p->next;
+            p = p->next_;
         }
         return nullptr;
     }
 
 private:
-    ChunkList* next{nullptr};
-    ChunkList* prev{nullptr};
-    Chunk chunk;
+    ChunkList* next_{nullptr};
+    ChunkList* prev_{nullptr};
+    Chunk chunk_;
 };
 
 class Pool {
