@@ -2,7 +2,7 @@
 #define MYTINYSTL_ALLOCATOR_TEST_H_
 
 #include "allocator.h"
-#include "unit_test.h"
+#include "htest.h"
 
 #include <memory>
 #include <iostream>
@@ -15,7 +15,7 @@
 #include <set>
 #include <algorithm>
 
-using namespace unit_test;
+using namespace htest;
 
 namespace mystl {
 namespace test {

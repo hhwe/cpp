@@ -1,14 +1,14 @@
 /*
  * a simple unit test for cpp
  */
-#ifndef UNIT_TEST_H_
-#define UNIT_TEST_H_
+#ifndef HTEST_H_
+#define HTEST_H_
 
 #include <iostream>
 #include <string>
 #include <vector>
 
-namespace unit_test {
+namespace htest {
 class TestCase {
 public:
     TestCase(const char* name) :
@@ -124,6 +124,6 @@ inline int RUN_ALL_TESTS() {
 #define EXPECT_TRUE(val) EXPECT_BOOL_HELPER_(true, val)
 #define EXPECT_FALSE(val) EXPECT_BOOL_HELPER_(false, val)
 
-} // namespace unit_test
+} // namespace htest
 
-#endif // UNIT_TEST_H_
+#endif // HTEST_H_

@@ -31,21 +31,92 @@ public: // member functions
     /*
      * Constructor and Destructor
      */
-    vector() :
-        begin_(0), end_(0), capacity_(0) {
+    // default (1)
+    explicit vector(const allocator_type& alloc = allocator_type()) :
+        begin_(0),
+        end_(0), capacity_(0) {
     }
 
-    vector(size_type n, const_reference val) {
+    // fill (2)
+    explicit vector(size_type n) {
+        fill_initialize(n, T());
+    }
+    vector(size_type n, const value_type& val, const allocator_type& alloc = allocator_type()) {
         fill_initialize(n, val);
     }
 
-    vector(size_type n) {
-        fill_initialize(n, T());
+    // range (3)
+    template <class InputIterator>
+    vector(InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type()) {
+        range_initialize(first, last);
+    }
+
+    // copy (4)
+    vector(const vector& x) {
+        range_initialize(x.begin_, x.end_);
+    }
+    vector(const vector& x, const allocator_type& alloc) {
+        range_initialize(x.begin_, x.end_);
+    }
+
+    // move (5)
+    vector(vector&& x) {
+        begin_ = mystl::move(x.begin_);
+        end_ = mystl::move(x.end_);
+        capacity_ = mystl::move(x.capacity_);
+    }
+    vector(vector&& x, const allocator_type& alloc) {
+        begin_ = mystl::move(x.begin_);
+        end_ = mystl::move(x.end_);
+        capacity_ = mystl::move(x.capacity_);
+    }
+
+    // initializer list (6)
+    vector(std::initializer_list<value_type> il, const allocator_type& alloc = allocator_type()) {
+        range_initialize(il.begin(), il.end());
     }
 
     ~vector() {
-        data_allocator::destroy(begin_, end_);
-        data_allocator::deallocate(begin_, capacity_ - end_);
+        destructor(begin_, end_, capacity_ - end_);
+    }
+
+    // copy (1)
+    vector& operator=(const vector& x) {
+        if (x != this) {
+            const auto len = x.size();
+            if (len > capacity()) {
+                vector tmp(x);
+                swap(tmp);
+            } else if (len <= size()) {
+                auto cur = mystl::copy(x.begin_, x.end_, begin_);
+                data_allocator::destroy(cur, end_);
+                end_ = cur;
+            } else {
+                mystl::copy(x.begin_, x.begin_ + size(), begin_);
+                auto cur = mystl::uninitialized_copy(x.begin_ + size(), x.end_, end_);
+                end_ = cur;
+            }
+        }
+        return *this;
+    }
+
+    // move (2)
+    vector& operator=(vector&& x) {
+        destructor(begin_, end_, capacity_ - end_);
+        begin_ = x.begin_;
+        end_ = x.end_;
+        capacity_ = x.capacity_;
+        x.begin_ = nullptr;
+        x.end_ = nullptr;
+        x.capacity_ = nullptr;
+        return *this;
+    }
+
+    // initializer list (3)
+    vector& operator=(std::initializer_list<value_type> il) {
+        vector tmp(il.begin(), il.end());
+        swap(tmp);
+        return *this;
     }
 
     /*
@@ -186,7 +257,7 @@ public: // member functions
 
     void assign(size_type n, const value_type& val);
 
-    // void assign(initializer_list<value_type> il);
+    // void assign(std::initializer_list<value_type> il);
 
     void push_back(const value_type& val) {
         insert_aux(end_, val);
@@ -209,14 +280,14 @@ public: // member functions
     // template <class InputIterator>
     // iterator insert(const_iterator position, InputIterator first, InputIterator last);
     // iterator insert(const_iterator position, value_type&& val);
-    // iterator insert(const_iterator position, initializer_list<value_type> il);
+    // iterator insert(const_iterator position, std::initializer_list<value_type> il);
 
     iterator erase(iterator position) {
         return erase(position, position + 1);
     }
 
     iterator erase(iterator first, iterator last) {
-        mystl::move(last, end_, first);
+        mystl::move(last, end_, first); // FIXME
         auto new_end = end_ - (first - last);
         data_allocator::destroy(new_end, end_);
         end_ = new_end;
@@ -245,12 +316,34 @@ public: // member functions
         emplace_aux(end_, mystl::forward<Args>(args)...);
     }
 
+    /*
+     * Allocator
+     */
+    allocator_type get_allocator() const noexcept {
+        return data_allocator();
+    }
+
 private:
     void fill_initialize(size_type n, const_reference val) {
         begin_ = data_allocator::allocate(n);
         mystl::uninitialized_fill_n(begin_, n, val);
         end_ = begin_ + n;
         capacity_ = end_;
+    }
+
+    template <class InputIterator>
+    void range_initialize(InputIterator first, InputIterator last) {
+        size_type n = size_type(last - first);
+        begin_ = data_allocator::allocate(n);
+        mystl::uninitialized_copy(first, last, begin_);
+        end_ = begin_ + n;
+        capacity_ = end_;
+    }
+
+    template <class InputIterator>
+    void destructor(InputIterator first, InputIterator last, size_type n) {
+        data_allocator::destroy(first, last);
+        data_allocator::deallocate(first, n);
     }
 
     void realloc_insert(iterator pos, const_reference val) {
@@ -345,6 +438,26 @@ protected:
     iterator capacity_;
 };
 
+template <class T, class Alloc>
+bool operator==(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs);
+template <class T, class Alloc>
+bool operator!=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs);
+template <class T, class Alloc>
+bool operator<(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs);
+template <class T, class Alloc>
+bool operator<=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs);
+template <class T, class Alloc>
+bool operator>(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs);
+template <class T, class Alloc>
+bool operator>=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs);
+
+template <class T, class Alloc>
+void swap(vector<T, Alloc>& x, vector<T, Alloc>& y);
+
+// bool specialization
+template <class Alloc>
+class vector<bool, Alloc> {
+};
 } // namespace mystl
 
 #endif // MYSTL_VECTOE_H_

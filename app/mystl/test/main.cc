@@ -1,6 +1,6 @@
-#include "unit_test.h"
+#include "htest.h"
 
 int main(int argc, char const* argv[]) {
-    unit_test::RUN_ALL_TESTS();
+    htest::RUN_ALL_TESTS();
     return 0;
 }

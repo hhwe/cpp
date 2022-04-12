@@ -2,12 +2,13 @@
 #define MYSTL_VECTOR_TEST_H_
 
 #include "vector.h"
-#include "unit_test.h"
+#include "htest.h"
+#include "htest_utils.h"
 
 #include <vector>
 #include <string>
 
-using namespace unit_test;
+using namespace htest;
 
 namespace mystl {
 namespace test {
@@ -16,16 +17,16 @@ namespace vector_test {
 TEST(vector_testCase1) {
     std::vector<std::string> v1(10, "zxh");
     mystl::vector<std::string> v2(10, "zxh");
-    // EXPECT_EQ(v1, v2);
+    EXPECT_TRUE(htest::ContainerEqual(v1, v2));
 
     std::vector<std::string> v3(10);
     mystl::vector<std::string> v4(10);
-    // EXPECT_EQ(v3, v4);
+    EXPECT_TRUE(htest::ContainerEqual(v3, v4));
 
     std::array<std::string, 3> arr = {"abc", "def", "ghi"};
     std::vector<std::string> v5(std::begin(arr), std::end(arr));
-    // mystl::vector<std::string> v6(std::begin(arr), std::end(arr));
-    // EXPECT_EQ(v5, v6);
+    mystl::vector<std::string> v6(std::begin(arr), std::end(arr));
+    EXPECT_TRUE(htest::ContainerEqual(v5, v6));
 }
 
 TEST(vector_testCase2) {
