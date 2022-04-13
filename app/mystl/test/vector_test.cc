@@ -35,11 +35,11 @@ TEST(vector_testCase2) {
 
     auto v1(temp1);
     auto v2(temp2);
-    // EXPECT_EQ(v1, v2);
+    EXPECT_TRUE(htest::ContainerEqual(v1, v2));
 
     auto v3(std::move(temp1));
     auto v4(std::move(temp2));
-    // EXPECT_EQ(v3, v4);
+    EXPECT_TRUE(htest::ContainerEqual(v3, v4));
 
     auto v5 = v1;
     auto v6 = v2;

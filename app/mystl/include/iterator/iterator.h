@@ -21,13 +21,52 @@ struct iterator {
     using reference = Reference;
 };
 
+namespace {
+// 2408. SFINAE-friendly common_type/iterator_traits is missing in C++14
+
+template <typename T>
+struct has_iterator_cat {
+private:
+    struct two {
+        char a;
+        char b;
+    };
+    template <typename U>
+    static two test(...);
+    template <typename U>
+    static char test(typename U::iterator_category* = 0);
+
+public:
+    static const bool value = sizeof(test<T>(0)) == sizeof(char);
+};
+
+template <typename Iterator, bool>
+struct iterator_traits_impl {};
+
 template <typename Iterator>
-struct iterator_traits {
+struct iterator_traits_impl<Iterator, true> {
     using iterator_category = typename Iterator::Category;
     using value_type = typename Iterator::Tp;
     using difference_type = typename Iterator::Distance;
     using pointer = typename Iterator::Pointer;
     using reference = typename Iterator::Reference;
+};
+
+template <typename Iterator, bool>
+struct iterator_traits_helper {};
+
+template <typename Iterator>
+struct iterator_traits_helper<Iterator, true>
+    : public iterator_traits_impl<Iterator,
+                                  std::is_convertible<
+                                      typename Iterator::iterator_category, input_iterator_tag>::value
+                                      || std::is_convertible<
+                                          typename Iterator::iterator_category, output_iterator_tag>::value> {
+};
+} // namespace
+
+template <typename Iterator>
+struct iterator_traits : public iterator_traits_helper<Iterator, has_iterator_cat<Iterator>::value> {
 };
 
 // 针对 pointer 的偏特化版本
@@ -143,6 +182,10 @@ inline bool operator!=(const reverse_iterator<Iterator>& x, const reverse_iterat
     return !(x == y);
 }
 
+template <typename InputIterator>
+using RequireInputIterator = typename std::enable_if<std::is_convertible<
+    typename iterator_traits<InputIterator>::iterator_category,
+    input_iterator_tag>::value>::type;
 } // namespace mystl
 
 #endif // MYSTL_ITERATOR_H_

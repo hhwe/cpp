@@ -46,7 +46,7 @@ public: // member functions
     }
 
     // range (3)
-    template <class InputIterator>
+    template <class InputIterator, typename = mystl::RequireInputIterator<InputIterator>>
     vector(InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type()) {
         range_initialize(first, last);
     }
