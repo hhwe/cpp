@@ -90,39 +90,39 @@ inline int RUN_ALL_TESTS() {
     return UnitTest::GetInstance()->Run();
 }
 
-#define EXPECT_COMPARE_HELPER_(op_name, op, val1, val2)                             \
-    do {                                                                            \
-        if (val1 op val2) {                                                         \
-            UnitTest::GetInstance()->currentTestCase_->passedPredicateNum_++;       \
-        } else {                                                                    \
-            UnitTest::GetInstance()->currentTestCase_->failedPredicateNum_++;       \
-            UnitTest::GetInstance()->currentTestCase_->result_ = false;             \
-            std::cout << __FILE__ << ":" << __LINE__ << " Failed!" << std::endl;    \
-            std::cout << "\tExpect:" << val1 << "\n\tActual:" << val2 << std::endl; \
-        }                                                                           \
+#define EXPECT_COMPARE_HELPER_(op_name, op, val1, val2)                                 \
+    do {                                                                                \
+        if ((val1)op(val2)) {                                                           \
+            UnitTest::GetInstance()->currentTestCase_->passedPredicateNum_++;           \
+        } else {                                                                        \
+            UnitTest::GetInstance()->currentTestCase_->failedPredicateNum_++;           \
+            UnitTest::GetInstance()->currentTestCase_->result_ = false;                 \
+            std::cout << __FILE__ << ":" << __LINE__ << " Failed!" << std::endl;        \
+            std::cout << "\tExpect:" << (val1) << "\n\tActual:" << (val2) << std::endl; \
+        }                                                                               \
     } while (0)
 
-#define EXPECT_EQ(val1, val2) EXPECT_COMPARE_HELPER_(EQ, ==, val1, val2)
-#define EXPECT_NE(val1, val2) EXPECT_COMPARE_HELPER_(NE, !=, val1, val2)
-#define EXPECT_LE(val1, val2) EXPECT_COMPARE_HELPER_(LE, <=, val1, val2)
-#define EXPECT_LT(val1, val2) EXPECT_COMPARE_HELPER_(LT, <, val1, val2)
-#define EXPECT_GE(val1, val2) EXPECT_COMPARE_HELPER_(GE, >=, val1, val2)
-#define EXPECT_GT(val1, val2) EXPECT_COMPARE_HELPER_(GT, >, val1, val2)
+#define EXPECT_EQ(val1, val2) EXPECT_COMPARE_HELPER_(EQ, ==, (val1), (val2))
+#define EXPECT_NE(val1, val2) EXPECT_COMPARE_HELPER_(NE, !=, (val1), (val2))
+#define EXPECT_LE(val1, val2) EXPECT_COMPARE_HELPER_(LE, <=, (val1), (val2))
+#define EXPECT_LT(val1, val2) EXPECT_COMPARE_HELPER_(LT, <, (val1), (val2))
+#define EXPECT_GE(val1, val2) EXPECT_COMPARE_HELPER_(GE, >=, (val1), (val2))
+#define EXPECT_GT(val1, val2) EXPECT_COMPARE_HELPER_(GT, >, (val1), (val2))
 
-#define EXPECT_BOOL_HELPER_(op, val)                                             \
-    do {                                                                         \
-        if (op == val) {                                                         \
-            UnitTest::GetInstance()->currentTestCase_->passedPredicateNum_++;    \
-        } else {                                                                 \
-            UnitTest::GetInstance()->currentTestCase_->failedPredicateNum_++;    \
-            UnitTest::GetInstance()->currentTestCase_->result_ = false;          \
-            std::cout << __FILE__ << ":" << __LINE__ << " Failed!" << std::endl; \
-            std::cout << "\tExpect:" << op << "\n\tActual:" << val << std::endl; \
-        }                                                                        \
+#define EXPECT_BOOL_HELPER_(op, val)                                                 \
+    do {                                                                             \
+        if (val) {                                                                   \
+            UnitTest::GetInstance()->currentTestCase_->passedPredicateNum_++;        \
+        } else {                                                                     \
+            UnitTest::GetInstance()->currentTestCase_->failedPredicateNum_++;        \
+            UnitTest::GetInstance()->currentTestCase_->result_ = false;              \
+            std::cout << __FILE__ << ":" << __LINE__ << " Failed!" << std::endl;     \
+            std::cout << "\tExpect:" << (op) << "\n\tActual:" << (val) << std::endl; \
+        }                                                                            \
     } while (0)
 
-#define EXPECT_TRUE(val) EXPECT_BOOL_HELPER_(true, val)
-#define EXPECT_FALSE(val) EXPECT_BOOL_HELPER_(false, val)
+#define EXPECT_TRUE(val) EXPECT_BOOL_HELPER_(true, (val))
+#define EXPECT_FALSE(val) EXPECT_BOOL_HELPER_(false, !(val))
 
 } // namespace htest
 

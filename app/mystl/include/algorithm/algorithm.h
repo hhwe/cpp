@@ -262,6 +262,14 @@ OutputIterator move(InputIterator first, InputIterator last, OutputIterator resu
     return result;
 }
 
+template <class BidirectionalIterator1, class BidirectionalIterator2>
+BidirectionalIterator2 move_backward(BidirectionalIterator1 first,
+                                     BidirectionalIterator1 last,
+                                     BidirectionalIterator2 result) {
+    while (last != first) *(--result) = std::move(*(--last));
+    return result;
+}
+
 /*
  * set
  */
@@ -322,8 +330,6 @@ OutputIterator set_intersection(InputIterator1 first1, InputIterator1 last1,
     }
     return result;
 }
-
-// set相关算法
 
 template <class InputIterator1, class InputIterator2,
           class OutputIterator, class Compare>
@@ -431,8 +437,9 @@ OutputIterator set_union(InputIterator1 first1, InputIterator1 last1,
     return copy(first2, last2, copy(first1, last1, result));
 }
 
-// heap 相关算法
-
+/*
+ * heap
+ */
 template <class RandomAccessIterator>
 void make_heap(RandomAccessIterator first, RandomAccessIterator last);
 
@@ -440,8 +447,9 @@ template <class RandomAccessIterator, class Compare>
 void make_heap(RandomAccessIterator first, RandomAccessIterator last,
                Compare comp);
 
-// search
-
+/*
+ * search
+ */
 template <class ForwardIterator, class T>
 bool binary_search(ForwardIterator first, ForwardIterator last,
                    const T& val) {

@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <string>
+#include <array>
 
 using namespace htest;
 
@@ -43,11 +44,11 @@ TEST(vector_testCase2) {
 
     auto v5 = v1;
     auto v6 = v2;
-    // EXPECT_EQ(v5, v6);
+    EXPECT_TRUE(htest::ContainerEqual(v5, v6));
 
     auto v7 = std::move(v3);
     auto v8 = std::move(v4);
-    // EXPECT_EQ(v7, v8);
+    EXPECT_TRUE(htest::ContainerEqual(v7, v8));
 }
 
 TEST(vector_testCase3) {
@@ -57,8 +58,8 @@ TEST(vector_testCase3) {
         v2.push_back(i);
     }
 
-    // EXPECT_TRUE(v1 == v2);
-    // EXPECT_TRUE(!(v1 != v2);
+    EXPECT_TRUE(v1 == v2);
+    EXPECT_FALSE(v1 != v2);
 }
 
 TEST(vector_testCase4) {
@@ -67,12 +68,12 @@ TEST(vector_testCase4) {
 
     auto i = 1;
     for (mystl::vector<int>::iterator it = myvector.begin(); it != myvector.end(); ++it, ++i) {
-        // EXPECT_TRUE(*it == i);
+        EXPECT_EQ(*it, i);
     }
 
     i = 1;
     for (mystl::vector<int>::const_iterator it = myvector.cbegin(); it != myvector.cend(); ++it, ++i) {
-        // EXPECT_TRUE(*it == i);
+        EXPECT_EQ(*it, i);
     }
 }
 
@@ -85,30 +86,30 @@ TEST(vector_testCase5) {
 
     i = 5;
     for (mystl::vector<int>::iterator it = myvector.begin(); it != myvector.end(); ++it, --i) {
-        // EXPECT_TRUE(*it == i);
+        EXPECT_EQ(*it, i);
     }
 
     i = 1;
     for (mystl::vector<int>::reverse_iterator it = myvector.rbegin(); it != myvector.rend(); ++it, ++i) {
-        // EXPECT_TRUE(*it == i);
+        EXPECT_EQ(*it, i);
     }
 }
 
 TEST(vector_testCase6) {
     mystl::vector<int> v(11, 0);
-    // EXPECT_TRUE(v.size() == 11);
+    EXPECT_EQ(v.size(), 11);
 
     v.resize(5);
-    // EXPECT_TRUE(v.size() == 5);
+    EXPECT_EQ(v.size(), 5);
 
     v.resize(20);
-    // EXPECT_TRUE(v.size() == 20);
+    EXPECT_EQ(v.size(), 20);
 }
 
 TEST(vector_testCase7) {
     mystl::vector<int> v;
     v.reserve(20);
-    // EXPECT_TRUE(v.capacity() == 20);
+    EXPECT_EQ(v.capacity(), 20);
 }
 
 TEST(vector_testCase8) {
@@ -118,14 +119,14 @@ TEST(vector_testCase8) {
         v1[i] = i;
         v2[i] = i;
     }
-    // EXPECT_EQ(v1, v2);
+    EXPECT_TRUE(htest::ContainerEqual(v1, v2));
 
     v1.front() = 99;
     v2.front() = 99;
     v1.back() = 100;
     v2.back() = 100;
 
-    // EXPECT_EQ(v1, v2);
+    EXPECT_TRUE(htest::ContainerEqual(v1, v2));
 }
 
 TEST(vector_testCase9) {
@@ -143,19 +144,21 @@ TEST(vector_testCase9) {
     *p2 = 20;
     p2[2] = 100;
 
-    // EXPECT_EQ(v1, v2);
+    EXPECT_TRUE(htest::ContainerEqual(v1, v2));
 }
 
 TEST(vector_testCase10) {
     mystl::vector<int> foo(3, 100); // three ints with a value of 100
     mystl::vector<int> bar(2, 200); // five ints with a value of 200
 
-    // EXPECT_EQ(foo, std::vector<int>{100, 100, 100});
-    // EXPECT_EQ(bar, std::vector<int>{200, 200});
+    std::vector<int> v1{100, 100, 100};
+    std::vector<int> v2{200, 200};
+    EXPECT_TRUE(htest::ContainerEqual(foo, v1));
+    EXPECT_TRUE(htest::ContainerEqual(bar, v2));
 
     foo.swap(bar);
-    // EXPECT_EQ(bar, std::vector<int>{100, 100, 100});
-    // EXPECT_EQ(foo, std::vector<int>{200, 200});
+    EXPECT_TRUE(htest::ContainerEqual(bar, v1));
+    EXPECT_TRUE(htest::ContainerEqual(foo, v2));
 }
 
 TEST(vector_testCase11) {
@@ -166,11 +169,11 @@ TEST(vector_testCase11) {
     v1.push_back("world");
     v2.push_back("hello ");
     v2.push_back("world");
-    // EXPECT_EQ(v1, v2);
+    EXPECT_TRUE(htest::ContainerEqual(v1, v2));
 
     v1.pop_back();
     v2.pop_back();
-    // EXPECT_EQ(v1, v2);
+    EXPECT_TRUE(htest::ContainerEqual(v1, v2));
 }
 
 TEST(vector_testCase12) {
@@ -179,20 +182,20 @@ TEST(vector_testCase12) {
 
     v1.insert(v1.begin(), 0);
     v2.insert(v2.begin(), 0);
-    // EXPECT_EQ(v1, v2);
+    EXPECT_TRUE(htest::ContainerEqual(v1, v2));
 
     v1.insert(v1.end(), 1);
     v2.insert(v2.end(), 1);
-    // EXPECT_EQ(v1, v2);
+    EXPECT_TRUE(htest::ContainerEqual(v1, v2));
 
-    // v1.insert(v1.begin() + v1.size() / 2, 10, 0);
-    // v2.insert(v2.begin() + v2.size() / 2, 10, 0);
-    // // EXPECT_EQ(v1, v2);
+    v1.insert(v1.begin() + v1.size() / 2, 10, 0);
+    v2.insert(v2.begin() + v2.size() / 2, 10, 0);
+    EXPECT_TRUE(htest::ContainerEqual(v1, v2));
 
     // int arr[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     // v1.insert(v1.end(), std::begin(arr), std::end(arr));
     // v2.insert(v2.end(), std::begin(arr), std::end(arr));
-    // // EXPECT_EQ(v1, v2);
+    // EXPECT_TRUE(htest::ContainerEqual(v1, v2));
 }
 
 TEST(vector_testCase13) {
@@ -204,19 +207,19 @@ TEST(vector_testCase13) {
     }
     v1.erase(v1.begin() + 5);
     v2.erase(v2.begin() + 5);
-    // EXPECT_EQ(v1, v2);
+    EXPECT_TRUE(htest::ContainerEqual(v1, v2));
 
     v1.erase(v1.begin(), v1.begin() + 3);
     v2.erase(v2.begin(), v2.begin() + 3);
-    // EXPECT_EQ(v1, v2);
+    EXPECT_TRUE(htest::ContainerEqual(v1, v2));
 }
 
 TEST(vector_testCase14) {
     mystl::vector<int> foo(3, 100);
     mystl::vector<int> bar(2, 200);
 
-    // EXPECT_TRUE(!(foo == bar);
-    // EXPECT_TRUE(foo != bar);
+    EXPECT_TRUE(!(foo == bar));
+    EXPECT_TRUE(foo != bar);
 }
 
 }
