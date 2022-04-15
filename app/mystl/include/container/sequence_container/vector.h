@@ -36,7 +36,6 @@ public: // member functions
         begin_(0),
         end_(0), capacity_(0) {
     }
-
     // fill (2)
     explicit vector(size_type n) {
         fill_initialize(n, T());
@@ -44,7 +43,6 @@ public: // member functions
     vector(size_type n, const value_type& val, const allocator_type& alloc = allocator_type()) {
         fill_initialize(n, val);
     }
-
     // range (3)
     template <class InputIterator, typename = mystl::RequireInputIterator<InputIterator>>
     vector(InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type()) {
@@ -58,7 +56,6 @@ public: // member functions
     vector(const vector& x, const allocator_type& alloc) {
         range_initialize(x.begin_, x.end_);
     }
-
     // move (5)
     vector(vector&& x) {
         begin_ = mystl::move(x.begin_);
@@ -70,7 +67,6 @@ public: // member functions
         end_ = mystl::move(x.end_);
         capacity_ = mystl::move(x.capacity_);
     }
-
     // initializer list (6)
     vector(std::initializer_list<value_type> il, const allocator_type& alloc = allocator_type()) {
         range_initialize(il.begin(), il.end());
@@ -216,7 +212,12 @@ public: // member functions
         }
     }
 
-    void shrink_to_fit();
+    void shrink_to_fit() {
+        if (end_ < capacity_) {
+            vector tmp(begin_, end_);
+            swap(tmp);
+        }
+    }
 
     /*
      * Element access
@@ -264,10 +265,16 @@ public: // member functions
     /*
      * Modifiers
      */
-    template <class InputIterator>
-    void assign(InputIterator first, InputIterator last);
-    void assign(size_type n, const value_type& val);
-    void assign(std::initializer_list<value_type> il);
+    template <class InputIterator, typename = mystl::RequireInputIterator<InputIterator>>
+    void assign(InputIterator first, InputIterator last) {
+        assign_dispatch(first, last, std::false_type());
+    }
+    void assign(size_type n, const value_type& val) {
+        fill_assign(n, val);
+    }
+    void assign(std::initializer_list<value_type> il) {
+        assign_dispatch(il.begin(), il.end(), std::false_type());
+    }
 
     void push_back(const value_type& val) {
         insert_aux(end_, val); // Optimize: use emplace_back
@@ -288,14 +295,18 @@ public: // member functions
     iterator insert(const_iterator position, size_type n, const value_type& val) {
         return fill_insert(const_cast<iterator>(position), n, val);
     }
-    // template <class InputIterator>
-    // iterator insert(const_iterator position, InputIterator first, InputIterator last);
+    template <class InputIterator, typename = mystl::RequireInputIterator<InputIterator>>
+    iterator insert(const_iterator position, InputIterator first, InputIterator last) {
+        insert_dispatch(const_cast<iterator>(position), first, last, std::false_type());
+        return const_cast<iterator>(position);
+    }
     iterator insert(const_iterator position, value_type&& val) {
         return emplace(position, mystl::move(val));
     }
-
-    // iterator insert(const_iterator position, std::initializer_list<value_type> il);
-
+    iterator insert(const_iterator position, std::initializer_list<value_type> il) {
+        insert_dispatch(const_cast<iterator>(position), il.begin(), il.end(), std::false_type());
+        return const_cast<iterator>(position);
+    }
     iterator erase(iterator position) {
         return erase(position, position + 1);
     }
@@ -368,13 +379,126 @@ private:
         return (len < size() || len > max_size()) ? max_size() : len;
     }
 
+    template <class Integer>
+    void assign_dispatch(Integer n, Integer val, std::true_type) { // FIXME: not used
+        fill_assign(n, val);
+    }
+
+    template <class InputIterator>
+    void assign_dispatch(InputIterator first, InputIterator last, std::false_type) {
+        range_assign(first, last, mystl::iterator_category(first));
+    }
+
+    iterator fill_assign(size_type n, const value_type& val) {
+        if (n > capacity()) {
+            vector tmp(n, val);
+            swap(tmp);
+        } else if (n > size()) {
+            mystl::fill(begin_, end_, val);
+            mystl::uninitialized_fill_n(end_, begin_ + n, val);
+        } else {
+            erase(begin_ + n, end_);
+        }
+        return begin_ + n;
+    }
+
+    template <class InputIterator>
+    void range_assign(InputIterator first, InputIterator last, mystl::input_iterator_tag) {
+        auto cur = begin_;
+        for (; first != last && cur != end_; ++cur, ++first) {
+            *cur = *first;
+        }
+        if (first == last) {
+            erase(cur, end_);
+        } else {
+            insert(end_, first, last);
+        }
+    }
+
+    template <class ForwardIterator>
+    void range_assign(ForwardIterator first, ForwardIterator last, mystl::forward_iterator_tag) {
+        const size_type len = mystl::distance(first, last);
+        if (len > capacity()) {
+            vector tmp(first, last);
+            swap(tmp);
+        } else if (len > size()) {
+            auto mid = first;
+            mystl::advance(mid, size());
+            mystl::copy(first, mid, begin_);
+            auto new_end = mystl::uninitialized_copy(mid, last, end_);
+            end_ = new_end;
+        } else {
+            erase(mystl::copy(first, last, begin_), end_);
+        }
+    }
+
+    template <typename Integer>
+    void insert_dispatch(iterator pos, Integer n, Integer val, std::true_type) {
+        fill_insert(pos, n, val);
+    }
+
+    template <typename InputIterator>
+    void insert_dispatch(iterator pos, InputIterator first, InputIterator last, std::false_type) {
+        range_insert(pos, first, last, mystl::iterator_category(first));
+    }
+
+    template <typename InputIterator>
+    void range_insert(iterator pos, InputIterator first, InputIterator last, mystl::input_iterator_tag) {
+        if (pos == end_) {
+            for (; first != last; ++first) {
+                insert(end_, *first);
+            }
+        } else if (first != last) {
+            vector tmp(first, last);
+            insert(pos, tmp.begin_, tmp.end_);
+        }
+    }
+
+    template <typename _ForwardIterator>
+    void range_insert(iterator pos, _ForwardIterator first, _ForwardIterator last, mystl::forward_iterator_tag) {
+        if (first == last) { return; }
+        const size_type n = std::distance(first, last);
+        if (static_cast<size_type>(capacity_ - end_) >= n) { // 备用空间足够插入
+            const auto elems_after = end_ - pos;
+            if (elems_after > n) {
+                mystl::uninitialized_move(end_ - n, end_, end_); // 移动n个元素到备用空间
+                mystl::move_backward(pos, end_ - n, end_);       // pos后的剩余部分从后往前开始移动,防止内存重叠
+                mystl::uninitialized_copy(first, last, pos);     // 填充元素
+            } else {
+                mystl::uninitialized_copy(first + elems_after, last, end_);     // 不足的部分填充到备用空间
+                mystl::uninitialized_move(pos, end_, end_ + (n - elems_after)); // pos后的元素移动到填充后的空备空间尾
+                mystl::uninitialized_copy(first, first + elems_after, pos);     // 填充移动后的空间
+            }
+            end_ += n;
+        } else { // 空间不足需要申请新内存
+            const size_type len = check_len(n);
+            const size_type elems_before = pos - begin_;
+            iterator new_begin = data_allocator::allocate(len);
+            iterator new_end = new_begin;
+            try {
+                new_end = mystl::uninitialized_move(begin_, pos, new_begin);                  // 插入前的元素移动到新的空间
+                new_end = mystl::uninitialized_copy(first, last, new_begin + elems_before);   // 再填充要插入的元素
+                new_end = mystl::uninitialized_move(pos, end_, new_begin + elems_before + n); // 最后将插入后的元素移动过来
+            } catch (...) {
+                destructor(new_begin, new_end, len);
+                throw;
+            }
+            destructor(begin_, end_, capacity());
+
+            begin_ = new_begin;
+            end_ = new_end;
+            capacity_ = new_begin + len;
+        }
+        return;
+    }
+
     iterator fill_insert(iterator pos, size_type n, const value_type& val) {
         if (n == 0) { return pos; }
         if (static_cast<size_type>(capacity_ - end_) >= n) { // 备用空间足够插入
             const auto elems_after = end_ - pos;
             if (elems_after > n) {
                 mystl::uninitialized_move(end_ - n, end_, end_); // 移动n个元素到备用空间
-                mystl::move_backward(pos, end_ - n, end_);       // pos后的剩余部分从后开始移动,防止内存重叠
+                mystl::move_backward(pos, end_ - n, end_);       // pos后的剩余部分从后往前开始移动,防止内存重叠
                 mystl::uninitialized_fill_n(pos, n, val);        // 填充元素
             } else {
                 mystl::uninitialized_fill_n(end_, n - elems_after, val);        // 不足的部分填充到备用空间
@@ -382,7 +506,7 @@ private:
                 mystl::uninitialized_fill_n(pos, elems_after, val);             // 填充移动后的空间
             }
             end_ += n;
-        } else {
+        } else { // 空间不足需要申请新内存
             const size_type len = check_len(n);
             const size_type elems_before = pos - begin_;
             iterator new_begin = data_allocator::allocate(len);
@@ -417,7 +541,7 @@ private:
             destructor(new_begin, new_end, len);
             throw;
         }
-        destructor(begin_, end_, capacity());
+        destructor(begin_, end_, capacity()); // 移动后的内存可以正常执行析构
 
         begin_ = new_begin;
         end_ = new_end;
