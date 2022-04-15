@@ -21,9 +21,7 @@ struct iterator {
     using reference = Reference;
 };
 
-namespace {
 // 2408. SFINAE-friendly common_type/iterator_traits is missing in C++14
-
 template <typename T>
 struct has_iterator_cat {
 private:
@@ -57,13 +55,9 @@ struct iterator_traits_helper {};
 
 template <typename Iterator>
 struct iterator_traits_helper<Iterator, true>
-    : public iterator_traits_impl<Iterator,
-                                  std::is_convertible<
-                                      typename Iterator::iterator_category, input_iterator_tag>::value
-                                      || std::is_convertible<
-                                          typename Iterator::iterator_category, output_iterator_tag>::value> {
+    : public iterator_traits_impl<Iterator, std::is_convertible<typename Iterator::iterator_category, input_iterator_tag>::value
+                                                || std::is_convertible<typename Iterator::iterator_category, output_iterator_tag>::value> {
 };
-} // namespace
 
 template <typename Iterator>
 struct iterator_traits : public iterator_traits_helper<Iterator, has_iterator_cat<Iterator>::value> {
@@ -186,6 +180,55 @@ template <typename InputIterator>
 using RequireInputIterator = typename std::enable_if<std::is_convertible<
     typename iterator_traits<InputIterator>::iterator_category,
     input_iterator_tag>::value>::type;
+
+template <class InputIterator, class Distance>
+void advance_dispatch(InputIterator& i, Distance n, input_iterator_tag) {
+    while (n--)
+        ++i;
+}
+
+template <class BidirectionalIterator, class Distance>
+void advance_dispatch(BidirectionalIterator& i, Distance n, bidirectional_iterator_tag) {
+    if (n >= 0)
+        while (n--) ++i;
+    else
+        while (n++) --i;
+}
+
+template <class RandomIter, class Distance>
+void advance_dispatch(RandomIter& i, Distance n, random_access_iterator_tag) {
+    i += n;
+}
+
+template <class InputIterator, class Distance>
+void advance(InputIterator& i, Distance n) {
+    advance_dispatch(i, n, iterator_category(i));
+}
+
+template <class InputIterator>
+typename mystl::iterator_traits<InputIterator>::difference_type
+distance_dispatch(InputIterator first, InputIterator last, input_iterator_tag) {
+    typename iterator_traits<InputIterator>::difference_type n = 0;
+    while (first != last) {
+        ++first;
+        ++n;
+    }
+    return n;
+}
+
+template <class RandomIter>
+typename mystl::iterator_traits<RandomIter>::difference_type
+distance_dispatch(RandomIter first, RandomIter last,
+                  random_access_iterator_tag) {
+    return last - first;
+}
+
+template <class InputIterator>
+typename iterator_traits<InputIterator>::difference_type
+distance(InputIterator first, InputIterator last) {
+    return distance_dispatch(first, last, iterator_category(first));
+}
+
 } // namespace mystl
 
 #endif // MYSTL_ITERATOR_H_

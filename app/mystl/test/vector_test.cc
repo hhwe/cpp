@@ -9,8 +9,6 @@
 #include <string>
 #include <array>
 
-using namespace htest;
-
 namespace mystl {
 namespace test {
 namespace vector_test {
@@ -192,10 +190,10 @@ TEST(vector_testCase12) {
     v2.insert(v2.begin() + v2.size() / 2, 10, 0);
     EXPECT_TRUE(htest::ContainerEqual(v1, v2));
 
-    // int arr[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    // v1.insert(v1.end(), std::begin(arr), std::end(arr));
-    // v2.insert(v2.end(), std::begin(arr), std::end(arr));
-    // EXPECT_TRUE(htest::ContainerEqual(v1, v2));
+    int arr[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    v1.insert(v1.end(), std::begin(arr), std::end(arr));
+    v2.insert(v2.end(), std::begin(arr), std::end(arr));
+    EXPECT_TRUE(htest::ContainerEqual(v1, v2));
 }
 
 TEST(vector_testCase13) {
@@ -222,6 +220,44 @@ TEST(vector_testCase14) {
     EXPECT_TRUE(foo != bar);
 }
 
+TEST(vector_testCase15) {
+    mystl::vector<int> myvector(100);
+    EXPECT_EQ(100, myvector.capacity());
+
+    myvector.resize(10);
+    EXPECT_EQ(100, myvector.capacity());
+
+    myvector.shrink_to_fit();
+    EXPECT_EQ(10, myvector.capacity());
+}
+
+TEST(vector_testCase16) {
+    mystl::vector<int> first;
+    mystl::vector<int> second;
+    mystl::vector<int> third;
+    std::vector<int> first1;
+    std::vector<int> second1;
+    std::vector<int> third1;
+
+    first.assign(7, 100); // 7 ints with a value of 100
+    first1.assign(7, 100);
+
+    mystl::vector<int>::iterator it;
+    std::vector<int>::iterator it1;
+    it = first.begin() + 1;
+    it1 = first1.begin() + 1;
+
+    second.assign(it, first.end() - 1); // the 5 central values of first
+    second1.assign(it1, first1.end() - 1);
+
+    int myints[] = {1776, 7, 4};
+    third.assign(myints, myints + 3); // assigning from array.
+    third1.assign(myints, myints + 3);
+
+    EXPECT_TRUE(htest::ContainerEqual(first, first1));
+    EXPECT_TRUE(htest::ContainerEqual(second, second1));
+    EXPECT_TRUE(htest::ContainerEqual(third, third1));
+}
 }
 }
 } // namespace mystl::test::vector_test

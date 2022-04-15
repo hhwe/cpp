@@ -65,20 +65,20 @@ private:
 #define TESTCASE_NAME_(testcase_name) testcase_name##_Test
 
 // Helper macro for defining tests.
-#define UNIT_TEST_(testcase_name)                                                                     \
-    class TESTCASE_NAME_(testcase_name) : public TestCase {                                           \
-    public:                                                                                           \
-        TESTCASE_NAME_(testcase_name)                                                                 \
-        (const char* name) : TestCase(name) {                                                         \
-        }                                                                                             \
-        virtual void Run() override;                                                                  \
-                                                                                                      \
-    private:                                                                                          \
-        static const TestCase* const testCase_;                                                       \
-    };                                                                                                \
-                                                                                                      \
-    const TestCase* const TESTCASE_NAME_(testcase_name)::testCase_ =                                  \
-        UnitTest::GetInstance()->RegisterTestCase(new TESTCASE_NAME_(testcase_name)(#testcase_name)); \
+#define UNIT_TEST_(testcase_name)                                                                            \
+    class TESTCASE_NAME_(testcase_name) : public htest::TestCase {                                           \
+    public:                                                                                                  \
+        TESTCASE_NAME_(testcase_name)                                                                        \
+        (const char* name) : TestCase(name) {                                                                \
+        }                                                                                                    \
+        virtual void Run() override;                                                                         \
+                                                                                                             \
+    private:                                                                                                 \
+        static const TestCase* const testCase_;                                                              \
+    };                                                                                                       \
+                                                                                                             \
+    const htest::TestCase* const TESTCASE_NAME_(testcase_name)::testCase_ =                                  \
+        htest::UnitTest::GetInstance()->RegisterTestCase(new TESTCASE_NAME_(testcase_name)(#testcase_name)); \
     void TESTCASE_NAME_(testcase_name)::Run()
 
 // Declare a class for each test suit, and user-defined function in TEST will copy to Run()
@@ -87,16 +87,16 @@ private:
 // Use this function in main() to run all tests.
 int RUN_ALL_TESTS();
 inline int RUN_ALL_TESTS() {
-    return UnitTest::GetInstance()->Run();
+    return htest::UnitTest::GetInstance()->Run();
 }
 
 #define EXPECT_COMPARE_HELPER_(op_name, op, val1, val2)                                 \
     do {                                                                                \
         if ((val1)op(val2)) {                                                           \
-            UnitTest::GetInstance()->currentTestCase_->passedPredicateNum_++;           \
+            htest::UnitTest::GetInstance()->currentTestCase_->passedPredicateNum_++;    \
         } else {                                                                        \
-            UnitTest::GetInstance()->currentTestCase_->failedPredicateNum_++;           \
-            UnitTest::GetInstance()->currentTestCase_->result_ = false;                 \
+            htest::UnitTest::GetInstance()->currentTestCase_->failedPredicateNum_++;    \
+            htest::UnitTest::GetInstance()->currentTestCase_->result_ = false;          \
             std::cout << __FILE__ << ":" << __LINE__ << " Failed!" << std::endl;        \
             std::cout << "\tExpect:" << (val1) << "\n\tActual:" << (val2) << std::endl; \
         }                                                                               \
@@ -112,10 +112,10 @@ inline int RUN_ALL_TESTS() {
 #define EXPECT_BOOL_HELPER_(op, val)                                                 \
     do {                                                                             \
         if (val) {                                                                   \
-            UnitTest::GetInstance()->currentTestCase_->passedPredicateNum_++;        \
+            htest::UnitTest::GetInstance()->currentTestCase_->passedPredicateNum_++; \
         } else {                                                                     \
-            UnitTest::GetInstance()->currentTestCase_->failedPredicateNum_++;        \
-            UnitTest::GetInstance()->currentTestCase_->result_ = false;              \
+            htest::UnitTest::GetInstance()->currentTestCase_->failedPredicateNum_++; \
+            htest::UnitTest::GetInstance()->currentTestCase_->result_ = false;       \
             std::cout << __FILE__ << ":" << __LINE__ << " Failed!" << std::endl;     \
             std::cout << "\tExpect:" << (op) << "\n\tActual:" << (val) << std::endl; \
         }                                                                            \

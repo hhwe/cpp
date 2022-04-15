@@ -2,6 +2,8 @@
 #define MYSTL_VECTOE_H_
 
 #include <iostream>
+#include <type_traits>
+#include <initializer_list>
 #include "allocator.h"
 #include "construct.h"
 #include "uninitialized.h"
@@ -29,7 +31,7 @@ public: // member types
 
 public: // member functions
     /*
-     * Constructor and Destructor
+     * @brief Constructor and Destructor
      */
     // default (1)
     explicit vector(const allocator_type& alloc = allocator_type()) :
@@ -116,7 +118,7 @@ public: // member functions
     }
 
     /*
-     * Iterators
+     * @brief Iterators
      */
     iterator begin() noexcept {
         return begin_;
@@ -167,7 +169,7 @@ public: // member functions
     }
 
     /*
-     * Capacity
+     * @brief Capacity
      */
     size_type size() const noexcept {
         return static_cast<size_type>(end_ - begin_);
@@ -220,7 +222,7 @@ public: // member functions
     }
 
     /*
-     * Element access
+     * @brief Element access
      */
     reference operator[](size_type n) {
         return *(begin_ + n);
@@ -263,7 +265,7 @@ public: // member functions
     }
 
     /*
-     * Modifiers
+     * @brief Modifiers
      */
     template <class InputIterator, typename = mystl::RequireInputIterator<InputIterator>>
     void assign(InputIterator first, InputIterator last) {
@@ -342,7 +344,7 @@ public: // member functions
     }
 
     /*
-     * Allocator
+     * @brief Allocator
      */
     allocator_type get_allocator() const noexcept {
         return data_allocator();
@@ -457,7 +459,7 @@ private:
     template <typename _ForwardIterator>
     void range_insert(iterator pos, _ForwardIterator first, _ForwardIterator last, mystl::forward_iterator_tag) {
         if (first == last) { return; }
-        const size_type n = std::distance(first, last);
+        const size_type n = mystl::distance(first, last);
         if (static_cast<size_type>(capacity_ - end_) >= n) { // 备用空间足够插入
             const auto elems_after = end_ - pos;
             if (elems_after > n) {

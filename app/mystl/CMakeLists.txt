@@ -5,11 +5,10 @@ file(GLOB SRC_FILES "src/*.cc")
 file(GLOB TEST_FILES "test/*.cc")
 
 include_directories(${PROJECT_SOURCE_DIR}/include/)
-include_directories(${PROJECT_SOURCE_DIR}/include/algorithm)
 include_directories(${PROJECT_SOURCE_DIR}/include/allocator)
-include_directories(${PROJECT_SOURCE_DIR}/include/container/associative_container)
-include_directories(${PROJECT_SOURCE_DIR}/include/container/sequence_container)
 include_directories(${PROJECT_SOURCE_DIR}/include/iterator)
+include_directories(${PROJECT_SOURCE_DIR}/include/algorithm)
+include_directories(${PROJECT_SOURCE_DIR}/include/container)
 message("include_directories" ${PROJECT_SOURCE_DIR}/include)
 
 add_executable(mystl_test ${TEST_FILES})
