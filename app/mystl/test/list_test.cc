@@ -13,23 +13,25 @@ namespace mystl {
 namespace test {
 namespace list_test {
 TEST(list_testCase1) {
-    std::list<int> l1(10, 0);
-    l1.begin();
-    mystl::list<int> l2(10, 0);
-    EXPECT_TRUE(htest::ContainerEqual(l1, l2));
+    mystl::list<int> l2();
 
-    int arr[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-    std::list<int> l3(std::begin(arr), std::end(arr));
-    mystl::list<int> l4(std::begin(arr), std::end(arr));
-    EXPECT_TRUE(htest::ContainerEqual(l3, l4));
+    // std::list<int> l1(10, 0);
+    // l1.begin();
+    // mystl::list<int> l2(10, 0);
+    // EXPECT_TRUE(htest::ContainerEqual(l1, l2));
 
-    auto l5(l1);
-    auto l6(l2);
-    EXPECT_TRUE(htest::ContainerEqual(l5, l6));
+    // int arr[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    // std::list<int> l3(std::begin(arr), std::end(arr));
+    // mystl::list<int> l4(std::begin(arr), std::end(arr));
+    // EXPECT_TRUE(htest::ContainerEqual(l3, l4));
 
-    auto l7 = l1;
-    auto l8 = l2;
-    EXPECT_TRUE(htest::ContainerEqual(l7, l8));
+    // auto l5(l1);
+    // auto l6(l2);
+    // EXPECT_TRUE(htest::ContainerEqual(l5, l6));
+
+    // auto l7 = l1;
+    // auto l8 = l2;
+    // EXPECT_TRUE(htest::ContainerEqual(l7, l8));
 }
 /*
 

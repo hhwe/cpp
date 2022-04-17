@@ -1,8 +1,6 @@
 #ifndef MYSTL_ITERATOR_H_
 #define MYSTL_ITERATOR_H_
 
-#include <cstddef>
-
 namespace mystl {
 
 struct input_iterator_tag {};
@@ -11,7 +9,7 @@ struct forward_iterator_tag : public input_iterator_tag {};
 struct bidirectional_iterator_tag : public forward_iterator_tag {};
 struct random_access_iterator_tag : public bidirectional_iterator_tag {};
 
-template <typename Category, typename Tp, typename Distance = ptrdiff_t,
+template <typename Category, typename Tp, typename Distance = std::ptrdiff_t,
           typename Pointer = Tp*, typename Reference = Tp&>
 struct iterator {
     using iterator_category = Category;
@@ -68,7 +66,7 @@ template <typename Iterator>
 struct iterator_traits<Iterator*> {
     using iterator_category = random_access_iterator_tag;
     using value_type = Iterator;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using pointer = Iterator*;
     using reference = Iterator&;
 };
@@ -78,7 +76,7 @@ template <typename Iterator>
 struct iterator_traits<const Iterator*> {
     using iterator_category = random_access_iterator_tag;
     using value_type = Iterator;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using pointer = const Iterator*;
     using reference = const Iterator&;
 };

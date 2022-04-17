@@ -238,6 +238,9 @@ BidirectionalIterator2 copy_backward(BidirectionalIterator1 first,
     return result;
 }
 
+/*
+ *@bug multiple definition
+
 // 针对 char* 的特化版本
 template <>
 char* copy(const char* first, const char* last, char* result) {
@@ -251,6 +254,8 @@ wchar_t* copy(const wchar_t* first, const wchar_t* last, wchar_t* result) {
     std::memmove(result, first, (last - first) * sizeof(wchar_t));
     return result;
 }
+
+*/
 
 template <class InputIterator, class OutputIterator>
 OutputIterator move(InputIterator first, InputIterator last, OutputIterator result) {

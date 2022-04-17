@@ -29,7 +29,7 @@ public:
     // 用于容器内部节点的内存分配
     template <class U>
     struct rebind {
-        typedef allocator<U> other;
+        using other = allocator<U>;
     };
 
     static pointer allocate(size_type n) {
@@ -61,6 +61,28 @@ public:
         mystl::destroy(first, last);
     }
 };
+
+/*
+ *@brief allocator traits
+ */
+template <typename T, typename Alloc>
+struct allocator_traits {
+    static const bool instanceless_ = false;
+    /* @tips: ::template用来消除歧义,否则Alloc::rebind<T>::other,会被编译器认为是 Alloc::rebind `<` T `>` ::other,
+    同理模块类的函数调用也可以使用: x.foo<T>() ,x.tmeplate .foo<T>() */
+    // 萃取分配器,将其绑定到新类型上
+    using allocator_type = typename Alloc::template rebind<T>::other;
+
+    // using allocator_category = random_access_allocator_tag;
+    // using value_type = Iterator;
+    // using difference_type = ptrdiff_t;
+    // using pointer = Iterator*;
+    // using reference = Iterator&;
+};
+
+template <typename T, typename Alloc>
+const bool allocator_traits<T, Alloc>::instanceless_;
+
 } // namespace mystl
 
 #endif // MYSTL_ALLOCATOR_H_

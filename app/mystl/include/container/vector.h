@@ -5,6 +5,7 @@
 #include <type_traits>
 #include <initializer_list>
 #include "allocator.h"
+#include "iterator.h"
 #include "construct.h"
 #include "uninitialized.h"
 
@@ -14,7 +15,6 @@ template <typename T, typename Alloc = mystl::allocator<T>>
 class vector {
 public: // member types
     using allocator_type = Alloc;
-    using data_allocator = Alloc;
 
     using value_type = typename allocator_type::value_type;
     using pointer = typename allocator_type::pointer;
@@ -28,6 +28,8 @@ public: // member types
     using const_iterator = const value_type*;
     using reverse_iterator = mystl::reverse_iterator<iterator>;
     using const_reverse_iterator = mystl::reverse_iterator<const_iterator>;
+
+    using data_allocator = Alloc; // 内存管理
 
 public: // member functions
     /*
@@ -612,7 +614,7 @@ private:
         return begin_ + n;
     }
 
-protected:
+private:
     iterator begin_;
     iterator end_;
     iterator capacity_;
