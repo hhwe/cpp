@@ -8,61 +8,58 @@
 
 namespace mystl {
 
-// struct list_node_base {
-//     list_node_base* next_;
-//     list_node_base* prev_;
-// };
-
 template <typename T>
 struct list_node {
-    list_node* next_;
-    list_node* prev_;
+    list_node* next_{nullptr};
+    list_node* prev_{nullptr};
     T data_;
+
+    // 在链表的指定位置插入本节点
+    void hook(list_node* const position) noexcept {
+        this->next_ = position->next_;
+        this->prev_ = position;
+        position->next_->prev_ = this;
+        position->next_ = this;
+    }
+
+    // 在链表的指定位置删除本节点
+    void unhook() noexcept {
+        this->prev_->next_ = this->next_;
+        this->next_->prev_ = this->prev_;
+        this->next_ = nullptr;
+        this->prev_ = nullptr;
+    }
+
+    // 把头尾节点插入到当前节点后
+    void link_after(list_node* const first, list_node* const last) noexcept {
+        last->next_ = this->next_;
+        first->prev_ = this;
+        this->next_->prev = last;
+        this->next_ = first;
+    }
+
+    // 把头尾节点插入到当前节点前
+    void link_before(list_node* const first, list_node* const last) noexcept {
+        last->next_ = this;
+        first->prev_ = this->prev_;
+        this->prev_->next_ = first;
+        this->prev_ = last;
+    }
+
+    void link(list_node* const first, list_node* const last) noexcept {
+        link_before(first, last);
+    }
+
+    // 把头尾节点从当前链表中删除
+    void unlink(list_node* const first, list_node* const last) noexcept {
+        first->prev_->next_ = last;
+        last->prev_ = first->prev_;
+    }
+
+    static void swap(list_node& x, list_node& y) noexcept;
+
+    void reverse() noexcept;
 };
-
-// class list_node_header : public list_node_base {
-// public:
-//     std::size_t size_;
-
-//     list_node_header() noexcept {
-//         init();
-//     }
-
-//     list_node_header(list_node_header&& x) noexcept :
-//         list_node_base{x.next_, x.prev_}, size_(x.size_) {
-//         if (x.base()->next_ = x.base()) {
-//             next_ = prev_ = this;
-//         } else {
-//             next_->prev_ = prev_->next_ = this->base();
-//             x.init();
-//         }
-//     }
-
-//     void move_node(list_node_header&& x) {
-//         list_node_base* const xnode = x.base();
-//         if (xnode->next_ == xnode)
-//             init();
-//         else {
-//             list_node_base* const node = this->base();
-//             node->next_ = xnode->next_;
-//             node->prev_ = xnode->prev_;
-//             node->next_->prev_ = node->prev_->next_ = node;
-//             size_ = x.size_;
-//             x.init();
-//         }
-//     }
-
-// private:
-//     void init() noexcept {
-//         next_ = this;
-//         prev_ = this;
-//         size_ = 0;
-//     }
-
-//     list_node_base* base() {
-//         return this;
-//     }
-// };
 
 template <typename T, typename Ref, typename Ptr>
 class list_iterator {
@@ -127,55 +124,6 @@ private:
     node_pointer node_;
 };
 
-// template <typename T, typename Alloc>
-// class list_base {
-// public: // member types
-//     using allocator_type = Alloc;
-//     using node = list_node<T>;
-//     using node_pointer = node*;
-//     using node_allocator = typename Alloc::template rebind<node>::other;
-//     using node_base = list_node_base<T>;
-//     using node_base_pointer = node_base*;
-
-// public:
-//     list_base(const allocator_type&) {
-//         node_ = get_node();
-//         node_->next_ = node_;
-//         node_->prev_ = node_;
-//     }
-//     ~list_base() {
-//         clear();
-//         put_node(node_);
-//     }
-
-// protected:
-//     // 配置一个节点
-//     node_pointer get_node() {
-//         return node_allocator::allocate(1);
-//     }
-
-//     // 释放一个节点
-//     void put_node(node_pointer p) {
-//         node_allocator::deallocate(p, 1);
-//     }
-
-//     void clear() {
-//         node_base_pointer cur = head->next_;
-//         while (cur != head.base()) {
-//             node_pointer tmp = cur;
-//             cur = tmp->next_;
-//             cur = static_cast<node_pointer>(tmp->next_);
-//             mystl::destroy(&cur->data_);
-//             put_node(tmp);
-//         }
-//         head->next_ = head;
-//         head->prev_ = head;
-//     }
-
-// protected:
-//     list_node_header head;
-// };
-
 template <typename T, typename Alloc = mystl::allocator<T>>
 class list {
 public: // member types
@@ -205,9 +153,8 @@ public: // member functions
      */
     // default (1)
     explicit list(const allocator_type& alloc = allocator_type()) {
-        node_ = get_node();
-        node_->next_ = node_;
-        node_->prev_ = node_;
+        node_ = node_allocator::allocate(1);
+        node_->init_as_head();
         size_ = 0U;
     }
     // fill (2)
@@ -231,7 +178,7 @@ public: // member functions
     ~list() {
         if (node_ != nullptr) {
             clear();
-            put_node(node_);
+            node_allocator::deallocate(node_);
             node_ = nullptr;
             size_ = 0U;
         }
@@ -295,7 +242,7 @@ public: // member functions
      * @brief Capacity
      */
     bool empty() const noexcept {
-        return node_->next_ == node_;
+        return size_ == 0U;
     }
 
     size_type size() const noexcept {
@@ -328,93 +275,233 @@ public: // member functions
      */
     // range (1)
     template <class InputIterator>
-    void assign(InputIterator first, InputIterator last);
+    void assign(InputIterator first, InputIterator last) {
+        range_assign(first, last);
+    }
     // fill (2)
     void assign(size_type n, const value_type& val) {
         fill_assign(n, val);
     }
     // initializer list (3)
-    void assign(initializer_list<value_type> il);
+    void assign(std::initializer_list<value_type> il) {
+        range_assign(il.begin(), il.end());
+    }
 
     template <class... Args>
-    void emplace_front(Args&&... args);
+    void emplace_front(Args&&... args) {
+        emplace(begin(), mystl::forward<Args>(args)...);
+    }
 
-    void push_front(const value_type& val);
-    void push_front(value_type&& val);
+    void push_front(const value_type& val) {
+        insert(begin(), val);
+    }
+    void push_front(value_type&& val) {
+        insert(begin(), std::move(val));
+    }
 
-    void pop_front();
+    void pop_front() {
+        erase(begin());
+    }
 
     template <class... Args>
-    void emplace_back(Args&&... args);
+    void emplace_back(Args&&... args) {
+        emplace(end(), mystl::forward<Args>(args)...);
+    }
 
-    void push_back(const value_type& val);
-    void push_back(value_type&& val);
+    void push_back(const value_type& val) {
+        insert(end(), val);
+    }
+    void push_back(value_type&& val) {
+        insert(end(), std::move(val));
+    }
 
-    void pop_back();
+    void pop_back() {
+        erase(end());
+    }
 
     template <class... Args>
-    iterator emplace(const_iterator position, Args&&... args);
+    iterator emplace(const_iterator position, Args&&... args) {
+        node_pointer tmp = create_node(mystl::forward<Args>(args)...);
+        tmp->hook(position.node_);
+        ++size_;
+        return iterator(tmp);
+    }
 
     // single element (1)
-    iterator insert(const_iterator position, const value_type& val);
+    iterator insert(const_iterator position, const value_type& val) {
+        return emplace(position, val);
+    }
     // fill (2)
     iterator insert(const_iterator position, size_type n, const value_type& val) {
+        list tmp(n, val);
+        if (tmp.empty()) { return position; }
+        iterator it = tmp.begin();
+        splice(position, tmp);
+        return it;
     }
     // range (3)
     template <class InputIterator>
-    iterator insert(const_iterator position, InputIterator first, InputIterator last);
+    iterator insert(const_iterator position, InputIterator first, InputIterator last) {
+        list tmp(first, last);
+        if (tmp.empty()) { return position; }
+        iterator it = tmp.begin();
+        splice(position, tmp);
+        return it;
+    }
     // move (4)
-    iterator insert(const_iterator position, value_type&& val);
+    iterator insert(const_iterator position, value_type&& val) {
+        return emplace(position, mystl::move(val));
+    }
     // initializer list (5)
-    iterator insert(const_iterator position, initializer_list<value_type> il);
+    iterator insert(const_iterator position, std::initializer_list<value_type> il) {
+        return insert(position, il.begin(), il.end());
+    }
 
-    iterator erase(const_iterator position);
-    iterator erase(const_iterator first, const_iterator last);
-    void swap(list& x);
-    void resize(size_type n);
-    void resize(size_type n, const value_type& val);
-    void clear() noexcept;
+    iterator erase(const_iterator position) {
+        iterator ret = iterator(position.node_->next_);
+        --size_;
+        position.node_->unhook();
+        delete_node(position);
+        return ret;
+    }
+    iterator erase(const_iterator first, const_iterator last) {
+        while (first != last) {
+            first = erase(first);
+        }
+        return last;
+    }
+
+    void swap(list& x) {
+        mystl::swap(node_, x.node_);
+        mystl::swap(size_, x.size_);
+    }
+
+    void resize(size_type n) {
+        resize(n, value_type());
+    }
+    void resize(size_type n, const value_type& val) {
+        if (n > size()) {
+            insert(end(), n - size(), val);
+        } else {
+            erase(begin() + n, end());
+        }
+    }
+
+    void clear() noexcept {
+        auto first = begin();
+        auto last = end();
+        while (first != last) {
+            delete_node(first);
+            ++first;
+        }
+        unlink_nodes(begin(), end()); // 调整指针
+        node_->unlink(node_->next_, node_);
+        size_ = 0;
+    }
 
     /*
      * @brief Operations
      */
     // entire list (1)
     void splice(const_iterator position, list& x) {
-        if (x.empty()) { return; }
-        THROW_LENGTH_ERROR_IF(x.size() > max_size() - size(), "x's size too big");
+        splice(position, mystl::move(x), x.begin(), x.end());
     }
-    void splice(const_iterator position, list&& x);
+    void splice(const_iterator position, list&& x) {
+        splice(position, x, x.begin(), x.end());
+    }
     // single element (2)
-    void splice(const_iterator position, list& x, const_iterator i);
-    void splice(const_iterator position, list&& x, const_iterator i);
+    void splice(const_iterator position, list& x, const_iterator i) {
+        splice(position, mystl::move(x), i, ++i);
+    }
+    void splice(const_iterator position, list&& x, const_iterator i) {
+        splice(position, x, i, ++i);
+    }
     // element range (3)
-    void splice(const_iterator position, list& x,
-                const_iterator first, const_iterator last);
-    void splice(const_iterator position, list&& x,
-                const_iterator first, const_iterator last);
-    void remove(const value_type& val);
+    void splice(const_iterator position, list& x, const_iterator first, const_iterator last) {
+        splice(position, mystl::move(x), first, last);
+    }
+    void splice(const_iterator position, list&& x, const_iterator first, const_iterator last) {
+        auto len = mystl::distance(first, last);
+        x.node_->unlink(first.node_, last.node_);      // 释放节点
+        position.node_->link(first.node_, last.node_); // 节点拼接
+        size_ += len;
+        x.size_ -= len;
+    }
+
+    void remove(const value_type& val) {
+        remove_if([val & ](value_type& x) { return val == x; });
+    }
     template <class Predicate>
-    void remove_if(Predicate pred);
-    //   (1)
-    void unique();
-    // (2)
-    template <class BinaryPredicate>
-    void unique(BinaryPredicate binary_pred);
+    void remove_if(Predicate pred) {
+        auto first = begin();
+        auto last = end();
+        while (first != last) {
+            if (pred(*first)) {
+                first = erase(first);
+            } else {
+                ++first;
+            }
+        }
+    }
 
     //   (1)
-    void merge(list& x);
-    void merge(list&& x);
+    void unique() {
+        unique([](value_type& x, value_type& y) { return x == y };)
+    }
+    // (2)
+    template <class BinaryPredicate>
+    void unique(BinaryPredicate binary_pred) {
+        auto first = begin();
+        auto prev = first++;
+        auto last = end();
+        while (first != last) {
+            if (binary_pred(*first, *prev)) {
+                first = erase(first);
+            } else {
+                prev = first++;
+            }
+        }
+    }
+
+    //   (1)
+    void merge(list& x) {
+        merge(mystl::move(x), [](const value_type& a, const value_type& b) { return a < b; });
+    }
+    void merge(list&& x) {
+        merge(x, [](const value_type& a, const value_type& b) { return a < b; });
+    }
     // (2)
     template <class Compare>
-    void merge(list& x, Compare comp);
+    void merge(list& x, Compare comp) {
+        merge(mystl::move(x), comp);
+    }
     template <class Compare>
-    void merge(list&& x, Compare comp);
+    void merge(list&& x, Compare comp) {
+        auto first1 = begin();
+        auto last1 = end();
+        auto first2 = x.begin();
+        auto last2 = x.end();
+        while (first1 != last1 && first2 != last2) {
+            if (Compare(*first2, *first1)) {
+                auto flag = first2;
+                while ((++first2 != last2) && Compare(*first2, *first1)) {}
+                splice(first1, x, flag, first2);
+            }
+            ++first1;
+        }
+        if (first2 != last2) {
+            splice(last1, x, first2, last2);
+        }
+    }
 
     // (1)
     void sort();
     // (2)
     template <class Compare>
-    void sort(Compare comp);
+    void sort(Compare comp) {
+        if (size() <= 1) { return; }
+        
+    }
 
     void reverse() noexcept;
 
@@ -423,51 +510,40 @@ public: // member functions
     }
 
 private:
-    // 配置一个节点
-    node_pointer get_node() {
-        return node_allocator::allocate(1);
-    }
-
-    // 释放一个节点
-    void put_node(node_pointer p) {
-        node_allocator::deallocate(p, 1);
-    }
-
-    void clear() {
-        node_pointer cur = static_cast<node_pointer>(node_->next_);
-        while (cur != node_) {
-            node_pointer tmp = cur;
-            cur = static_cast<node_pointer>(cur->next_);
-            mystl::destroy(&node_->data_);
-            node_allocator::deallocate(tmp, 1);
-        }
-        node_->next_ = node_;
-        node_->prev_ = node_;
-    }
-
     template <typename... Args>
-    node_pointer create_node(Aegs... args) {
+    node_pointer create_node(Args... args) {
         auto p = node_allocator::allocate(1);
         node_allocator::construct(p, mystl::forward<Args>(args)...);
         return p;
     }
 
-    template <typename... Args>
-    void insert_aux(iterator pos, Args&&... args) {
-        node_pointer tmp = create_node(mystl::forward<Args>(args)...);
-        tmp.hook(pos.node_);
-        // tmp
+    node_pointer delete_node(iterator pos) {
+        node_allocator::destroy(pos.node_);
+        node_allocator::deallocate(pos.node_, 1);
     }
 
     void fill_assign(size_type n, const value_type& val) {
-        auto i = begin();
-        for (; i != end() && n > 0; ++i, --n) {
-            *i = *val;
+        auto cur = begin();
+        for (; cur != end() && n > 0; ++cur, --n) {
+            *cur = *val;
         }
         if (n > 0) {
             insert(end(), n, val);
         } else {
-            erase(i, end());
+            erase(cur, end());
+        }
+    }
+
+    template <class InputIterator>
+    void range_assign(InputIterator first, InputIterator last) {
+        auto cur = begin();
+        for (; cur != end() && first != end(); ++cur, ++first) {
+            *cur = *first;
+        }
+        if (first != last) {
+            insert(end(), first, last);
+        } else {
+            erase(cur, end());
         }
     }
 

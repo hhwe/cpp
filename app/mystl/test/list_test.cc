@@ -15,8 +15,9 @@ namespace list_test {
 TEST(list_testCase1) {
     mystl::list<int> l2();
 
-    // std::list<int> l1(10, 0);
-    // l1.begin();
+    std::list<int> l1(10, 0);
+    l1.begin();
+    l1.emplace(l1.begin(), 5);
     // mystl::list<int> l2(10, 0);
     // EXPECT_TRUE(htest::ContainerEqual(l1, l2));
 

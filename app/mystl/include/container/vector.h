@@ -243,25 +243,22 @@ public: // member functions
     }
 
     reference front() {
-        return *(begin_);
+        return *begin();
     }
-
     const_reference front() const {
-        return *(begin_);
+        return *begin();
     }
 
     reference back() {
-        return *(end_ - 1);
+        return *(end() - 1);
     }
-
     const_reference back() const {
-        return *(end_ - 1);
+        return *(end() - 1);
     }
 
     pointer data() noexcept {
         return begin_;
     }
-
     const_pointer data() const noexcept {
         return begin_;
     }
