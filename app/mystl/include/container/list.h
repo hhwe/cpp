@@ -429,7 +429,7 @@ public: // member functions
     }
 
     void remove(const value_type& val) {
-        remove_if([val & ](value_type& x) { return val == x; });
+        remove_if([&val](value_type& x) { return val == x; });
     }
     template <class Predicate>
     void remove_if(Predicate pred) {
@@ -446,7 +446,7 @@ public: // member functions
 
     //   (1)
     void unique() {
-        unique([](value_type& x, value_type& y) { return x == y };)
+        unique([](value_type& x, value_type& y) { return x == y; });
     }
     // (2)
     template <class BinaryPredicate>
@@ -500,7 +500,6 @@ public: // member functions
     template <class Compare>
     void sort(Compare comp) {
         if (size() <= 1) { return; }
-        
     }
 
     void reverse() noexcept;
