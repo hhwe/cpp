@@ -19,66 +19,46 @@ struct iterator {
     using reference = Reference;
 };
 
-// 2408. SFINAE-friendly common_type/iterator_traits is missing in C++14
-template <typename T>
-struct has_iterator_cat {
-private:
-    struct two {
-        char a;
-        char b;
-    };
-    template <typename U>
-    static two test(...);
-    template <typename U>
-    static char test(typename U::iterator_category* = 0);
+// std::void_t功能：能够检测到应用SFINAE(替换失败并不是一个错误）特性时出现的非法类型。换句话说，给进来的类型 _Types 必须是一个有效的类型，不能是一个非法类型。
+// 泛化版本
+template <typename Iterator, typename = std::void_t<>>
+struct iterator_traits_aux {};
 
-public:
-    static const bool value = sizeof(test<T>(0)) == sizeof(char);
-};
-
-template <typename Iterator, bool>
-struct iterator_traits_impl {};
-
+// 特化版本, 如果没有如下的成员类型, 是个非法类型, 所以选择忽略特化版本, 从而实现泛化版本
 template <typename Iterator>
-struct iterator_traits_impl<Iterator, true> {
-    using iterator_category = typename Iterator::Category;
-    using value_type = typename Iterator::Tp;
-    using difference_type = typename Iterator::Distance;
-    using pointer = typename Iterator::Pointer;
-    using reference = typename Iterator::Reference;
-};
-
-template <typename Iterator, bool>
-struct iterator_traits_helper {};
-
-template <typename Iterator>
-struct iterator_traits_helper<Iterator, true>
-    : public iterator_traits_impl<Iterator, std::is_convertible<typename Iterator::iterator_category, input_iterator_tag>::value
-                                                || std::is_convertible<typename Iterator::iterator_category, output_iterator_tag>::value> {
+struct iterator_traits_aux<Iterator, std::void_t<typename Iterator::iterator_category,
+                                                 typename Iterator::value_type,
+                                                 typename Iterator::difference_type,
+                                                 typename Iterator::pointer,
+                                                 typename Iterator::reference>> {
+    using iterator_category = typename Iterator::iterator_category;
+    using value_type = typename Iterator::value_type;
+    using difference_type = typename Iterator::difference_type;
+    using pointer = typename Iterator::pointer;
+    using reference = typename Iterator::reference;
 };
 
 template <typename Iterator>
-struct iterator_traits : public iterator_traits_helper<Iterator, has_iterator_cat<Iterator>::value> {
-};
+struct iterator_traits : public iterator_traits_aux<Iterator> {};
 
 // 针对 pointer 的偏特化版本
-template <typename Iterator>
-struct iterator_traits<Iterator*> {
+template <typename Tp>
+struct iterator_traits<Tp*> {
     using iterator_category = random_access_iterator_tag;
-    using value_type = Iterator;
+    using value_type = Tp;
     using difference_type = std::ptrdiff_t;
-    using pointer = Iterator*;
-    using reference = Iterator&;
+    using pointer = Tp*;
+    using reference = Tp&;
 };
 
 // 针对 pointer-to-const 的偏特化版本
-template <typename Iterator>
-struct iterator_traits<const Iterator*> {
+template <typename Tp>
+struct iterator_traits<const Tp*> {
     using iterator_category = random_access_iterator_tag;
-    using value_type = Iterator;
+    using value_type = Tp;
     using difference_type = std::ptrdiff_t;
-    using pointer = const Iterator*;
-    using reference = const Iterator&;
+    using pointer = const Tp*;
+    using reference = const Tp&;
 };
 
 // 萃取迭代器的类型

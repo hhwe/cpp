@@ -14,6 +14,15 @@ struct list_node {
     list_node* prev_{nullptr};
     T data_;
 
+    list_node() = default;
+    list_node(const T& v) :
+        data_(v) {
+    }
+    list_node(T&& v) :
+        data_(mystl::move(v)) {
+    }
+    ~list_node() = default;
+
     // 在链表的指定位置插入本节点
     void hook(list_node* const position) noexcept {
         this->next_ = position->next_;
@@ -56,6 +65,10 @@ struct list_node {
         last->prev_ = first->prev_;
     }
 
+    void init_as_head() {
+        prev_ = next_ = this;
+    }
+
     static void swap(list_node& x, list_node& y) noexcept;
 
     void reverse() noexcept;
@@ -83,7 +96,7 @@ public:
     }
 
     reference operator*() const {
-        return (static_cast<node_pointer>(node_))->data_;
+        return node_->data_;
     }
 
     pointer operator->() const {
@@ -120,7 +133,7 @@ public:
         return node_ != rhs.node_;
     }
 
-private:
+public:
     node_pointer node_;
 };
 
@@ -153,27 +166,35 @@ public: // member functions
      */
     // default (1)
     explicit list(const allocator_type& alloc = allocator_type()) {
-        node_ = node_allocator::allocate(1);
-        node_->init_as_head();
+        init_node();
         size_ = 0U;
     }
     // fill (2)
-    explicit list(size_type n);
-    list(size_type n, const value_type& val,
-         const allocator_type& alloc = allocator_type());
+    explicit list(size_type n) {
+        fill_initialize(n, value_type());
+    }
+    list(size_type n, const value_type& val, const allocator_type& alloc = allocator_type()) {
+        fill_initialize(n, val);
+    }
     // range (3)
-    template <class InputIterator>
-    list(InputIterator first, InputIterator last,
-         const allocator_type& alloc = allocator_type());
+    template <class InputIterator, typename = mystl::RequireInputIterator<InputIterator>>
+    list(InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type()) {
+        range_initialize(first, last);
+    }
     // copy (4)
-    list(const list& x);
-    list(const list& x, const allocator_type& alloc);
+    list(const list& x) {
+        range_initialize(x.begin(), x.end());
+    }
+    // list(const list& x, const allocator_type& alloc);
     // move (5)
-    list(list&& x);
-    list(list&& x, const allocator_type& alloc);
+    list(list&& x) {
+        list(mystl::move(x));
+    }
+    // list(list&& x, const allocator_type& alloc);
     // initializer list (6)
-    list(std::initializer_list<value_type> il,
-         const allocator_type& alloc = allocator_type());
+    list(std::initializer_list<value_type> il, const allocator_type& alloc = allocator_type()) {
+        range_initialize(il.begin(), il.end());
+    }
 
     ~list() {
         if (node_ != nullptr) {
@@ -274,7 +295,7 @@ public: // member functions
      * @brief Modifiers
      */
     // range (1)
-    template <class InputIterator>
+    template <class InputIterator, typename = mystl::RequireInputIterator<InputIterator>>
     void assign(InputIterator first, InputIterator last) {
         range_assign(first, last);
     }
@@ -320,7 +341,7 @@ public: // member functions
     }
 
     template <class... Args>
-    iterator emplace(const_iterator position, Args&&... args) {
+    iterator emplace(iterator position, Args&&... args) {
         node_pointer tmp = create_node(mystl::forward<Args>(args)...);
         tmp->hook(position.node_);
         ++size_;
@@ -328,11 +349,11 @@ public: // member functions
     }
 
     // single element (1)
-    iterator insert(const_iterator position, const value_type& val) {
+    iterator insert(iterator position, const value_type& val) {
         return emplace(position, val);
     }
     // fill (2)
-    iterator insert(const_iterator position, size_type n, const value_type& val) {
+    iterator insert(iterator position, size_type n, const value_type& val) {
         list tmp(n, val);
         if (tmp.empty()) { return position; }
         iterator it = tmp.begin();
@@ -340,8 +361,8 @@ public: // member functions
         return it;
     }
     // range (3)
-    template <class InputIterator>
-    iterator insert(const_iterator position, InputIterator first, InputIterator last) {
+    template <class InputIterator, typename = mystl::RequireInputIterator<InputIterator>>
+    iterator insert(iterator position, InputIterator first, InputIterator last) {
         list tmp(first, last);
         if (tmp.empty()) { return position; }
         iterator it = tmp.begin();
@@ -349,22 +370,22 @@ public: // member functions
         return it;
     }
     // move (4)
-    iterator insert(const_iterator position, value_type&& val) {
+    iterator insert(iterator position, value_type&& val) {
         return emplace(position, mystl::move(val));
     }
     // initializer list (5)
-    iterator insert(const_iterator position, std::initializer_list<value_type> il) {
+    iterator insert(iterator position, std::initializer_list<value_type> il) {
         return insert(position, il.begin(), il.end());
     }
 
-    iterator erase(const_iterator position) {
+    iterator erase(iterator position) {
         iterator ret = iterator(position.node_->next_);
         --size_;
         position.node_->unhook();
         delete_node(position);
         return ret;
     }
-    iterator erase(const_iterator first, const_iterator last) {
+    iterator erase(iterator first, iterator last) {
         while (first != last) {
             first = erase(first);
         }
@@ -394,7 +415,6 @@ public: // member functions
             delete_node(first);
             ++first;
         }
-        unlink_nodes(begin(), end()); // 调整指针
         node_->unlink(node_->next_, node_);
         size_ = 0;
     }
@@ -403,24 +423,24 @@ public: // member functions
      * @brief Operations
      */
     // entire list (1)
-    void splice(const_iterator position, list& x) {
+    void splice(iterator position, list& x) {
         splice(position, mystl::move(x), x.begin(), x.end());
     }
-    void splice(const_iterator position, list&& x) {
+    void splice(iterator position, list&& x) {
         splice(position, x, x.begin(), x.end());
     }
     // single element (2)
-    void splice(const_iterator position, list& x, const_iterator i) {
+    void splice(iterator position, list& x, iterator i) {
         splice(position, mystl::move(x), i, ++i);
     }
-    void splice(const_iterator position, list&& x, const_iterator i) {
+    void splice(iterator position, list&& x, iterator i) {
         splice(position, x, i, ++i);
     }
     // element range (3)
-    void splice(const_iterator position, list& x, const_iterator first, const_iterator last) {
+    void splice(iterator position, list& x, iterator first, iterator last) {
         splice(position, mystl::move(x), first, last);
     }
-    void splice(const_iterator position, list&& x, const_iterator first, const_iterator last) {
+    void splice(iterator position, list&& x, iterator first, iterator last) {
         auto len = mystl::distance(first, last);
         x.node_->unlink(first.node_, last.node_);      // 释放节点
         position.node_->link(first.node_, last.node_); // 节点拼接
@@ -495,11 +515,41 @@ public: // member functions
     }
 
     // (1)
-    void sort();
+    void sort() {
+        sort([](const value_type& a, const value_type& b) { return a < b; });
+    }
     // (2)
     template <class Compare>
     void sort(Compare comp) {
-        if (size() <= 1) { return; }
+        if (size() <= 1) { return; } // 长度等于 0 或者 1 不进行处理
+        list carry;
+        list tmp[64]; // 按序号保存归并排序后list, 有序链表长度次幂级增长 1-2-4-8-...
+        list* fill = tmp;
+        list* counter;
+        try {
+            do {
+                carry.splice(carry.begin(), *this, begin()); // 每次将第一个节点拼接到carry
+                for (counter = tmp; counter != fill && !counter->empty(); ++counter) {
+                    counter->merge(carry, comp); // 把carry按从小到大合并到counter(tmp[i](中, carry被置空
+                    carry.swap(*counter);        // 已经排好序的counter放入到carry中,counter被置空
+                }
+                carry.swap(*counter); // carry中内容放入tmp[j](j是循环结束序列)中, carry被置空
+                if (counter == fill) {
+                    ++fill;
+                }
+            } while (!empty());
+            // 拼接归并后的链表
+            for (counter = tmp + 1; counter != fill; ++counter) {
+                counter->merge(*(counter - 1), comp);
+                swap(*(fill - 1));
+            }
+        } catch (...) {
+            this->splice(this->end(), carry);
+            for (int i = 0; i < sizeof(tmp) / sizeof(tmp[0]); ++i) {
+                this->splice(this->end(), tmp[i]);
+                throw;
+            }
+        }
     }
 
     void reverse() noexcept;
@@ -509,6 +559,28 @@ public: // member functions
     }
 
 private:
+    void init_node() {
+        node_ = node_allocator::allocate(1);
+        node_->init_as_head();
+    }
+
+    void fill_initialize(size_type n, const_reference val) {
+        init_node();
+        size_ = n;
+        for (; n; --n) {
+            push_back(val);
+        }
+    }
+
+    template <class InputIterator>
+    void range_initialize(InputIterator first, InputIterator last) {
+        init_node();
+        size_ = mystl::distance(first, last);
+        for (; first != last; ++first) {
+            emplace_back(*first);
+        }
+    }
+
     template <typename... Args>
     node_pointer create_node(Args... args) {
         auto p = node_allocator::allocate(1);
@@ -516,7 +588,7 @@ private:
         return p;
     }
 
-    node_pointer delete_node(iterator pos) {
+    void delete_node(iterator pos) {
         node_allocator::destroy(pos.node_);
         node_allocator::deallocate(pos.node_, 1);
     }
