@@ -14,7 +14,7 @@ public:
     }
     ~Chunk() {
         if (pBlocks_ != nullptr) {
-            delete pBlocks_;
+            delete[] pBlocks_;
         }
     }
 
@@ -89,9 +89,9 @@ public:
 
     void InsertAtTail(ChunkList* p) {
         p->next_ = this;
-        p->prev_ = prev_;
-        prev_->next_ = p;
-        prev_ = p;
+        p->prev_ = this->prev_;
+        this->prev_->next_ = p;
+        this->prev_ = p;
     }
 
     void Remove(ChunkList* p) {
@@ -103,7 +103,7 @@ public:
         ChunkList* p = this->next_;
         while (p != this) {
             if (p->chunk_.IsAvailable()) {
-                return this;
+                return p;
             }
             p = p->next_;
         }
@@ -114,7 +114,7 @@ public:
         ChunkList* p = this->next_;
         while (p != this) {
             if (p->chunk_.IsInside(ptr, chunkSize)) {
-                return this;
+                return p;
             }
             p = p->next_;
         }
@@ -185,7 +185,7 @@ private:
     void FreeChunk(unsigned char* ptr) {
         // 判断是否是全回收, 保证有两块全回收时才真正释放延迟一块的内存
         if (deallocChunk_->IsAllBlockFree(blockNum_)) {
-            if (deferChunk_ != nullptr) {
+            if (deferChunk_ != nullptr && deferChunk_ != deallocChunk_) {
                 deferChunk_->Deallocate(ptr, blockSize_);
                 head->Remove(deferChunk_);
                 delete deferChunk_;
