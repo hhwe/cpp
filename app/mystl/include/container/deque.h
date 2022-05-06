@@ -1,5 +1,5 @@
-#ifndef MYSTL_LIST_H_
-#define MYSTL_LIST_H_
+#ifndef MYSTL_DEQUE_H_
+#define MYSTL_DEQUE_H_
 
 #include "allocator.h"
 #include "iterator.h"
@@ -9,29 +9,29 @@
 
 namespace mystl {
 template <typename T>
-struct list_node {
-    list_node* next_{nullptr};
-    list_node* prev_{nullptr};
+struct deque_node {
+    deque_node* next_{nullptr};
+    deque_node* prev_{nullptr};
     T data_;
 
-    list_node() = default;
-    list_node(const T& v) :
+    deque_node() = default;
+    deque_node(const T& v) :
         data_(v) {
     }
-    list_node(T&& v) :
+    deque_node(T&& v) :
         data_(mystl::move(v)) {
     }
-    ~list_node() = default;
+    ~deque_node() = default;
 
-    static void swap(list_node& x, list_node& y) noexcept;
+    static void swap(deque_node& x, deque_node& y) noexcept;
 
     // 将 [first, last) 内所有元素移动到 position 之前
-    void transfer(list_node* const first, list_node* const last) noexcept {
+    void transfer(deque_node* const first, deque_node* const last) noexcept {
         last->prev_->next_ = this;
         first->prev_->next_ = last;
         this->prev_->next_ = first;
 
-        list_node* tmp = this->prev_;
+        deque_node* tmp = this->prev_;
         this->prev_ = last->prev_;
         last->prev_ = first->prev_;
         first->prev_ = tmp;
@@ -39,8 +39,8 @@ struct list_node {
 
     // 链表反转, 只移动头尾节点元素, 不调整指针
     void reverse() noexcept {
-        list_node* next = this->next_;
-        list_node* prev = this->prev_;
+        deque_node* next = this->next_;
+        deque_node* prev = this->prev_;
         while (next != prev && next->prev_ != prev) {
             mystl::swap(next->data_, prev->data_);
             next = next->next_;
@@ -49,7 +49,7 @@ struct list_node {
     }
 
     // 在链表的指定位置前插入本节点
-    void hook(list_node* const position) noexcept {
+    void hook(deque_node* const position) noexcept {
         this->next_ = position;
         this->prev_ = position->prev_;
         position->prev_->next_ = this;
@@ -65,7 +65,7 @@ struct list_node {
     }
 
     // 把头尾节点从当前链表中删除
-    void unlink(list_node* const first, list_node* const last) noexcept {
+    void unlink(deque_node* const first, deque_node* const last) noexcept {
         first->prev_->next_ = last;
         last->prev_ = first->prev_;
     }
@@ -76,10 +76,10 @@ struct list_node {
 };
 
 template <typename T, typename Ref, typename Ptr>
-class list_iterator {
+class deque_iterator {
 public:
-    using self = list_iterator<T, Ref, Ptr>;
-    using node = list_node<T>;
+    using self = deque_iterator<T, Ref, Ptr>;
+    using node = deque_node<T>;
     using node_pointer = node*;
 
     using iterator_category = mystl::bidirectional_iterator_tag;
@@ -89,10 +89,10 @@ public:
     using reference = Ref;
 
 public:
-    list_iterator() :
+    deque_iterator() :
         node_() {
     }
-    explicit list_iterator(node_pointer x) :
+    explicit deque_iterator(node_pointer x) :
         node_(x) {
     }
 
@@ -139,7 +139,7 @@ public:
 };
 
 template <typename T, typename Alloc = mystl::allocator<T>>
-class list {
+class deque {
 public: // member types
     using allocator_type = Alloc;
 
@@ -151,13 +151,13 @@ public: // member types
     using size_type = typename allocator_type::size_type;
     using difference_type = typename allocator_type::difference_type;
 
-    using iterator = list_iterator<T, T&, T*>;
-    using const_iterator = list_iterator<T, const T&, const T*>;
+    using iterator = deque_iterator<T, T&, T*>;
+    using const_iterator = deque_iterator<T, const T&, const T*>;
     using reverse_iterator = mystl::reverse_iterator<iterator>;
     using const_reverse_iterator = mystl::reverse_iterator<const_iterator>;
 
     using data_allocator = Alloc;
-    using node = list_node<T>;
+    using node = deque_node<T>;
     using node_pointer = node*;
     using node_allocator = typename Alloc::template rebind<node>::other;
 
@@ -166,38 +166,38 @@ public: // member functions
      * @brief Constructor and Destructor
      */
     // default (1)
-    explicit list(const allocator_type& alloc = allocator_type()) {
+    explicit deque(const allocator_type& alloc = allocator_type()) {
         init_node();
         size_ = 0U;
     }
     // fill (2)
-    explicit list(size_type n) {
+    explicit deque(size_type n) {
         fill_initialize(n, value_type());
     }
-    list(size_type n, const value_type& val, const allocator_type& alloc = allocator_type()) {
+    deque(size_type n, const value_type& val, const allocator_type& alloc = allocator_type()) {
         fill_initialize(n, val);
     }
     // range (3)
     template <class InputIterator, typename = mystl::RequireInputIterator<InputIterator>>
-    list(InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type()) {
+    deque(InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type()) {
         range_initialize(first, last);
     }
     // copy (4)
-    list(const list& x) {
+    deque(const deque& x) {
         range_initialize(x.begin(), x.end());
     }
-    // list(const list& x, const allocator_type& alloc);
+    // deque(const deque& x, const allocator_type& alloc);
     // move (5)
-    list(list&& x) {
-        list(mystl::move(x));
+    deque(deque&& x) {
+        deque(mystl::move(x));
     }
-    // list(list&& x, const allocator_type& alloc);
-    // initializer list (6)
-    list(std::initializer_list<value_type> il, const allocator_type& alloc = allocator_type()) {
+    // deque(deque&& x, const allocator_type& alloc);
+    // initializer deque (6)
+    deque(std::initializer_list<value_type> il, const allocator_type& alloc = allocator_type()) {
         range_initialize(il.begin(), il.end());
     }
 
-    ~list() {
+    ~deque() {
         if (node_ != nullptr) {
             clear();
             node_allocator::deallocate(node_);
@@ -207,11 +207,11 @@ public: // member functions
     }
 
     // copy (1)
-    list& operator=(const list& x);
+    deque& operator=(const deque& x);
     // move (2)
-    list& operator=(list&& x);
-    // initializer list (3)
-    list& operator=(std::initializer_list<value_type> il);
+    deque& operator=(deque&& x);
+    // initializer deque (3)
+    deque& operator=(std::initializer_list<value_type> il);
 
     /*
      * @brief Iterators
@@ -306,7 +306,7 @@ public: // member functions
     void assign(size_type n, const value_type& val) {
         fill_assign(n, val);
     }
-    // initializer list (3)
+    // initializer deque (3)
     void assign(std::initializer_list<value_type> il) {
         range_assign(il.begin(), il.end());
     }
@@ -357,7 +357,7 @@ public: // member functions
     }
     // fill (2)
     iterator insert(iterator position, size_type n, const value_type& val) {
-        list tmp(n, val);
+        deque tmp(n, val);
         if (tmp.empty()) { return position; }
         iterator it = tmp.begin();
         splice(position, tmp);
@@ -366,7 +366,7 @@ public: // member functions
     // range (3)
     template <class InputIterator, typename = mystl::RequireInputIterator<InputIterator>>
     iterator insert(iterator position, InputIterator first, InputIterator last) {
-        list tmp(first, last);
+        deque tmp(first, last);
         if (tmp.empty()) { return position; }
         iterator it = tmp.begin();
         splice(position, tmp);
@@ -376,7 +376,7 @@ public: // member functions
     iterator insert(iterator position, value_type&& val) {
         return emplace(position, mystl::move(val));
     }
-    // initializer list (5)
+    // initializer deque (5)
     iterator insert(iterator position, std::initializer_list<value_type> il) {
         return insert(position, il.begin(), il.end());
     }
@@ -395,7 +395,7 @@ public: // member functions
         return last;
     }
 
-    void swap(list& x) {
+    void swap(deque& x) {
         mystl::swap(node_, x.node_);
         mystl::swap(size_, x.size_);
     }
@@ -426,27 +426,27 @@ public: // member functions
     /*
      * @brief Operations
      */
-    // entire list (1)
-    void splice(iterator position, list& x) {
+    // entire deque (1)
+    void splice(iterator position, deque& x) {
         splice(position, mystl::move(x), x.begin(), x.end());
     }
-    void splice(iterator position, list&& x) {
+    void splice(iterator position, deque&& x) {
         splice(position, x, x.begin(), x.end());
     }
     // single element (2)
-    void splice(iterator position, list& x, iterator i) {
+    void splice(iterator position, deque& x, iterator i) {
         auto j = i++;
         splice(position, mystl::move(x), j, i);
     }
-    void splice(iterator position, list&& x, iterator i) {
+    void splice(iterator position, deque&& x, iterator i) {
         auto j = i++;
         splice(position, x, j, i);
     }
     // element range (3)
-    void splice(iterator position, list& x, iterator first, iterator last) {
+    void splice(iterator position, deque& x, iterator first, iterator last) {
         splice(position, mystl::move(x), first, last);
     }
-    void splice(iterator position, list&& x, iterator first, iterator last) {
+    void splice(iterator position, deque&& x, iterator first, iterator last) {
         auto len = mystl::distance(first, last);
         position.node_->transfer(first.node_, last.node_); // 节点拼接
         size_ += len;
@@ -489,19 +489,19 @@ public: // member functions
     }
 
     //   (1)
-    void merge(list& x) {
+    void merge(deque& x) {
         merge(mystl::move(x), mystl::less<value_type>());
     }
-    void merge(list&& x) {
+    void merge(deque&& x) {
         merge(x, mystl::less<value_type>());
     }
     // (2)
     template <class Compare>
-    void merge(list& x, Compare comp) {
+    void merge(deque& x, Compare comp) {
         merge(mystl::move(x), comp);
     }
     template <class Compare>
-    void merge(list&& x, Compare comp) {
+    void merge(deque&& x, Compare comp) {
         if (*this == x) { return; }
         auto first1 = begin();
         auto last1 = end();
@@ -528,10 +528,10 @@ public: // member functions
     template <class Compare>
     void sort(Compare comp) {
         if (size() <= 1) { return; } // 长度等于 0 或者 1 不进行处理
-        list carry;
-        list tmp[64]; // 按序号保存归并排序后list, 有序链表长度次幂级增长 1-2-4-8-...
-        list* fill = tmp;
-        list* counter;
+        deque carry;
+        deque tmp[64]; // 按序号保存归并排序后deque, 有序链表长度次幂级增长 1-2-4-8-...
+        deque* fill = tmp;
+        deque* counter;
         try {
             do {
                 carry.splice(carry.begin(), *this, begin()); // 每次将第一个节点拼接到carry
@@ -631,33 +631,33 @@ private:
 
 // (1)
 template <class T, class Alloc>
-bool operator==(const list<T, Alloc>& lhs, const list<T, Alloc>& rhs) {
+bool operator==(const deque<T, Alloc>& lhs, const deque<T, Alloc>& rhs) {
     if (lhs.size() != rhs.size()) { return false; }
     return mystl::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
 // (2)
 template <class T, class Alloc>
-bool operator!=(const list<T, Alloc>& lhs, const list<T, Alloc>& rhs) {
+bool operator!=(const deque<T, Alloc>& lhs, const deque<T, Alloc>& rhs) {
     return !(lhs == rhs);
 }
 // (3)
 template <class T, class Alloc>
-bool operator<(const list<T, Alloc>& lhs, const list<T, Alloc>& rhs);
+bool operator<(const deque<T, Alloc>& lhs, const deque<T, Alloc>& rhs);
 // (4)
 template <class T, class Alloc>
-bool operator<=(const list<T, Alloc>& lhs, const list<T, Alloc>& rhs);
+bool operator<=(const deque<T, Alloc>& lhs, const deque<T, Alloc>& rhs);
 // (5)
 template <class T, class Alloc>
-bool operator>(const list<T, Alloc>& lhs, const list<T, Alloc>& rhs);
+bool operator>(const deque<T, Alloc>& lhs, const deque<T, Alloc>& rhs);
 // (6)
 template <class T, class Alloc>
-bool operator>=(const list<T, Alloc>& lhs, const list<T, Alloc>& rhs);
+bool operator>=(const deque<T, Alloc>& lhs, const deque<T, Alloc>& rhs);
 
 template <class T, class Alloc>
-void swap(list<T, Alloc>& x, list<T, Alloc>& y) {
+void swap(deque<T, Alloc>& x, deque<T, Alloc>& y) {
     x.swap(y);
 }
 
 } // namespace mystl
 
-#endif // MYSTL_LIST_H_
+#endif // MYSTL_DEQUE_H_
