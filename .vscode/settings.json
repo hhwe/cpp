@@ -52,7 +52,11 @@
         "ctime": "cpp",
         "iomanip": "cpp",
         "unordered_set": "cpp",
-        "complex": "cpp"
+        "complex": "cpp",
+        "cassert": "cpp",
+        "cerrno": "cpp",
+        "ios": "cpp",
+        "queue": "cpp"
     },
     "cmake.configureOnOpen": true,
 }

@@ -6,6 +6,7 @@
 #include "construct.h"
 #include "uninitialized.h"
 #include "functional.h"
+#include "functexcept.h"
 
 namespace mystl {
 template <typename T>
@@ -79,44 +80,55 @@ template <typename T, typename Ref, typename Ptr>
 class deque_iterator {
 public:
     using self = deque_iterator<T, Ref, Ptr>;
-    using node = deque_node<T>;
-    using node_pointer = node*;
 
-    using iterator_category = mystl::bidirectional_iterator_tag;
+    using iterator_category = mystl::random_access_iterator_tag;
     using difference_type = std::ptrdiff_t;
     using value_type = T;
     using pointer = Ptr;
     using reference = Ref;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
+
+    using elt_pointer = T*;
+    using map_pointer = elt_pointer*;
 
 public:
     deque_iterator() :
-        node_() {
+        cur_(), first_(), last_(), node_() {
     }
-    explicit deque_iterator(node_pointer x) :
-        node_(x) {
+    explicit deque_iterator(elt_pointer x, map_pointer y) :
+        cur_(x), first_(*y), last_(*y + buffer_size()), node_(y) {
     }
 
     reference operator*() const {
-        return node_->data_;
+        return *cur_;
     }
 
     pointer operator->() const {
         return &(operator*());
     }
 
-    self operator++() {
-        node_ = node_->next_;
+    self& operator++() {
+        ++cur_;
+        if (cur_ == last_) {
+            set_node(node_ + 1);
+            cur_ = first_;
+        }
         return *this;
     }
 
     self operator++(int) {
         self tmp = *this;
-        node_ = node_->next_;
+        ++*this;
         return tmp;
     }
 
-    self operator--() {
-        node_ = node_->prev_;
+    self& operator--() {
+        if (cur_ == first_) {
+            set_node(node_ - 1);
+            cur_ = last_;
+        }
+        --cur_;
         return *this;
     }
 
@@ -126,16 +138,62 @@ public:
         return tmp;
     }
 
+    self& operator+=(difference_type n) {
+        const difference_type offset = n + (cur_ - first_);
+        if (offset >= 0 && offset < difference_type(buffer_size())) {
+            cur_ += n;
+        } else {
+            const difference_type node_offset = offset > 0 ?
+                                                    offset / difference_type(buffer_size()) :
+                                                    -difference_type((-offset - 1) / buffer_size()) - 1;
+            set_node(node_ + node_offset);
+            cur_ = first_ + (offset - node_offset * (difference_type(buffer_size())));
+        }
+        return *this;
+    }
+
+    self operator+(difference_type n) const noexcept {
+        self tmp = *this;
+        return tmp += n;
+    }
+
+    self& operator-=(difference_type n) {
+        return operator+=(-n);
+    }
+
+    self operator-(difference_type n) const noexcept {
+        return operator+(-n);
+    }
+
+    self operator[](difference_type n) const noexcept {
+        return *(*this + n);
+    }
+
     bool operator==(const self rhs) const {
-        return node_ == rhs.node_;
+        return cur_ == rhs.cur_;
     }
 
     bool operator!=(const self rhs) const {
-        return node_ != rhs.node_;
+        return !(operator==(rhs));
     }
 
-public:
-    node_pointer node_;
+private:
+    constexpr dequeBufSize = 512U;
+    std::size_t buffer_size() {
+        return (sizeof(T) < dequeBufSize) ? std::size_t(dequeBufSize / sizeof(T)) : std::size_t(1);
+    }
+
+    void set_node(map_pointer new_node) noexcept {
+        node_ = new_node;
+        first_ = *new_node;
+        last_ = first_ + difference_type(buffer_size())
+    }
+
+private:
+    elt_pointer cur_;
+    elt_pointer first_;
+    elt_pointer last_;
+    map_pointer node_;
 };
 
 template <typename T, typename Alloc = mystl::allocator<T>>
@@ -157,9 +215,7 @@ public: // member types
     using const_reverse_iterator = mystl::reverse_iterator<const_iterator>;
 
     using data_allocator = Alloc;
-    using node = deque_node<T>;
-    using node_pointer = node*;
-    using node_allocator = typename Alloc::template rebind<node>::other;
+    using map_pointer = iterator::map_pointer;
 
 public: // member functions
     /*
@@ -217,17 +273,17 @@ public: // member functions
      * @brief Iterators
      */
     iterator begin() noexcept {
-        return iterator(node_->next_);
+        return start_;
     }
     const_iterator begin() const noexcept {
-        return const_iterator(node_->next_);
+        return const_iterator(start_);
     }
 
     iterator end() noexcept {
-        return iterator(node_);
+        return finish_;
     }
     const_iterator end() const noexcept {
-        return const_iterator(node_);
+        return const_iterator(finish_);
     }
 
     reverse_iterator rbegin() noexcept {
@@ -263,36 +319,55 @@ public: // member functions
     /*
      * @brief Capacity
      */
-    bool empty() const noexcept {
-        return size_ == 0U;
-    }
 
     size_type size() const noexcept {
-        return size_;
+        return finish_ - start_;
     }
 
     size_type max_size() const noexcept {
         return static_cast<size_type>(-1);
     }
 
+    void resize(size_type n) {
+        resize(n, value_type());
+    }
+    void resize(size_type n, const value_type& val) {
+        if (n > size()) {
+            insert(end(), n - size(), val);
+        } else {
+            erase(begin() + n, end());
+        }
+    }
+
+    bool empty() const noexcept {
+        return finish_ == start_;
+    }
+
     /*
      * @brief Element access
      */
+    reference operator[](size_type n) {
+        return *(start_[n]);
+    }
+    const_reference operator[](size_type n) const;
+
+    reference at(size_type n) {
+        THROW_OUT_OF_RANGE_IF(n >= size(), "deque.at");
+        return (*this)[n];
+    }
+    const_reference at(size_type n) const;
+
     reference front() {
         return *begin();
     }
-    const_reference front() const {
-        return *begin();
-    }
+    const_reference front() const;
 
     reference back() {
         iterator tmp = end();
         --tmp;
         return *tmp;
     }
-    const_reference back() const {
-        return back();
-    }
+    const_reference back() const;
 
     /*
      * @brief Modifiers
@@ -345,10 +420,14 @@ public: // member functions
 
     template <class... Args>
     iterator emplace(iterator position, Args&&... args) {
-        node_pointer tmp = create_node(mystl::forward<Args>(args)...);
-        tmp->hook(position.node_);
-        ++size_;
-        return iterator(tmp);
+        if (position.cur_ == start_.cur_) {
+            emplace_front(mystl::forward<Args>(args)...);
+            return start_;
+        } else if (position.cur_ == finish_.cur_) {
+            emplace_back(mystl::forward<Args>(args)...);
+            return finish_;
+        }
+        return insert_aux(position, mystl::forward<Args>(args)...);
     }
 
     // single element (1)
@@ -396,19 +475,10 @@ public: // member functions
     }
 
     void swap(deque& x) {
-        mystl::swap(node_, x.node_);
-        mystl::swap(size_, x.size_);
-    }
-
-    void resize(size_type n) {
-        resize(n, value_type());
-    }
-    void resize(size_type n, const value_type& val) {
-        if (n > size()) {
-            insert(end(), n - size(), val);
-        } else {
-            erase(begin() + n, end());
-        }
+        mystl::swap(map_, x.map_);
+        mystl::swap(map_size_, x.map_size_);
+        mystl::swap(start_, x.start_);
+        mystl::swap(finish_, x.finish_);
     }
 
     void clear() noexcept {
@@ -624,9 +694,38 @@ private:
         }
     }
 
+    template <class... Args>
+    iterator insert_aux(iterator pos, Args&&... args) {
+        value_type x_copy(mystl::forward<Args>(args)...);
+        difference_type index = pos - start_;
+        if (index < size() / 2) { // 前半段
+            push_front(mystl::move(front()));
+            iterator front1 = start_;
+            ++front1;
+            iterator front2 = front1;
+            ++front2;
+            pos = start_ + index;
+            iterator pos1 = pos;
+            ++pos1;
+            mystl::move(front2, pos, front1);
+        } else {
+            push_back(mystl::move(back()));
+            iterator back1 = finish_;
+            --back1;
+            iterator back2 = back1;
+            --back2;
+            pos = start_ + index;
+            mystl::move(back2, pos, back1);
+        }
+        *pos = mystl::move(x_copy);
+        return pos;
+    }
+
 private:
-    node_pointer node_{nullptr};
-    size_type size_{0U};
+    map_pointer map_;
+    size_type map_size_;
+    iterator start_;
+    iterator finish_;
 };
 
 // (1)
