@@ -23,6 +23,7 @@ ForwardIterator uninitialized_copy_aux(InputIterator first, InputIterator last,
         }
     } catch (...) {
         mystl::destroy(result, cur);
+        throw;
     }
     return cur;
 }
@@ -43,6 +44,7 @@ ForwardIterator uninitialized_move_aux(InputIterator first, InputIterator last,
         }
     } catch (...) {
         mystl::destroy(result, cur);
+        throw;
     }
     return cur;
 }
@@ -61,6 +63,7 @@ void uninitialized_fill_aux(ForwardIterator first, ForwardIterator last, const T
         }
     } catch (...) {
         mystl::destroy(first, cur);
+        throw;
     }
     return;
 }
@@ -79,6 +82,7 @@ ForwardIterator uninitialized_fill_n_aux(ForwardIterator first, Size n, const T&
         }
     } catch (...) {
         mystl::destroy(first, cur);
+        throw;
     }
     return cur;
 }

@@ -1,6 +1,8 @@
 #ifndef MYSTL_DEQUE_H_
 #define MYSTL_DEQUE_H_
 
+#include <cstddef>
+
 #include "allocator.h"
 #include "iterator.h"
 #include "construct.h"
@@ -9,72 +11,11 @@
 #include "functexcept.h"
 
 namespace mystl {
-template <typename T>
-struct deque_node {
-    deque_node* next_{nullptr};
-    deque_node* prev_{nullptr};
-    T data_;
-
-    deque_node() = default;
-    deque_node(const T& v) :
-        data_(v) {
-    }
-    deque_node(T&& v) :
-        data_(mystl::move(v)) {
-    }
-    ~deque_node() = default;
-
-    static void swap(deque_node& x, deque_node& y) noexcept;
-
-    // 将 [first, last) 内所有元素移动到 position 之前
-    void transfer(deque_node* const first, deque_node* const last) noexcept {
-        last->prev_->next_ = this;
-        first->prev_->next_ = last;
-        this->prev_->next_ = first;
-
-        deque_node* tmp = this->prev_;
-        this->prev_ = last->prev_;
-        last->prev_ = first->prev_;
-        first->prev_ = tmp;
-    }
-
-    // 链表反转, 只移动头尾节点元素, 不调整指针
-    void reverse() noexcept {
-        deque_node* next = this->next_;
-        deque_node* prev = this->prev_;
-        while (next != prev && next->prev_ != prev) {
-            mystl::swap(next->data_, prev->data_);
-            next = next->next_;
-            prev = prev->prev_;
-        }
-    }
-
-    // 在链表的指定位置前插入本节点
-    void hook(deque_node* const position) noexcept {
-        this->next_ = position;
-        this->prev_ = position->prev_;
-        position->prev_->next_ = this;
-        position->prev_ = this;
-    }
-
-    // 在链表的指定位置删除本节点
-    void unhook() noexcept {
-        this->prev_->next_ = this->next_;
-        this->next_->prev_ = this->prev_;
-        this->next_ = nullptr;
-        this->prev_ = nullptr;
-    }
-
-    // 把头尾节点从当前链表中删除
-    void unlink(deque_node* const first, deque_node* const last) noexcept {
-        first->prev_->next_ = last;
-        last->prev_ = first->prev_;
-    }
-
-    void init() {
-        prev_ = next_ = this;
-    }
-};
+constexpr std::size_t DEQUE_BUFFER_SIZE = 512U;
+constexpr std::size_t DEQUE_INIT_MAP_SIZE = 8U;
+std::size_t deque_buf_size(std::size_t size) {
+    return (size < DEQUE_BUFFER_SIZE) ? std::size_t(DEQUE_BUFFER_SIZE / size) : std::size_t(1);
+}
 
 template <typename T, typename Ref, typename Ptr>
 class deque_iterator {
@@ -82,21 +23,20 @@ public:
     using self = deque_iterator<T, Ref, Ptr>;
 
     using iterator_category = mystl::random_access_iterator_tag;
-    using difference_type = std::ptrdiff_t;
     using value_type = T;
     using pointer = Ptr;
     using reference = Ref;
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
 
-    using elt_pointer = T*;
-    using map_pointer = elt_pointer*;
+    using node_pointer = value_type*;
+    using map_pointer = node_pointer*;
 
 public:
     deque_iterator() :
         cur_(), first_(), last_(), node_() {
     }
-    explicit deque_iterator(elt_pointer x, map_pointer y) :
+    explicit deque_iterator(node_pointer x, map_pointer y) :
         cur_(x), first_(*y), last_(*y + buffer_size()), node_(y) {
     }
 
@@ -143,9 +83,9 @@ public:
         if (offset >= 0 && offset < difference_type(buffer_size())) {
             cur_ += n;
         } else {
-            const difference_type node_offset = offset > 0 ?
-                                                    offset / difference_type(buffer_size()) :
-                                                    -difference_type((-offset - 1) / buffer_size()) - 1;
+            const difference_type node_offset =
+                offset > 0 ? offset / difference_type(buffer_size()) :
+                             -difference_type((-offset - 1) / buffer_size()) - 1;
             set_node(node_ + node_offset);
             cur_ = first_ + (offset - node_offset * (difference_type(buffer_size())));
         }
@@ -178,21 +118,20 @@ public:
     }
 
 private:
-    constexpr dequeBufSize = 512U;
-    std::size_t buffer_size() {
-        return (sizeof(T) < dequeBufSize) ? std::size_t(dequeBufSize / sizeof(T)) : std::size_t(1);
+    static constexpr std::size_t buffer_size() {
+        return deque_buf_size(sizeof(T));
     }
 
     void set_node(map_pointer new_node) noexcept {
         node_ = new_node;
         first_ = *new_node;
-        last_ = first_ + difference_type(buffer_size())
+        last_ = first_ + difference_type(buffer_size());
     }
 
 private:
-    elt_pointer cur_;
-    elt_pointer first_;
-    elt_pointer last_;
+    node_pointer cur_;
+    node_pointer first_;
+    node_pointer last_;
     map_pointer node_;
 };
 
@@ -215,7 +154,9 @@ public: // member types
     using const_reverse_iterator = mystl::reverse_iterator<const_iterator>;
 
     using data_allocator = Alloc;
-    using map_pointer = iterator::map_pointer;
+    using node_pointer = typename iterator::node_pointer;
+    using map_pointer = typename iterator::map_pointer;
+    using map_allocator = typename Alloc::template rebind<node_pointer>::other;
 
 public: // member functions
     /*
@@ -223,8 +164,7 @@ public: // member functions
      */
     // default (1)
     explicit deque(const allocator_type& alloc = allocator_type()) {
-        init_node();
-        size_ = 0U;
+        fill_initialize(0, value_type());
     }
     // fill (2)
     explicit deque(size_type n) {
@@ -254,11 +194,11 @@ public: // member functions
     }
 
     ~deque() {
-        if (node_ != nullptr) {
+        if (map_ != nullptr) {
             clear();
-            node_allocator::deallocate(node_);
-            node_ = nullptr;
-            size_ = 0U;
+            map_allocator::deallocate(map_, map_size_);
+            map_ = nullptr;
+            map_size_ = 0U;
         }
     }
 
@@ -388,7 +328,12 @@ public: // member functions
 
     template <class... Args>
     void emplace_front(Args&&... args) {
-        emplace(begin(), mystl::forward<Args>(args)...);
+        if (start_.cur_ != start_.first_) {
+            data_allocator::construct(start_.cur_, mystl::forward<Args>(args)...);
+            --start_.cur_;
+        } else {
+            push_front_aux(mystl::forward<Args>(args)...);
+        }
     }
 
     void push_front(const value_type& val) {
@@ -399,12 +344,21 @@ public: // member functions
     }
 
     void pop_front() {
-        erase(begin());
+        if (start_.cur_ != start_.last_ - 1) {
+            data_allocator::destroy(start_.cur_);
+            ++start_.cur_;
+        } else {
+        }
     }
 
     template <class... Args>
     void emplace_back(Args&&... args) {
-        emplace(end(), mystl::forward<Args>(args)...);
+        if (finish_.cur_ != finish_.last_ - 1) {
+            data_allocator::construct(finish_.cur_, mystl::forward<Args>(args)...);
+            ++finish_.cur_;
+        } else {
+            push_back_aux(mystl::forward<Args>(args)...);
+        }
     }
 
     void push_back(const value_type& val) {
@@ -415,7 +369,7 @@ public: // member functions
     }
 
     void pop_back() {
-        erase(iterator(node_->prev_));
+        // erase(iterator(node_->prev_));
     }
 
     template <class... Args>
@@ -461,11 +415,12 @@ public: // member functions
     }
 
     iterator erase(iterator position) {
-        iterator ret = iterator(position.node_->next_);
-        --size_;
-        position.node_->unhook();
-        delete_node(position);
-        return ret;
+        iterator next = position;
+        ++next;
+        const difference_type index = position - begin();
+        if (position != begin()) {
+        }
+        return next;
     }
     iterator erase(iterator first, iterator last) {
         while (first != last) {
@@ -482,154 +437,9 @@ public: // member functions
     }
 
     void clear() noexcept {
-        auto first = begin();
-        auto last = end();
-        while (first != last) {
-            iterator tmp = first;
-            ++first;
-            delete_node(tmp);
-        }
-        node_->unlink(node_->next_, node_);
-        size_ = 0;
-    }
-
-    /*
-     * @brief Operations
-     */
-    // entire deque (1)
-    void splice(iterator position, deque& x) {
-        splice(position, mystl::move(x), x.begin(), x.end());
-    }
-    void splice(iterator position, deque&& x) {
-        splice(position, x, x.begin(), x.end());
-    }
-    // single element (2)
-    void splice(iterator position, deque& x, iterator i) {
-        auto j = i++;
-        splice(position, mystl::move(x), j, i);
-    }
-    void splice(iterator position, deque&& x, iterator i) {
-        auto j = i++;
-        splice(position, x, j, i);
-    }
-    // element range (3)
-    void splice(iterator position, deque& x, iterator first, iterator last) {
-        splice(position, mystl::move(x), first, last);
-    }
-    void splice(iterator position, deque&& x, iterator first, iterator last) {
-        auto len = mystl::distance(first, last);
-        position.node_->transfer(first.node_, last.node_); // 节点拼接
-        size_ += len;
-        x.size_ -= len;
-    }
-
-    void remove(const value_type& val) {
-        remove_if([&val](value_type& x) { return val == x; });
-    }
-    template <class Predicate>
-    void remove_if(Predicate pred) {
-        auto first = begin();
-        auto last = end();
-        while (first != last) {
-            if (pred(*first)) {
-                first = erase(first);
-            } else {
-                ++first;
-            }
-        }
-    }
-
-    //   (1)
-    void unique() {
-        unique([](value_type& x, value_type& y) { return x == y; });
-    }
-    // (2)
-    template <class BinaryPredicate>
-    void unique(BinaryPredicate binary_pred) {
-        auto first = begin();
-        auto prev = first++;
-        auto last = end();
-        while (first != last) {
-            if (binary_pred(*first, *prev)) {
-                first = erase(first);
-            } else {
-                prev = first++;
-            }
-        }
-    }
-
-    //   (1)
-    void merge(deque& x) {
-        merge(mystl::move(x), mystl::less<value_type>());
-    }
-    void merge(deque&& x) {
-        merge(x, mystl::less<value_type>());
-    }
-    // (2)
-    template <class Compare>
-    void merge(deque& x, Compare comp) {
-        merge(mystl::move(x), comp);
-    }
-    template <class Compare>
-    void merge(deque&& x, Compare comp) {
-        if (*this == x) { return; }
-        auto first1 = begin();
-        auto last1 = end();
-        auto first2 = x.begin();
-        auto last2 = x.end();
-        while (first1 != last1 && first2 != last2) {
-            if (comp(*first2, *first1)) {
-                auto flag = first2;
-                while ((++first2 != last2) && comp(*first2, *first1)) {}
-                splice(first1, x, flag, first2);
-            }
-            ++first1;
-        }
-        if (first2 != last2) {
-            splice(last1, x, first2, last2);
-        }
-    }
-
-    // (1)
-    void sort() {
-        sort(mystl::less<value_type>());
-    }
-    // (2)
-    template <class Compare>
-    void sort(Compare comp) {
-        if (size() <= 1) { return; } // 长度等于 0 或者 1 不进行处理
-        deque carry;
-        deque tmp[64]; // 按序号保存归并排序后deque, 有序链表长度次幂级增长 1-2-4-8-...
-        deque* fill = tmp;
-        deque* counter;
-        try {
-            do {
-                carry.splice(carry.begin(), *this, begin()); // 每次将第一个节点拼接到carry
-                for (counter = tmp; counter != fill && !counter->empty(); ++counter) {
-                    counter->merge(carry, comp); // 把carry按从小到大合并到counter(tmp[i](中, carry被置空
-                    carry.swap(*counter);        // 已经排好序的counter放入到carry中,counter被置空
-                }
-                carry.swap(*counter); // carry中内容放入tmp[j](j是循环结束序列)中, carry被置空
-                if (counter == fill) {
-                    ++fill;
-                }
-            } while (!empty());
-            // 拼接归并后的链表
-            for (counter = tmp + 1; counter != fill; ++counter) {
-                counter->merge(*(counter - 1), comp);
-                swap(*(fill - 1));
-            }
-        } catch (...) {
-            this->splice(this->end(), carry);
-            for (int i = 0; i < sizeof(tmp) / sizeof(tmp[0]); ++i) {
-                this->splice(this->end(), tmp[i]);
-                throw;
-            }
-        }
-    }
-
-    void reverse() noexcept {
-        node_->reverse();
+        mystl::destroy(start_, finish_);
+        delete_nodes(start_.node_, finish_.node_);
+        finish_ = start_;
     }
 
     allocator_type get_allocator() const noexcept {
@@ -637,36 +447,148 @@ public: // member functions
     }
 
 private:
-    void init_node() {
-        node_ = node_allocator::allocate(1);
-        node_->init();
+    static constexpr std::size_t buffer_size() {
+        return deque_buf_size(sizeof(T));
+    }
+
+    void delete_node(node_pointer node) {
+        return data_allocator::deallocate(node, buffer_size());
+    }
+
+    void delete_nodes(map_pointer nstart, map_pointer nfinish) {
+        map_pointer cur;
+        for (cur = nstart; cur < nfinish; ++cur) {
+            delete_node(*cur);
+        }
+    }
+
+    node_pointer create_node() {
+        return data_allocator::allocate(buffer_size());
+    }
+
+    void create_nodes(map_pointer nstart, map_pointer nfinish) {
+        map_pointer cur;
+        try {
+            for (cur = nstart; cur < nfinish; ++cur) {
+                *cur = create_node();
+            }
+        } catch (...) {
+            delete_nodes(nstart, cur);
+            throw;
+        }
+    }
+
+    void init_map(size_type num_elemens) {
+        const size_type num_nodes = (num_elemens / buffer_size()) + 1;
+        map_size_ = mystl::max(DEQUE_INIT_MAP_SIZE, num_nodes + 2);
+        map_ = map_allocator::allocate(map_size_);
+
+        // 将头尾指针指向中间位置,方便前后扩展
+        map_pointer nstart = map_ + (map_size_ - num_nodes) / 2;
+        map_pointer nfinish = nstart + num_nodes;
+
+        try {
+            create_nodes(nstart, nfinish);
+        } catch (...) {
+            map_allocator::deallocate(map_, map_size_);
+            map_ = map_pointer();
+            map_size_ = 0;
+            throw;
+        }
+
+        start_.set_node(nstart);
+        finish_.set_node(nfinish - 1);
+        start_.cur_ = start_.first_;
+        finish_.cur_ = finish_.first_ + num_elemens % buffer_size();
+    }
+
+    void reserve_map_at_front(size_type nodes_to_add = 1) {
+        if (nodes_to_add > start_.node_ - map_) { // start.first指向最前一个node的头
+            reallocate_map(nodes_to_add, true);
+        }
+    }
+
+    void reserve_map_at_back(size_type nodes_to_add = 1) {
+        if (nodes_to_add + 1 > map_size_ - (finish_.node_ - map_)) { // finish.last指向最后一个node的尾
+            reallocate_map(nodes_to_add, false);
+        }
+    }
+
+    void reallocate_map(size_type nodes_to_add, bool add_at_front) {
+        const size_type old_num_nodes = finish_.node_ - start_.node_ + 1;
+        const size_type new_num_nodes = old_num_nodes + nodes_to_add;
+
+        map_pointer new_nstart;
+        if (map_size_ > 2 * new_num_nodes) {
+            new_nstart = map_ + (map_size_ - new_num_nodes) / 2 + (add_at_front ? nodes_to_add : 0);
+            if (new_nstart < start_.node_) {
+                mystl::copy(start_.node_, finish_.node_ + 1, new_nstart);
+            } else {
+                mystl::copy_backward(start_.node_, finish_.node_ + 1, new_nstart + old_num_nodes);)
+            }
+        } else {
+            size_type new_map_size = map_size_ + mystl::max(map_size_, nodes_to_add) + 2;
+            map_pointer new_map = map_allocator::allocate(new_map_size);
+            new_nstart = new_map + (new_map_size - new_num_nodes) / 2 + (add_at_front ? nodes_to_add : 0);
+            mystl::copy(start_.node_, finish_.node_ + 1, new_nstart);
+            map_allocator::deallocate(map_, map_size_);
+            map_ = new_map;
+            map_size_ = new_map_size;
+        }
+        start_.set_node(new_nstart);
+        finish_.set_node(new_nstart + old_num_nodes - 1);
     }
 
     void fill_initialize(size_type n, const_reference val) {
-        init_node();
-        for (; n; --n) {
-            emplace_back(val);
+        init_map(n);
+        if (n == 0) { return; }
+        map_pointer cur;
+        try {
+            for (cur = start_.node_; cur < finish_.node_; ++cur) {
+                mystl::uninitialized_fill(*cur, *cur + buffer_size(), val);
+            }
+            mystl::uninitialized_fill(finish_.first_, finish_.cur_, val);
+        } catch (...) {
+            mystl::destroy(start_, iterator(*cur, cur));
+            throw;
+        }
+    }
+
+    template <class InputIterator>
+    void range_initialize_aux(InputIterator first, InputIterator last, mystl::input_iterator_tag) {
+        init_map(0);
+        try {
+            for (; first != last; ++first) {
+                emplace_back(*first);
+            }
+        } catch (...) {
+            clear();
+            throw;
+        }
+    }
+
+    template <class ForwardIterator>
+    void range_initialize_aux(ForwardIterator first, ForwardIterator last, mystl::forward_iterator_tag) {
+        const size_type n = mystl::distance(first, last);
+        init_map(n);
+        map_pointer cur;
+        try {
+            for (cur = start_.node_; cur < finish_.node_; ++cur) {
+                ForwardIterator mid = first;
+                mystl::advance(mid, buffer_size());
+                mystl::uninitialized_copy(first, mid, *cur);
+                first = mid;
+            }
+            mystl::uninitialized_copy(first, last, finish_.first_);
+        } catch (...) {
+            mystl::destroy(start_, iterator(*cur, cur));
+            throw;
         }
     }
 
     template <class InputIterator>
     void range_initialize(InputIterator first, InputIterator last) {
-        init_node();
-        for (; first != last; ++first) {
-            emplace_back(*first);
-        }
-    }
-
-    template <typename... Args>
-    node_pointer create_node(Args... args) {
-        auto p = node_allocator::allocate(1);
-        node_allocator::construct(p, mystl::forward<Args>(args)...);
-        return p;
-    }
-
-    void delete_node(iterator pos) {
-        node_allocator::destroy(pos.node_);
-        node_allocator::deallocate(pos.node_, 1);
+        range_initialize_aux(first, last, iterator_category(first));
     }
 
     void fill_assign(size_type n, const value_type& val) {
@@ -684,7 +606,7 @@ private:
     template <class InputIterator>
     void range_assign(InputIterator first, InputIterator last) {
         auto cur = begin();
-        for (; cur != end() && first != end(); ++cur, ++first) {
+        for (; cur != end() && first != last; ++cur, ++first) {
             *cur = *first;
         }
         if (first != last) {
@@ -707,7 +629,7 @@ private:
             pos = start_ + index;
             iterator pos1 = pos;
             ++pos1;
-            mystl::move(front2, pos, front1);
+            mystl::move(front2, pos1, front1);
         } else {
             push_back(mystl::move(back()));
             iterator back1 = finish_;
@@ -715,10 +637,40 @@ private:
             iterator back2 = back1;
             --back2;
             pos = start_ + index;
-            mystl::move(back2, pos, back1);
+            mystl::move(pos, back2, back1);
         }
         *pos = mystl::move(x_copy);
         return pos;
+    }
+
+    template <class... Args>
+    void push_front_aux(Args&&... args) {
+        THROW_OUT_OF_RANGE_IF(size() == max_size(), "out of range");
+        reserve_map_at_front(); // 符合条件重换map
+        *(start_.node_ - 1) = create_node();
+        try {
+            data_allocator::construct(start_.cur_, mystl::forward<Args>(args)...);
+            start_.set_node(start_.node_ - 1);
+            start_.cur_ = start_.last_ - 1;
+        } catch (...) {
+            delete_node(*(start_.node_ - 1));
+            throw;
+        }
+    }
+
+    template <class... Args>
+    void push_back_aux(Args&&... args) {
+        THROW_OUT_OF_RANGE_IF(size() == max_size(), "out of range");
+        reserve_map_at_back(); // 符合条件重换map
+        *(finish_.node_ + 1) = create_node();
+        try {
+            data_allocator::construct(finish_.cur_, mystl::forward<Args>(args)...);
+            finish_.set_node(finish_.node_ + 1);
+            finish_.cur_ = finish_.first_;
+        } catch (...) {
+            delete_node(*(finish_.node_ + 1));
+            throw;
+        }
     }
 
 private:

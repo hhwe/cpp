@@ -614,7 +614,7 @@ private:
     template <class InputIterator>
     void range_assign(InputIterator first, InputIterator last) {
         auto cur = begin();
-        for (; cur != end() && first != end(); ++cur, ++first) {
+        for (; cur != end() && first != last; ++cur, ++first) {
             *cur = *first;
         }
         if (first != last) {
