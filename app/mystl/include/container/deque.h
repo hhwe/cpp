@@ -21,6 +21,8 @@ template <typename T, typename Ref, typename Ptr>
 class deque_iterator {
 public:
     using self = deque_iterator<T, Ref, Ptr>;
+    using iterator = deque_iterator<T, T&, T*>;
+    using const_iterator = deque_iterator<T, const T&, const T*>;
 
     using iterator_category = mystl::random_access_iterator_tag;
     using value_type = T;
@@ -38,6 +40,9 @@ public:
     }
     explicit deque_iterator(node_pointer x, map_pointer y) :
         cur_(x), first_(*y), last_(*y + buffer_size()), node_(y) {
+    }
+    deque_iterator(const iterator& x) :
+        cur_(x.cur_), first_(x.first_), last_(x.last_), node_(x.node_) {
     }
 
     reference operator*() const {
@@ -105,19 +110,34 @@ public:
         return operator+(-n);
     }
 
-    self operator[](difference_type n) const noexcept {
+    reference operator[](difference_type n) const noexcept {
         return *(*this + n);
     }
 
-    bool operator==(const self rhs) const {
+    difference_type operator-(const self& x) const {
+        return static_cast<difference_type>(buffer_size()) * (node_ - x.node_)
+               + (cur_ - first_) - (x.cur_ - x.first_);
+    }
+
+    bool operator==(const self& rhs) const {
         return cur_ == rhs.cur_;
     }
-
-    bool operator!=(const self rhs) const {
-        return !(operator==(rhs));
+    bool operator<(const self& rhs) const {
+        return node_ == rhs.node_ ? (cur_ < rhs.cur_) : (node_ < rhs.node_);
+    }
+    bool operator!=(const self& rhs) const {
+        return !(*this == rhs);
+    }
+    bool operator>(const self& rhs) const {
+        return rhs < *this;
+    }
+    bool operator<=(const self& rhs) const {
+        return !(rhs < *this);
+    }
+    bool operator>=(const self& rhs) const {
+        return !(*this < rhs);
     }
 
-private:
     static constexpr std::size_t buffer_size() {
         return deque_buf_size(sizeof(T));
     }
@@ -128,7 +148,7 @@ private:
         last_ = first_ + difference_type(buffer_size());
     }
 
-private:
+public:
     node_pointer cur_;
     node_pointer first_;
     node_pointer last_;
@@ -185,7 +205,10 @@ public: // member functions
     // deque(const deque& x, const allocator_type& alloc);
     // move (5)
     deque(deque&& x) {
-        deque(mystl::move(x));
+        map_ = mystl::move(x.map_);
+        map_size_ = mystl::move(x.map_size_);
+        start_ = mystl::move(x.start_);
+        finish_ = mystl::move(x.finish_);
     }
     // deque(deque&& x, const allocator_type& alloc);
     // initializer deque (6)
@@ -287,7 +310,7 @@ public: // member functions
      * @brief Element access
      */
     reference operator[](size_type n) {
-        return *(start_[n]);
+        return start_[n];
     }
     const_reference operator[](size_type n) const;
 
@@ -329,7 +352,7 @@ public: // member functions
     template <class... Args>
     void emplace_front(Args&&... args) {
         if (start_.cur_ != start_.first_) {
-            data_allocator::construct(start_.cur_, mystl::forward<Args>(args)...);
+            data_allocator::construct(start_.cur_ - 1, mystl::forward<Args>(args)...);
             --start_.cur_;
         } else {
             push_front_aux(mystl::forward<Args>(args)...);
@@ -348,6 +371,7 @@ public: // member functions
             data_allocator::destroy(start_.cur_);
             ++start_.cur_;
         } else {
+            pop_front_aux();
         }
     }
 
@@ -369,7 +393,12 @@ public: // member functions
     }
 
     void pop_back() {
-        // erase(iterator(node_->prev_));
+        if (finish_.cur_ != finish_.first_) {
+            data_allocator::destroy(finish_.cur_);
+            --finish_.cur_;
+        } else {
+            pop_back_aux();
+        }
     }
 
     template <class... Args>
@@ -524,7 +553,7 @@ private:
             if (new_nstart < start_.node_) {
                 mystl::copy(start_.node_, finish_.node_ + 1, new_nstart);
             } else {
-                mystl::copy_backward(start_.node_, finish_.node_ + 1, new_nstart + old_num_nodes);)
+                mystl::copy_backward(start_.node_, finish_.node_ + 1, new_nstart + old_num_nodes);
             }
         } else {
             size_type new_map_size = map_size_ + mystl::max(map_size_, nodes_to_add) + 2;
@@ -649,10 +678,11 @@ private:
         reserve_map_at_front(); // 符合条件重换map
         *(start_.node_ - 1) = create_node();
         try {
-            data_allocator::construct(start_.cur_, mystl::forward<Args>(args)...);
             start_.set_node(start_.node_ - 1);
             start_.cur_ = start_.last_ - 1;
+            data_allocator::construct(start_.cur_, mystl::forward<Args>(args)...);
         } catch (...) {
+            ++start_;
             delete_node(*(start_.node_ - 1));
             throw;
         }
@@ -671,6 +701,20 @@ private:
             delete_node(*(finish_.node_ + 1));
             throw;
         }
+    }
+
+    void pop_front_aux() {
+        data_allocator::destroy(start_.first_);
+        delete_node(*start_.node_);
+        start_.set_node(start_.node_ + 1);
+        start_.cur_ = start_.first_;
+    }
+
+    void pop_back_aux() {
+        delete_node(*finish_.node_);
+        finish_.set_node(finish_.node_ - 1);
+        finish_.cur_ = finish_.last_ - 1;
+        data_allocator::destroy(finish_.cur_);
     }
 
 private:
