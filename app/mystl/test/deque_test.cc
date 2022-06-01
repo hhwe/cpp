@@ -40,12 +40,12 @@ TEST(deque) {
 
     {
         mystl::deque<int> dq1;
-        assert(dq1.empty());
-        assert(dq1.size() == 0);
+        EXPECT_TRUE(dq1.empty());
+        EXPECT_TRUE(dq1.size() == 0);
 
         mystl::deque<int> dq2(10, 0);
-        assert(!dq2.empty());
-        assert(dq2.size() == 10);
+        EXPECT_TRUE(!dq2.empty());
+        EXPECT_TRUE(dq2.size() == 10);
     }
 
     {
@@ -57,8 +57,8 @@ TEST(deque) {
         dq2[0] = "0";
         dq2[9] = "9";
 
-        assert(dq1.front() == dq2.front());
-        assert(dq1.back() == dq2.back());
+        EXPECT_TRUE(dq1.front() == dq2.front());
+        EXPECT_TRUE(dq1.back() == dq2.back());
     }
 
     {
@@ -94,20 +94,20 @@ TEST(deque) {
         int arr[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         mystl::deque<int> foo(arr, arr + 3), bar(arr + 3, arr + 10);
 
-        assert(foo.size() == 3 && bar.size() == 7);
+        EXPECT_TRUE(foo.size() == 3 && bar.size() == 7);
         foo.swap(bar);
-        assert(foo.size() == 7 && bar.size() == 3);
+        EXPECT_TRUE(foo.size() == 7 && bar.size() == 3);
         mystl::swap(foo, bar);
-        assert(foo.size() == 3 && bar.size() == 7);
+        EXPECT_TRUE(foo.size() == 3 && bar.size() == 7);
     }
 
     {
         int arr[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
         mystl::deque<int> foo1(arr, arr + 3), bar(arr + 3, arr + 10);
 
-        assert(foo1 != bar);
+        EXPECT_TRUE(foo1 != bar);
         auto foo2 = bar;
-        assert(foo2 == bar);
+        EXPECT_TRUE(foo2 == bar);
     }
 }
 }

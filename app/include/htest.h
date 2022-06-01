@@ -39,15 +39,15 @@ public:
     int Run() {
         for (auto testCase : testCases_) {
             currentTestCase_ = testCase;
-            std::cout << ">>>>[Run TestCase] " << testCase->name_ << std::endl;
+            std::cout << ">>>>[Run TestCase <\033[1m\033[4m" << testCase->name_ << "\033[0m>]" << std::endl;
             testCase->Run();
             if (testCase->result_) {
                 passedTestCaseNum_++;
             } else {
                 failedTestCaseNum_++;
             }
-            std::cout << "[TestCase Result] Passed:" << testCase->passedPredicateNum_
-                      << " Failed:" << testCase->failedPredicateNum_ << std::endl;
+            std::cout << "[TestCase Result] Passed:\033[32m" << testCase->passedPredicateNum_
+                      << "\033[0m Failed:\033[31m" << testCase->failedPredicateNum_ << "\033[0m" << std::endl;
         }
         std::cout << "\n[UnitTest Result] Passed-TestCase:" << passedTestCaseNum_ << " Failed-TestCase:" << failedTestCaseNum_ << std::endl;
         return 0;

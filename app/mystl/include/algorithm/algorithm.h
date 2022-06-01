@@ -4,6 +4,7 @@
 #include <type_traits>
 #include <cstring>
 #include "utility.h"
+#include "heap.h"
 
 namespace mystl {
 
@@ -441,16 +442,6 @@ OutputIterator set_union(InputIterator1 first1, InputIterator1 last1,
     }
     return copy(first2, last2, copy(first1, last1, result));
 }
-
-/*
- * heap
- */
-template <class RandomAccessIterator>
-void make_heap(RandomAccessIterator first, RandomAccessIterator last);
-
-template <class RandomAccessIterator, class Compare>
-void make_heap(RandomAccessIterator first, RandomAccessIterator last,
-               Compare comp);
 
 /*
  * search

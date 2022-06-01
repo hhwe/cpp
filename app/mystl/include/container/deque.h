@@ -13,7 +13,7 @@
 namespace mystl {
 constexpr std::size_t DEQUE_BUFFER_SIZE = 512U;
 constexpr std::size_t DEQUE_INIT_MAP_SIZE = 8U;
-std::size_t deque_buf_size(std::size_t size) {
+inline std::size_t deque_buf_size(std::size_t size) {
     return (size < DEQUE_BUFFER_SIZE) ? std::size_t(DEQUE_BUFFER_SIZE / size) : std::size_t(1);
 }
 
