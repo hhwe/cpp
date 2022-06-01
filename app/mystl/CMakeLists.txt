@@ -5,6 +5,7 @@ file(GLOB SRC_FILES "src/*.cc")
 file(GLOB TEST_FILES "test/*.cc")
 
 include_directories(${PROJECT_SOURCE_DIR}/include/)
+include_directories(${PROJECT_SOURCE_DIR}/include/adapter)
 include_directories(${PROJECT_SOURCE_DIR}/include/allocator)
 include_directories(${PROJECT_SOURCE_DIR}/include/iterator)
 include_directories(${PROJECT_SOURCE_DIR}/include/algorithm)
