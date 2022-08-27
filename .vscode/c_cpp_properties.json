@@ -8,8 +8,7 @@
             "intelliSenseMode": "gcc-x64",
             "includePath": [
                 "${default}",
-                "${workspaceFolder}/app/**",
-                "${workspaceFolder}/app/mystl/include"
+                "${workspaceFolder}/app/**"
             ],
             "configurationProvider": "ms-vscode.cmake-tools"
         }

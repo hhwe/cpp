@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <array>
+#include <set>
 
 namespace mystl {
 namespace test {
