@@ -14,6 +14,17 @@ struct unary_function {
     typedef Result result_type;
 };
 
+template <typename T>
+struct identity : public unary_function<T, T> {
+    T& operator()(T& x) const {
+        return x;
+    }
+
+    const T& operator()(const T& x) const {
+        return x;
+    }
+};
+
 template <typename Arg1, typename Arg2, typename Result>
 struct binary_function {
     /// @c first_argument_type is the type of the first argument

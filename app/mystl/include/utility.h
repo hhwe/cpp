@@ -55,6 +55,13 @@ struct pair {
 
     T1 first;
     T2 second;
+
+    explicit constexpr pair() :
+        first(), second() {
+    }
+    constexpr pair(const T1& a, const T2& b) :
+        first(a), second(b) {
+    }
 };
 
 template <class T1, class T2>
