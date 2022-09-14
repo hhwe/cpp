@@ -56,7 +56,8 @@
         "cassert": "cpp",
         "cerrno": "cpp",
         "ios": "cpp",
-        "queue": "cpp"
+        "queue": "cpp",
+        "hash_set": "cpp"
     },
     "cmake.configureOnOpen": true,
 }

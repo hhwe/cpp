@@ -1,5 +1,5 @@
-#ifndef MYSTL_SET_H_
-#define MYSTL_SET_H_
+#ifndef MYSTL_MAP_H_
+#define MYSTL_MAP_H_
 
 #include "allocator.h"
 #include "iterator.h"
@@ -10,77 +10,96 @@
 #include "utility.h"
 
 namespace mystl {
-template <typename Key, typename Compare = mystl::less<Key>, typename Alloc = mystl::allocator<Key>>
-class set {
+template <typename Key, typename Tp, typename Compare = mystl::less<Key>,
+          typename Alloc = mystl::allocator<mystl::pair<const Key, Tp>>>
+class map {
 public: // member types
     using allocator_type = Alloc;
     using key_type = Key;
+    using mapped_type = Tp;
     using key_compare = Compare;
-    using value_compare = Compare;
+    using value_type = mystl::pair<const Key, Tp>;
 
-    using value_type = typename allocator_type::value_type;
-    using pointer = typename allocator_type::pointer;
-    using const_pointer = typename allocator_type::const_pointer;
-    using reference = typename allocator_type::reference;
-    using const_reference = typename allocator_type::const_reference;
-    using size_type = typename allocator_type::size_type;
-    using difference_type = typename allocator_type::difference_type;
-
-    using key_alloc_type = typename mystl::allocator_traits<Key, Alloc>::allocator_type;
-    using rep_type = mystl::rb_tree<key_type, value_type, mystl::identity<value_type>, key_compare, key_alloc_type>;
+private:
+    using pair_alloc_type = typename mystl::allocator_traits<value_type, Alloc>::allocator_type;
+    using rep_type = mystl::rb_tree<key_type, value_type, mystl::select1st<value_type>, key_compare, pair_alloc_type>;
     rep_type rb_tree_;
+
+public:
+    using pointer = typename rep_type::pointer;
+    using const_pointer = typename rep_type::const_pointer;
+    using reference = typename rep_type::reference;
+    using const_reference = typename rep_type::const_reference;
+    using size_type = typename rep_type::size_type;
+    using difference_type = typename rep_type::difference_type;
 
     using iterator = typename rep_type::iterator;
     using const_iterator = typename rep_type::const_iterator;
     using reverse_iterator = typename rep_type::reverse_iterator;
     using const_reverse_iterator = typename rep_type::const_reverse_iterator;
 
+public:
+    class value_compare : public mystl::binary_function<value_type, value_type, bool> {
+        friend class map<Key, Tp, Compare, Alloc>;
+
+    protected:
+        Compare comp;
+        value_compare(Compare c) :
+            comp(c) {
+        }
+
+    public:
+        bool operator()(const value_type& x, const value_type& y) const {
+            return comp(x.first, y.first);
+        }
+    };
+
 public: // member functions
     /*
      * @brief Constructor and Destructor
      */
     // empty(1)
-    explicit set(const key_compare& comp = key_compare(),
+    explicit map(const key_compare& comp = key_compare(),
                  const allocator_type& alloc = allocator_type()) :
-        rb_tree_(comp, key_alloc_type(alloc)) {
+        rb_tree_(comp, pair_alloc_type(alloc)) {
     }
-    explicit set(const allocator_type& alloc) :
-        rb_tree_(key_alloc_type(alloc)) {
+    explicit map(const allocator_type& alloc) :
+        rb_tree_(pair_alloc_type(alloc)) {
     }
     // range(2)
     template <class InputIterator>
-    set(InputIterator first, InputIterator last,
+    map(InputIterator first, InputIterator last,
         const key_compare& comp = key_compare(),
         const allocator_type& alloc = allocator_type()) :
-        rb_tree_(comp, key_alloc_type(alloc)) {
+        rb_tree_(comp, pair_alloc_type(alloc)) {
         // rb_tree_.insert_range_unique(first, last);
     }
     // copy(3)
-    set(const set& x) = default;
-    set(const set& x, const allocator_type& alloc) :
-        rb_tree_(x.rb_tree_, key_alloc_type(alloc)) {
+    map(const map& x) = default;
+    map(const map& x, const allocator_type& alloc) :
+        rb_tree_(x.rb_tree_, pair_alloc_type(alloc)) {
     }
     // move(4)
-    set(set&& x) = default;
-    set(set&& x, const allocator_type& alloc) :
-        rb_tree_(mystl::move(x.rb_tree_), key_alloc_type(alloc)) {
+    map(map&& x) = default;
+    map(map&& x, const allocator_type& alloc) :
+        rb_tree_(mystl::move(x.rb_tree_), pair_alloc_type(alloc)) {
     }
-    // initializer SET(5)
-    set(std::initializer_list<value_type> il,
+    // initializer MAP(5)
+    map(std::initializer_list<value_type> il,
         const key_compare& comp = key_compare(),
         const allocator_type& alloc = allocator_type()) :
-        rb_tree_(comp, key_alloc_type(alloc)) {
+        rb_tree_(comp, pair_alloc_type(alloc)) {
         rb_tree_.insert_range_unique(il.begin(), il.end());
     }
 
-    ~set() = default;
+    ~map() = default;
 
     // copy (1)
-    set& operator=(const set& x) = default;
+    map& operator=(const map& x) = default;
     // move (2)
-    set& operator=(set&& x) = default;
-    // initializer set (3)
-    set& operator=(std::initializer_list<value_type> il) {
+    map& operator=(map&& x) = default;
+    // initializer map (3)
+    map& operator=(std::initializer_list<value_type> il) {
         rb_tree_.assign_unique(il.begin(), il.end());
         return *this;
     }
@@ -152,6 +171,23 @@ public: // member functions
     }
 
     /*
+     * @brief Element access
+     */
+    mapped_type& operator[](const key_type& k) {
+        iterator i = lower_bound(k);
+        if (i == end() || key_comp()(k, (*i).first)) {
+            i = insert(i, value_type(k, mapped_type()));
+        }
+        return (*i).second;
+    }
+    mapped_type& at(const key_type& k) const {
+        iterator i = lower_bound(k);
+        if (i == end() || key_comp()(k, (*i).first)) {
+            throw std::out_of_range("map::at");
+        }
+        return (*i).second;
+    }
+    /*
      * @brief Modifiers
      */
     // single element (1)
@@ -176,7 +212,7 @@ public: // member functions
     void insert(InputIterator first, InputIterator last) {
         rb_tree_.insert_range_unique(first, last);
     }
-    // initializer SET (4)
+    // initializer MAP (4)
     void insert(std::initializer_list<value_type> il) {
         rb_tree_.insert_range_unique(il.begin(), il.end());
     }
@@ -191,7 +227,7 @@ public: // member functions
         return rb_tree_.erase(first, last);
     }
 
-    void swap(set& x) {
+    void swap(map& x) {
         rb_tree_.swap(x.rb_tree_);
     }
 
@@ -240,4 +276,4 @@ public: // member functions
     }
 };
 } // namespace mystl
-#endif // MYSTL_SET_H_
+#endif // MYSTL_MAP_H_

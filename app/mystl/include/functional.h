@@ -25,6 +25,17 @@ struct identity : public unary_function<T, T> {
     }
 };
 
+template <typename Pair>
+struct select1st : public unary_function<Pair, typename Pair::first_type> {
+    typename Pair::first_type& operator()(Pair& x) const {
+        return x.first;
+    }
+
+    const typename Pair::first_type& operator()(const Pair& x) const {
+        return x.first;
+    }
+};
+
 template <typename Arg1, typename Arg2, typename Result>
 struct binary_function {
     /// @c first_argument_type is the type of the first argument
