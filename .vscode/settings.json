@@ -57,7 +57,8 @@
         "cerrno": "cpp",
         "ios": "cpp",
         "queue": "cpp",
-        "hash_set": "cpp"
+        "hash_set": "cpp",
+        "unistd.h": "c"
     },
     "cmake.configureOnOpen": true,
 }
