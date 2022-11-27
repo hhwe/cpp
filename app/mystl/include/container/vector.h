@@ -396,7 +396,7 @@ private:
             swap(tmp);
         } else if (n > size()) {
             mystl::fill(begin_, end_, val);
-            mystl::uninitialized_fill_n(end_, begin_ + n, val);
+            mystl::uninitialized_fill(end_, begin_ + n, val);
         } else {
             erase(begin_ + n, end_);
         }
