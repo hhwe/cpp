@@ -1,0 +1,14 @@
+#include "csapp.h"
+
+
+int main(int argc, char*argv[])
+{
+	printf("Command-ine arguments:\n")
+	for (int i = 0; i < argc; ++i) {
+		printf("\rargv[%d]: %s\n", i, argv[i]);
+	}
+
+	char* env;
+	printf("Enviroment variables:\n")
+	while ((env = getenv))
+}
