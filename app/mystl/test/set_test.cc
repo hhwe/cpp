@@ -56,10 +56,9 @@ TEST(set) {
         int myints[] = {5, 10, 15}; // 10 already in set, not inserted
         myset.insert(myints, myints + 3);
 
-        std::cout << "myset contains:";
-        for (it = myset.begin(); it != myset.end(); ++it)
-            std::cout << ' ' << *it;
-        std::cout << '\n';
+        int expect[] = {5, 10, 15, 20, 24, 25, 26, 30, 40, 50};
+        std::set<int> s1(expect, expect + sizeof(expect) / sizeof(expect[0]));
+        EXPECT_TRUE(htest::ContainerEqual(myset, s1));
     }
 }
 }

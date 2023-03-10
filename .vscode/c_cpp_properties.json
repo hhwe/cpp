@@ -10,7 +10,8 @@
                 "${default}",
                 "${workspaceFolder}/app/**"
             ],
-            "configurationProvider": "ms-vscode.cmake-tools"
+            "configurationProvider": "ms-vscode.cmake-tools",
+            "compilerPath": "/usr/bin/gcc"
         }
     ],
     "version": 4

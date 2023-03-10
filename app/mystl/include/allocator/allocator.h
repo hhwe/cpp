@@ -12,12 +12,18 @@ template <typename T>
 class allocator {
 public:
     using value_type = T;
-    using pointer = value_type*;
-    using const_pointer = const value_type*;
-    using reference = value_type&;
-    using const_reference = const value_type&;
+    using pointer = T*;
+    using const_pointer = const T*;
+    using reference = T&;
+    using const_reference = const T&;
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
+
+    // 用于容器内部节点的内存分配
+    template <class U>
+    struct rebind {
+        using other = allocator<U>;
+    };
 
     allocator() = default;
     allocator(const allocator&) = default;
@@ -26,11 +32,13 @@ public:
     allocator(const allocator<U>&){};
     ~allocator() = default;
 
-    // 用于容器内部节点的内存分配
-    template <class U>
-    struct rebind {
-        using other = allocator<U>;
-    };
+    static pointer address(reference x) const {
+        return &x;
+    }
+
+    static const_pointer address(const_reference x) const {
+        return &x;
+    }
 
     static pointer allocate(size_type n) {
         return reinterpret_cast<pointer>(mystl::MyAllocator::GetInstance()->Allocate(n * sizeof(value_type)));
